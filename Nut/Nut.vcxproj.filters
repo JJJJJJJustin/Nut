@@ -4,6 +4,9 @@
     <Filter Include="Nut">
       <UniqueIdentifier>{3C0E880B-A817-887C-3193-9E7C9D9B937C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Nut\Events">
+      <UniqueIdentifier>{A0DE0F87-8C96-51D4-F59D-2A30E174ECC4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Nut.h" />
@@ -16,13 +19,22 @@
     <ClInclude Include="src\Nut\EntryPoint.h">
       <Filter>Nut</Filter>
     </ClInclude>
+    <ClInclude Include="src\Nut\Events\ApplicationEvent.h">
+      <Filter>Nut\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Nut\Events\Event.h">
+      <Filter>Nut\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Nut\Events\KeyEvent.h">
+      <Filter>Nut\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Nut\Events\MouseEvent.h">
+      <Filter>Nut\Events</Filter>
+    </ClInclude>
     <ClInclude Include="src\Nut\Log.h">
       <Filter>Nut</Filter>
     </ClInclude>
-    <ClInclude Include="src\Nut\Events\ApplicationEvent.h" />
-    <ClInclude Include="src\Nut\Events\Event.h" />
-    <ClInclude Include="src\Nut\Events\KeyEvent.h" />
-    <ClInclude Include="src\Nut\Events\MouseEvent.h" />
+    <ClInclude Include="src\nutpch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Application.cpp">
@@ -31,5 +43,6 @@
     <ClCompile Include="src\Nut\Log.cpp">
       <Filter>Nut</Filter>
     </ClCompile>
+    <ClCompile Include="src\nutpch.cpp" />
   </ItemGroup>
 </Project>

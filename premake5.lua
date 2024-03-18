@@ -22,6 +22,10 @@ project "Nut"                       --项目
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")                           --输出目录(.. XX ..中 ".."是字符串连接符)
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")                          --中间目录
 
+    pchheader "nutpch.h"            --预编译头文件
+    pchsource "Nut/src/nutpch.cpp"                                              --(实际上编译器不需要 但是VS需要这个.cpp文件)
+    
+
     files                           --将源代码文件添加到特定的项目中
     {
        "%{prj.name}/src/**.h",

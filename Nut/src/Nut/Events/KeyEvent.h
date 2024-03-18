@@ -2,8 +2,6 @@
 
 #include"Event.h"
 
-#include <sstream>
-
 namespace Nut {
 	class NUT_API KeyEvent : public Event
 	{

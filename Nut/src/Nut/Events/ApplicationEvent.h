@@ -2,8 +2,6 @@
 
 #include"Event.h"
 
-#include <sstream>
-
 namespace Nut {
 	class NUT_API WindowResizeEvent : public Event				//公有继承的派生类
 	{
