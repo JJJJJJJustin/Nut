@@ -27,9 +27,15 @@
     <ClInclude Include="src\Nut\EntryPoint.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\Nut\Log.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Application.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Nut\Log.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
