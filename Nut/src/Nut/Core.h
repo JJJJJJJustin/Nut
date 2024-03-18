@@ -9,3 +9,6 @@
 #else
 	#error Nut only supports Windows!
 #endif
+
+//将1在二进制数中左移x位: Bit(2)->00000100
+#define Bit(x) (1 << x)
