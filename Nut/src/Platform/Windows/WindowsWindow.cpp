@@ -49,6 +49,10 @@ namespace Nut
 		//初始化Windows对象并创建窗口上下文
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
+		//通过glad加载OpenGL提供的各种图形渲染函数
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		NUT_CORE_ASSERT(status, "Failed to initialize Glad!");
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 

@@ -14,10 +14,16 @@ workspace "Nut"                     --工作区
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"                 --（方便输出和中间目录编写）
 IncludeDir = {}                                                                 --创建一个名为IncludeDir的表
 IncludeDir["GLFW"] = "Nut/vendor/GLFW/include"                                  --将表的"GLFW"键索引到此路径
+IncludeDir["Glad"] = "Nut/vendor/Glad/include"                                  --将表的"Glad"键索引到此路径
 
 ---------------------------------------------------------------------------------------
 --[[包含Nut/Nut/vendor/GLFW中的premake文件并合并到这里]]
 include "Nut/vendor/GLFW"
+--[[
+    XXXX
+]]
+--[[包含Nut/Nut/vendor/Glad中的premake文件并合并到这里]]
+include "Nut/vendor/Glad"
 --[[
     XXXX
 ]]
@@ -45,14 +51,15 @@ project "Nut"                       --项目
     includedirs                     --库文件
     {
         "%{prj.name}/src",
-        "%{prj.name}/vendor/spdlog/include",                                                 --将IncludeDir表中GLFW键索引的值作为一个库文件
         "%{prj.name}/vendor/spdlog/include",
-        "%{IncludeDir.GLFW}"                                                    --将IncludeDir表中GLFW键索引的值作为一个库文件
+        "%{IncludeDir.GLFW}",                                                   --将IncludeDir表中GLFW键索引的值（地址）作为一个库文件路径
+        "%{IncludeDir.Glad}"                                                    --将IncludeDir表中Glad键索引的值（地址）作为一个库文件路径
     }
 
     links                           --为Nut项目(.dll)链接文件
     {
         "GLFW",                                                                 --链接上方项目GLFW
+        "Glad",                                                                 --链接上方项目Glad
         "opengl32.lib"
     }
 
@@ -64,7 +71,8 @@ project "Nut"                       --项目
         defines
         {                           --宏的声明
             "NUT_PLATFORM_WINDOWS",
-            "NUT_BUILD_DLL"
+            "NUT_BUILD_DLL",
+            "NUT_CORE_ASSERT"
         }
 
         postbuildcommands           --构建项目完成后执行的指令
@@ -122,7 +130,8 @@ project "Sandbox"
 
         defines
         {                          
-            "NUT_PLATFORM_WINDOWS"
+            "NUT_PLATFORM_WINDOWS",
+            "NUT_ASSERT"
         }
 
         filter "configurations:Debug"
