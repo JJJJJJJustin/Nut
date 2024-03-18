@@ -9,7 +9,7 @@ namespace Nut {
 
 	Application::Application()
 	{
-
+		m_Window = std::unique_ptr<Window>(Window::Create());
 	}
 
 	Application::~Application()
@@ -28,6 +28,9 @@ namespace Nut {
 		{
 			NUT_TRACE(WRE);
 		}
-		while (true);
+		while (m_Running)
+		{
+			m_Window->OnUpdate();
+		}
 	}
 }

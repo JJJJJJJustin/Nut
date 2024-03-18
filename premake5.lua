@@ -12,6 +12,16 @@ workspace "Nut"                     --工作区
 
 --[[起别名]]
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"                 --（方便输出和中间目录编写）
+IncludeDir = {}                                                                 --创建一个名为IncludeDir的表
+IncludeDir["GLFW"] = "Nut/vendor/GLFW/include"                                  --将表的"GLFW"键索引到此路径
+
+---------------------------------------------------------------------------------------
+--[[包含Nut/Nut/vendor/GLFW中的premake文件并合并到这里]]
+include "Nut/vendor/GLFW"
+--[[
+    XXXX
+]]
+---------------------------------------------------------------------------------------
 
 --[[项目Nut]]
 project "Nut"                       --项目
@@ -36,6 +46,14 @@ project "Nut"                       --项目
     {
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",                                                 --将IncludeDir表中GLFW键索引的值作为一个库文件
+        "%{prj.name}/vendor/spdlog/include",
+        "%{IncludeDir.GLFW}"                                                    --将IncludeDir表中GLFW键索引的值作为一个库文件
+    }
+
+    links                           --为Nut项目(.dll)链接文件
+    {
+        "GLFW",                                                                 --链接上方项目GLFW
+        "opengl32.lib"
     }
 
     filter "system:windows"         --过滤器(如果系统是windows)   >>> !!!  filter, not filters  !!!
