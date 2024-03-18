@@ -1,0 +1,8 @@
+# Ignore files and directories in the .vs folder
+.vs/
+# Ignore directories
+bin/
+bin-int/
+
+#Ignore files
+*.user

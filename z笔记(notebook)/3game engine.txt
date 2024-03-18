@@ -1,0 +1,533 @@
+----------------------------------------------------------------------项目设置-------------------------------------------------
+》》》》项目设置：
+1.建立一个github库
+2.设置一个VS解决方案和项目
+3.设置相应的配置
+4.链接
+
+1.配置：
+	设置引擎为一个库文件（dll），在外部将库文件链接到外部的应用项目（exe）
+	  （静态库的形式类似于将一大堆库链接到游戏中）
+	  （动态库的形式类似于将一大堆外部库先链接到dll文件中，再将这个dll文件链接到游戏中，这样我们的游戏只会依赖于这一个dll文件）
+	1.删除了适应平台（x86）
+	2.改变配置类型（exe -> dll）
+	3.更改输出目录和中间目录
+2.新建一个项目并且配置其支持平台，输出和中间目录（和引擎相同）
+3.设置启动项目：
+	右键Sandbox并选择该选项(.vs文件会保存我们在vs中做出的配置调整，但我们要为其他平台启动的人做一些调整0
+4.调整sln文件中的启动项
+	在文本编辑器（可以是vscode）中打开解决方案文件.sln，调整前几句为
+	Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{28573136-9FAB-4D60-8F24-3DF8BCC0422B}"
+	EndProject
+	Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Nut", "Nut\Nut.vcxproj", "{7FB1D529-C182-497A-A2B0-633BC7A48C81}"
+	EndProject
+5.链接
+	将启动项目和引擎库链接，右键sandbox -> add（添加） -> reference（引用） -> 勾选你的引擎文件	
+
+
+
+
+----------------------------------------------------------------------引擎入口点-------------------------------------------------
+》》》》什么是入口点
+引擎入口点（Engine Entry Point）通常指的是一个程序的起始执行位置，也可以被称为主函数（Main Function）。程序从这里开始执行，并按照预定的流程继续执行。
+eg::例如，在C语言中，引擎入口点通常被命名为main函数，它是程序的起始位置。在C++中，引擎入口点可以是全局的main函数，也可以是类的静态成员函数。
+
+
+
+》》》》什么是沙盒(sandbox)
+sandbox（沙盒）是一种安全机制，用于限制程序的访问权限和行为范围。它创建了一个受限的执行环境，将程序隔离在其中，以防止恶意代码或不安全的操作对系统造成损害。
+
+
+
+》》》》虚析构函数？
+当一个类的析构函数被声明为虚析构函数时，这意味着该类将成为多态类型，并且可以安全地通过基类指针删除派生类对象。
+	1.安全地销毁派生类对象：当使用基类指针指向派生类对象时，如果基类的析构函数不是虚函数，在使用delete删除指针时只会调用基类的析构函数。这可能导致派生类中的资源泄漏，因为派生类的析构函数未被调用。通过将析构函数声明为虚函数，可以确保在删除指向派生类对象的基类指针时，会先调用派生类的析构函数，然后再调用基类的析构函数，从而正确释放派生类所占用的资源。
+	2.支持多态行为：在使用基类指针指向派生类对象并调用虚函数时，会根据对象的实际类型来调用相应的函数。
+
+
+
+》》》》实现思路
+通过应用程序是否执行任务（比如是否在windows平台，是否加载了一个dll文件...）来进行条件判断，也就是捕获了这些事件，然后利用这个条件运行某段代码。
+
+
+
+》》》》宏（条件判断的实现逻辑）
+
+#define 宏名称 值或代码
+
+#ifdef 标识符
+    // 如果标识符已经被定义，则编译这部分代码
+#else
+    // 如果标识符没有被定义，则编译这部分代码
+#endif
+
+宏不会自动定义。如果在 属性页 -> C++ -> 预处理器 中填入一个宏XXX，这意味着在编译代码时会自动在预处理阶段为XXX这个宏定义一个值。
+这样不用手动编写一个宏，可以直接使用#ifdef语句进行条件判断。
+
+
+
+
+》》》》类的继承
+在 C++ 中，有三种继承方式：公有继承（public inheritance）、私有继承（private inheritance）和受保护继承（protected inheritance）。
+它们的区别在于派生类对基类成员的访问权限。
+
+公有继承（public inheritance）：
+		语法：使用 public 关键字进行声明，例如 class 派生类 : public 基类 {}。
+		      基类的公有成员在派生类中仍然是公有的。
+		      基类的保护成员在派生类中仍然是保护的。
+		      基类的私有成员在派生类中不可访问。
+私有继承（private inheritance）：
+		语法：使用 private 关键字进行声明，例如 class 派生类 : private 基类 {}。
+		      基类的公有成员在派生类中变为私有的。
+		      基类的保护成员在派生类中变为私有的。
+		      基类的私有成员在派生类中不可访问。
+受保护继承（protected inheritance）：
+		语法：使用 protected 关键字进行声明，例如 class 派生类 : protected 基类 {}。
+		      基类的公有成员在派生类中变为受保护的。
+		      基类的保护成员在派生类中仍然是受保护的。
+		      基类的私有成员在派生类中不可访问。
+选择继承方式应根据具体的设计需求和情况来决定。通常情况下，公有继承是最常用的继承方式，因为它能够使派生类获得基类的接口和功能，并且符合面向对象编程的封装性和多态性原则。私有继承和受保护继承在特定场景下有其用途，比如实现继承实现细节封装或限制派生类对基类接口的访问。
+
+
+
+
+----------------------------------------------------------------------引擎日志-------------------------------------------------
+》》》》
+思路：使用C#风格的库spdlog，将其创建为子模版。将spdlog接口打包，方便使用。
+打包后将其设计为宏函数，方便使用。也方便在发行时候通过 #ifdef 来控制一系列宏函数打印的日志不用在发行版本使用。
+
+
+
+》》》》子模版？
+git submodule add 命令会在主仓库中创建一个指向子模块仓库的链接，并将子模块仓库克隆到指定的目录下。
+这个链接存储在主仓库的 .gitmodules 文件中，以便记录和管理子模块的相关信息。
+
+通过将外部依赖库作为子模块添加到主仓库中，你可以保持主仓库和子模块仓库的独立性。
+这意味着主仓库和子模块仓库可以分别进行版本控制和更改，而不会相互干扰。
+当你在不同的项目中使用相同的外部依赖库时，你只需要在这些项目中添加子模块的链接，而不必重复复制和维护这些外部依赖库的副本。
+
+
+
+》》》》什么是打包？
+封装（Packaging）可以理解为打包的一种表达方式，在软件开发中常用来指代将相关文件和资源封装到一个独立的包中以便于分发和使用。
+（打包和封装在大部分情况下可以视作同义词。）
+
+打包（Packaging）指的是将软件或应用程序的源代码、依赖项和其他必要的资源组合在一起，以便在其他环境中进行部署或分发。
+它可以将一个或多个文件或目录打包成一个单独的可执行文件、库文件、安装程序、容器镜像等形式。
+
+打包通常包括以下内容：
+	源代码：包括软件的原始代码文件，用于编译和构建可执行文件或库。
+	依赖项：软件所依赖的库文件、框架、工具或其他第三方组件。这些依赖项可能需要事先安装或打包到同一个包中，以确保软件在目标环境中能够正常运行。
+	资源文件：例如配置文件、模板、静态文件、图像、文档等，这些文件通常是软件运行所需的辅助资源。
+
+eg:
+class Calculator {
+public:
+	int func( int a ){
+		return XXX::complex_function( a );
+	}
+};
+int main(){
+	Calulator calc;
+	std::cout << "result is " << calc.func( X );
+}
+
+
+
+
+
+》》》》 双下划线   "__"   ---->   预定义的宏
+定义：双下划线 "" 表示这是一个预定义的宏，由编译器或标准库定义。
+目的：一些预定义的宏都包含双下划线 "__"，例如 __cplusplus、LINE、FILE 等等。这样设计的目的是为了避免与用户自定义的标识符冲突，并且提供一些方便的功能。
+
+
+
+》》》》(...) 和 __VA_ARGS__配对使用
+
+1.(...) 是可变参数模板的语法，表示宏函数可以接受任意数量的参数。
+2.VA_ARGS 是一个预定义的宏，在 C++ 中用于表示可变参数列表。它将被展开成实际传入的可变参数列表。
+
+一般情况下，在宏定义中使用 (...) 来接受可变数量的参数，在宏展开时使用 VA_ARGS 来引用这些参数。
+下面是一个示例来说明 (...) 和 VA_ARGS 的配对使用：
+
+#define PRINT_VALUES(format, ...) \
+    printf(format, __VA_ARGS__);
+
+int main() {
+    PRINT_VALUES("%d %s\n", 10, "Hello");  // 输出：10 Hello
+    return 0;
+}
+在这个例子中，PRINT_VALUES 宏使用了可变参数模板 (...) 来接受可变数量的参数，然后使用 VA_ARGS 来引用这些参数。在宏展开时，VA_ARGS 将被实际传入的可变参数替换。
+
+
+
+
+
+----------------------------------------------------------------------引擎脚本(use Premake API)-------------------------------------------------
+》》》》思路：
+使用premake内置的API接口编写premake.lua脚本文件，使其自动构建特定于平台的项目文件，并自动化的完成Dll文件的复制--替换操作。
+同时通过bat文件自动化输入命令启动premake5.exe文件的这个操作。
+
+
+----------------------------------------------------------------------事件系统设计-------------------------------------------------
+》》》》设计：
+四个事件文件
+	   -->AppEvent
+Event.h-->KeyEvent
+	   -->MouseEvent
+
+
+
+
+》》》》代码解析：
+1.EventType::##type 和 #type 是什么？
+EventType::##type 中的 ## 是预处理操作符，用于将宏参数 type 与 EventType:: 连接起来。例如，如果 type 是 Mouse，那么 EventType::##type 就会被展开为 EventType::Mouse。
+return #type; 中的 # 是字符串化操作符，将宏参数转换为字符串。如果 type 是 Mouse，那么 #type 就会被展开为 "Mouse"。
+
+2.宏定义 EVENT_CLASS_TYPE(type) 的逻辑是什么？
+EVENT_CLASS_TYPE 宏定义了三个函数：GetStaticType、GetEventType 和 GetName。其中 GetStaticType 返回事件的静态类型，即将 type 参数与 EventType:: 连接。GetEventType 实际上调用了 GetStaticType 函数。GetName 返回事件对象的名称，即将 type 参数转换为字符串。
+
+3.枚举类型 EventCategory 和位运算的使用是怎样的？
+在代码中，使用 #define BIT(x) (1 << x) 定义掩码常量，表示对应位置为 1。而 EventCategory 枚举类型定义了五种事件类别。通过位运算 & 将 category 和该事件对象所属的类别进行比较，判断该事件对象是否包含在指定事件类别中。
+																enum EventCategory
+																{
+																    None = 0,
+																    Mouse = 0b00000001,    // 表示鼠标事件的掩码常量
+																    Keyboard = 0b00000010, // 表示键盘事件的掩码常量
+																    Window = 0b00000100     // 表示窗口事件的掩码常量
+																};
+												假设 GetCategoryFlags() 返回的是 Mouse 类别的掩码常量 0b00000001，
+												而 category 是	另一个掩码常量，例如 Keyboard 类别的掩码常量 0b00000010。
+												那么当二者进行按位与运算时，结果如下所示：
+
+																0b00000001  (GetCategoryFlags() 的值，Mouse 类别的掩码常量)
+																& 
+																0b00000010  (category 的值，Keyboard 类别的掩码常量)
+																-----------
+																00000000   (结果为 0，表示不属于 Keyboard 类别)
+												因此，结果是一个新的值，其比特位是根据两个操作数的相应比特位进行按位与操作得到的。
+												在这个例子中，结果为 0，表示不属于键盘事件类别。
+
+4.m_Event.GetEventType() == T::GetStaticType() 的作用是什么？
+这段代码是在 EventDispatcher 类中定义的模板函数 Dispatch 中，用于根据事件类型分发事件处理函数。该模板函数可以接受一个函数对象 func，该对象的参数类型为 T&。在函数体内，判断传入的事件处理函数类型是否与当前事件对象的类型匹配。
+
+5.m_Event.m_Handled = func(*(T*)&m_Event) 的作用是什么？
+这段代码在 Dispatch 模板函数中，将事件对象转换为指定类型 T 后，调用传入的处理函数 func 来处理事件，并将处理结果存储在 m_Event.m_Handled 中，标记事件是否被处理。*(T*)&m_Event 表示强制将 m_Event 转换为 T 类型的引用，并将其作为参数调用函数对象 func。
+
+6.template<typename T> using EventFn = std::function<bool(T&)>; 和 std::function 是什么？
+EventFn 是一个别名模板，定义了一个函数对象类型 std::function<bool(T&)>，表示接受一个参数类型为 T&，返回类型为 bool 的函数对象。std::function 是一个通用的函数封装类，用于封装可调用对象，如函数指针、成员函数指针、Lambda 表达式等。
+
+
+
+
+》》》》enum 和 enum class 的区别
+enum class 中的成员在使用时候有类名这个作用域的限制，enum 则没有
+
+
+
+
+》》》》什么是事件分发器
+概念：事件分发器（Event Dispatcher）是一种设计模式，用于处理和分发事件（Event）的机制。
+包括以下几个要点：
+	接收事件：事件分发器需要能够接收系统中产生的各种事件，如按键输入、鼠标点击、网络消息等。
+	分发事件：根据事件的类型和属性，事件分发器将事件分发给注册的事件处理函数或对象。
+	事件处理：事件处理函数负责对接收到的事件做出相应的处理，可能包括更新系统状态、触发其他操作等。
+
+eg.一个简单的事件分发器的例子是一个图形界面应用程序，当用户点击按钮时，按钮控件会生成一个点击事件，事件分发器接收到该事件后，会将事件分发给注册的按钮点击事件处理函数，从而执行按钮点击后的相应操作，比如显示弹窗、切换界面等。
+
+
+
+》》》》std::to_string() 和 std::stringstream ss 的 ss.str()
+std::to_string 函数只接受基本数据类型（例如 int、float 等）作为参数，并将其转换为 std::string 类型的字符串。
+因此，直接将 std::stringstream 对象作为参数传递给 std::to_string 函数是不可行的，编译器会报错。
+
+
+
+》》》》WindowResizeEvent WRE(1280, 720);
+	     NUT_TRACE(WRE);
+为什么能将WRE作为字符型的类型的参数传入NUT_TRACE这个宏中，并让其中的 trace( ) 函数接受WindowResizeEvent类中ToString函数的结果并输出日志？
+
+回答：
+在很多日志库中，当你将一个自定义类型的对象传递给日志输出函数时，
+它们会通过调用该类型的特定方法（通常称为 ToString() 或类似的方法）来获取对象的字符串表示形式，然后将其输出到日志中。
+
+		在你的代码中，NUT_TRACE 宏展开后会调用 logger 对象的 trace 函数，并将传入的参数作为日志消息。
+		而在 trace 函数内部，由于传入的参数是一个 WindowResizeEvent 对象，
+		因此会调用 WindowResizeEvent 类中的 ToString() 方法来获取该对象的字符串表示形式。
+
+		所以，当你传递 WRE 对象给 NUT_TRACE 宏时，实际上是调用了 WRE.ToString() 方法，该方法返回一个描述 WindowResizeEvent 对象内容的字符串。
+		然后，这个字符串将被传递给 logger 对象的 trace 函数，并最终输出到日志中。
+
+这种做法的好处是，可以灵活地将自定义类型的对象转换为字符串，并将其记录在日志中。
+
+
+
+
+》》》》子类的构造函数中是否应该调用父类的构造函数？
+
+在 C++ 中，如果子类构造函数没有显式调用父类构造函数，则会自动调用父类的默认构造函数（如果存在）。
+以确保从父类继承而来的部分能够正确初始化，保证整个对象的完整性和正确性。
+
+如果父类没有无参的默认构造函数，而只有带参数的构造函数，则子类必须通过初始化列表显式调用父类的构造函数来初始化从父类继承而来的部分。
+
+														eg.
+															class Base {
+															public:
+															    Base(int value) {
+															        std::cout << "Base constructor with value: " << value << std::endl;
+															    }
+															};
+															
+															class Derived : public Base {
+															public:
+															    // 派生类构造函数没有显式调用基类构造函数
+															    Derived(int value) {
+															        // 派生类构造函数体
+															    }
+															};
+														在这个例子中，基类 Base 定义了带参数的构造函数 Base(int value)，
+														而派生类 Derived 的构造函数没有显式调用基类构造函数。
+
+														接下来，如果我们尝试使用派生类 Derived 来创建对象：
+
+															Derived d(5);
+														派生类构造函数没有显式调用基类构造函数，编译器会自动尝试调用基类的默认构造函														数。但是这个基类 Base 并没有默认构造函数，
+														因此编译器会报错指出找不到默认构造函数来初始化基类的部分。
+
+														为解决问题，可以通过初始化列表显式调用基类构造函数来初始化从基类继承来的部分：
+
+															class Derived : public Base {
+															public:
+															    Derived(int value) : Base(value) {
+															        // 派生类构造函数体
+															    }
+															};
+														修正后，我们在派生类的构造函数初始化列表中显式调用了基类的构造函数，
+														并传递了合适的参数来初始化基类的部分。
+														这样就能够正确地初始化从基类继承而来的部分，避免了编译错误。
+--------------------------------------------------------------预编译头文件---------------------------------------------------------
+》》》》理解
+在premake中做出的项目设置实际上等同于在VS可视化界面上的设置
+pch.h：（Use/Yc）
+pch.cpp：（Create/Yc）
+--------------------------------------------------------窗口和GLFW----------------------------------------------------
+》》》》fork（分支/派生）和submodule（子模块）
+
+Fork= 就像是你复制了一个完整的项目到你自己的账号下，你可以在这个复制的项目上做任何修改而不影响原始项目。
+          你可以把这个复制的项目当作你自己的项目来管理。
+Submodule= 就像是在一个项目中引入了另一个项目，但它们是独立的。主项目知道子项目的存在并能够与之交互，但它们是分开管理的。
+	  子模块通常用于将一个项目作为另一个项目的一部分来使用。
+
+简而言之，Fork 是复制整个项目到你自己的账号下，而 Submodule 是在一个项目中引入另一个项目作为子项目。
+
+cherno的做法是：
+1. 在 GitHub 上 Fork 了 glfw 库，获得自己的独立副本。
+2. 向库中上传自己的premake文件。
+2. 将这个 Fork 的 glfw 库作为子模块引入到自己的项目中，以便在项目中依赖和使用 glfw 库。
+
+
+
+》》》》在查证过程中，发现cherno在当时使用的是3.3发布版本的一个开发分支。（https://github.com/TheCherno/glfw/tree/53c8c72c676ca97c10aedfe3d0eb4271c5b23dba）
+位于（https://github.com/glfw/glfw/tree/53c8c72c676ca97c10aedfe3d0eb4271c5b23dba）
+我选择先Fork最新的glfw，如果有其他情况以后再修正。
+
+》》编译问题参考：
+(http://t.csdnimg.cn/hQN5j)
+It will help you a lot, believe me.
+
+
+》》》》lua中的语法
+
+1.IncludeDir = {} 是创建了一个空的 Lua 表（table），用来存储不同模块或库的包含目录。
+2.而 IncludeDir["GLFW"] 则是使用了 Lua 中的表索引操作，将键为 "GLFW" 的元素设置为 "Hazel/vendor/GLFW/include"。
+3.%{IncludeDir.GLFW}表示要获取表 IncludeDir 中键为 "GLFW" 的元素值
+
+
+
+》》》》glfwInit（）
+通常情况下，glfwInit() 函数会返回一个整数值来指示初始化是否成功。
+
+
+》》》》glfwSetWindowUserPointer( )
+作用：将一个指向自定义数据的指针与 GLFW 窗口相关联
+解释：
+通过调用 glfwSetWindowUserPointer(m_Window, &m_Data); 函数，你将自定义数据 m_Data 与 GLFW 窗口 m_Window 相关联。这样做的目的通常是为了在程序中可以方便地访问和操作与该窗口相关的自定义数据。例如，当你需要在 GLFW 窗口回调函数中访问特定窗口的自定义数据时，可以使用 glfwGetWindowUserPointer(m_Window) 来获取该数据指针。
+
+
+》》》》glfwSetWindowUserPointer 和 glfwGetWindowUserPointer的关系和用法
+
+void glfwSetWindowUserPointer(GLFWwindow* window, void* pointer)、
+参数：
+	window：用于设置用户指针数据的窗口对象。
+	pointer： 想要关联的自定义指针数据（通常是一个结构体指针或其他数据类型的指针。）
+功能：将用户自定义的指针数据与特定窗口对象关联起来。方便后续取出使用。
+
+
+void* glfwGetWindowUserPointer(GLFWwindow* window)
+参数：
+	window：想要获取用户指针数据的窗口对象。
+返回值：
+	与窗口对象关联的，用户指明的 自定义指针数据（即上面关联进来的那个数据或结构体）。
+注意：
+	返回值是一个void *，可以指向任何数据。所以在使用时也许需要你将返回值强制类型转换并赋值给其他变量。
+功能：从特定窗口对象中获取之前通过 glfwSetWindowUserPointer 设置的用户自定义指针数据。
+
+											eg.
+											// 在初始化窗口时将自定义数据与窗口对象关联
+											MyData data;
+											glfwSetWindowUserPointer(window, &data);
+
+											// 在需要时从窗口对象中获取自定义数据
+											MyData* userData = static_cast<MyData*>(glfwGetWindowUserPointer(window));
+											if (userData)  {    // 使用 userData 中的数据     }
+
+----------------------------------窗口事件----------------------------------------------------------------------------------
+》》》》一些涉及到的知识点：
+lambda:
+	(https://www.bilibili.com/video/BV1mw41187Ac/?p=12&vd_source=64ca0934a8f5ef66a21e8d0bddd35f63)
+std::placeholders::_1:
+	是 C++ 标准库中定义的占位符，用于表示函数对象中的第一个参数。用于等待下次使用时在此占位符位置上填入的值。
+	（这里的placeholders::1的1好像只是标明占位符的，无其他意义，比如同时使用了两个占位符那第二个占位符就是placeholders::2,
+	其中数字与其使用时的位置和方法没有关系，仅仅代表占位符的标号）
+std::bind:
+	std::bind 在实际使用中有多种用途。
+	1.延迟调用和参数绑定
+	2.改变函数签名
+	3.成员函数绑定
+	4.函数适配器
+											eg.
+											----std::bind 延迟调用一个函数：
+
+												#include <functional>
+												#include <iostream>
+
+												void delayedFunction(int a, int b) {
+												    std::cout << "Delayed function called with arguments: " << a << " and " << b;
+												}
+
+												int main() {
+												    auto delayedFunc = std::bind(delayedFunction, 10, 20);
+												    // 延迟执行 delayedFunction，参数被预先绑定为 10 和 20
+ 												   // ...
+ 												   // 在需要的时候调用 delayedFunc
+  												  delayedFunc();
+  												  return 0;
+												}
+
+											----改变函数的签名，包括修改函数的参数类型或个数。
+												#include <functional>
+												#include <iostream>
+													void originalFunction(int a, int b) {
+												    std::cout << "Original function called with arguments: " << a << " and " << b;
+												}
+
+												void modifiedFunction(double x, double y) {
+												    std::cout << "Modified function called with arguments: " << x << " and " << y;
+												}
+												int main() {
+												    // 使用 std::bind 将 modifiedFunction 的签名修改为接受两个 double 类型参数
+ 												   auto modifiedFunc = std::bind(
+																	modifiedFunction, std::placeholders::_1, std::placeholders::_2);
+   
+												    // 在需要的时候调用 modifiedFunc，并传入合适类型的参数
+												    modifiedFunc(3.14, 2.71); // 输出: Modified function called with arguments: 3.14 and 2.71
+   
+												    return 0;
+												}
+
+											----绑定类的成员函数，并指定对象实例作为第一个参数。
+												#include <functional>
+												#include <iostream>
+
+												class MyClass {
+												public:
+												    void memberFunction(int value) {
+												        std::cout << "Member function called with value: " << value << std::endl;
+												    }
+												};
+
+												int main() {
+												    MyClass obj;
+												    auto memberFunc = std::bind(&MyClass::memberFunction, &obj, std::placeholders::_1);
+												    // 绑定 MyClass 的成员函数 memberFunction，并将 obj 作为对象实例
+												    // ...
+ 												    // 在需要的时候调用 memberFunc
+ 												    memberFunc(42);
+   
+												   return 0;
+												}
+
+
+											----使用函数适配器进行参数绑定：
+												#include <functional>
+												#include <iostream>
+
+												void printSum(int a, int b) {
+ 												   std::cout << "Sum: " << a + b << std::endl;
+												}
+
+												int main() {
+												   auto sumFunc = std::bind(printSum, std::placeholders::_1, 5);
+												   // 将第二个参数绑定为 5，等待传入第一个参数
+												   // ...
+ 												   // 在需要的时候调用 sumFunc
+												    sumFunc(10); // 输出 Sum: 15
+  
+												    return 0;
+												}
+
+-----------接下来我以发问的方式来查证疑惑（这都是我在学习时产生的疑惑）--------------------------
+
+》》》问题：Application.cpp中的语句m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));在干什么？
+
+在WindowsWindow.h中，有  inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }  这样的定义。
+所以SetEventCallback 这个函数需要接受一个  EventCallbackFn  类型的函数，也就是  void XXX(Event& e)  这样的函数。
+而std::bind恰好能返回一组函数指针或者说一个函数对象，通过这个函数对象，我们可以用传入的 OnEvent  这个函数初始化  m_Data.EventCallback 
+（注意：在将成员函数作为函数对象传递时，需要绑定其对象，确保能通过对象正确的访问到这个成员函数）
+
+而  BIND_EVENT_FN(OnEvent)  就像是对  OnEvent  做了一些暂缓的设置，以便之后处理
+（我们后面会谈到）
+
+》》关于函数指针：
+https://www.bilibili.com/video/BV1254y1h7Ha/?vd_source=64ca0934a8f5ef66a21e8d0bddd35f63
+
+》》》问题：占位符呢？
+虽然有占位符的设计，但是m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));这个OnEvent却没有填入参数
+即使在绑定时没有显式地填入参数，但通过占位符的机制，函数对象仍然能够正确地接收事件参数并传递给 OnEvent 函数。
+（注意是  std::placeholders::_1  而不是  std::placeholders::1， 有下划线）
+
+理解：
+通过使用占位符，函数对象会暂时（注意：暂时）保留一个位置用于接收后续传入的参数，并在调用时将这些参数正确地传递给被绑定的成员函数。
+
+
+
+》》》m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));  是什么意思？
+	  BIND_EVENT_FN(OnEvent)，代表了什么意思？
+	  随后的data.EventCallback(event);  和以上有什么联系，为什么这样使用？
+
+问题一：
+首先我们在前面提到，m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent)); 其实是  std::bind( )  返回了一个函数对象作为 SetEventCallback的参数，
+这用来初始化  data  中的一个元素  EventCallback 。
+
+问题二：那么  BIND_EVENT_FN(OnEvent)  呢？
+
+解释：在定义中我们看到  #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
+	  意思是为成员函数绑定了对象，并将其作为函数对象传递，这就是前两个参数的意义，
+	  第三个参数：std::placeholders::_1 ， 指出了  OnEvent  的参数暂时被占位了，可以先不填入参数，以便之后处理。
+
+问题三：
+	  之后处理，实际上就是指之后的  data.EventCallback(event);   要进行的处理
+	  通过  Data  类型的对象  data，我们调用出来了刚才初始化进  data  的那个函数：OnEvent。
+（我们在之后通过  glfwSetWindowUserPointer  和  glfwGetWindowUserPointer 获取了  m_Data,并将其复制到一个名为data的引用上：
+   WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);  ）
+	  调用出来的  OnEvent( )  就相当于  data.EventCallback( )，然而  OnEvent  在定义上是需要参数的，所以
+	  data.EventCallback(event)  ==  OnEvent(event)  ,这个  event ，就是我们用占位符延缓的参数（ 这个参数被标明会在后续使用）
+
+	  在使用  Event  对象作为  OnEvent  的参数填入之后，event这个参数参与到OnEvent函数体内的操作中去，完成我们定义的操作。
+（在回调函数中我们这样使用：
+	WindowResizeEvent event(width, height);
+	data.EventCallback(event);
+）
+
+
+你可能没有理解完全，可以继续阅读笔记，3game engine2.txt  中还有其他语句的理解，看完之后你会明白的。

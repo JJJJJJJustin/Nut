@@ -1,0 +1,472 @@
+----------------------------------------------------窗口事件---------------------------------------------
+》》》》关于闭包的理解（不太清晰）
+EventCallback 是一个成员变量，类型为 EventCallbackFn，即 std::function<void(Event&)>。这个变量是一个闭包，它可以持有函数对象，并且在需要时执行相应的操作。
+eg.
+
+		class WindowsWindow : public Window {
+		public:
+		    // ... 省略其他部分
+
+		    inline void SetEventCallback(const EventCallbackFn& callback) override { 
+		        m_Data.EventCallback = callback; 
+		    }
+    
+		private:
+		    struct WindowData {
+ 		       // ... 省略其他部分
+ 		       EventCallbackFn EventCallback;
+ 		   };
+ 		   WindowData m_Data;
+		};
+
+在上面的代码中，WindowsWindow 类包含了一个成员变量 m_Data，其中声明了一个名为 EventCallback 的成员变量，类型为 EventCallbackFn，也就是 std::function<void(Event&)>。这个 EventCallback 变量就是一个闭包，它可以持有各种可调用对象，并且在需要时执行相应的事件处理逻辑。
+
+当你调用 SetEventCallback 函数时，你可以将一个函数、Lambda 表达式或者其他可调用对象赋值给 m_Data.EventCallback，从而将相应的事件处理逻辑绑定到窗口实例上。
+举个例子，假设你有一个处理窗口关闭事件的函数 OnWindowClose：
+
+		void OnWindowClose(Event& event) {
+		    // 处理窗口关闭事件的逻辑
+		}
+
+		// 在创建窗口实例后，将处理窗口关闭事件的函数赋值给 EventCallback
+		WindowsWindow window;
+		window.SetEventCallback(OnWindowClose);
+
+		// 当窗口关闭事件发生时，可以通过调用 EventCallback 来执行相应的处理逻辑
+		WindowCloseEvent closeEvent;
+		// 假设 closeEvent 是窗口关闭事件
+		window.m_Data.EventCallback(closeEvent);
+
+
+在这个例子中，通过调用 SetEventCallback 函数，你可以将处理窗口关闭事件的函数 OnWindowClose 绑定到窗口实例上，然后在窗口关闭事件发生时，通过调用 EventCallback 来执行相应的处理逻辑。这种机制允许你动态地设置事件处理逻辑，并且可以方便地在事件发生时执行相应的操作。
+
+
+
+
+》》》》关于data的使用理解：
+
+glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			data.Width = width;
+			data.Height = height;
+
+			WindowResizeEvent event(width, height);
+			data.EventCallback(event);
+		});
+
+	逻辑：WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window); 的作用是从 GLFW 窗口中获取用户指针，并将其转换为 WindowData 类型的引用，从而可以访问窗口相关的数据。
+（如果在之前的代码中将 m_Data 设置为窗口的用户指针（通过 glfwSetWindowUserPointer 函数），那么在这个回调函数中获取到的 data 就是之前声明的 m_Data。）
+
+	概念：通过 glfwSetWindowUserPointer 来将自定义数据与 GLFW 窗口关联起来，然后在回调函数中使用这些数据。
+（这里的 WindowData& data 是对用户指针指向的 WindowData 结构体的 引用（注意：引用），因此对 data 的操作实际上是对窗口关联的数据进行修改或访问。）
+
+	深入理解：
+（是否反复声明data对象？）
+	1.每次调用 glfwSetWindowSizeCallback 或 glfwSetWindowCloseCallback 时会重新获取窗口关联的 WindowData 数据，所以不是每次都重新声明 data，
+	   而是获取同一个窗口关联的数据，传入并刷新。
+（是否在更新同一个data对象中的值？）
+	2.是的，多次调用 glfwSetWindowSizeCallback 或 glfwSetWindowCloseCallback 绑定了不同的事件处理逻辑，但是它们都共享同一个 data，每次调用回调时 	  data 中的值会被修改，因为它们都是指向同一个 WindowData 数据结构的引用。
+（是否使用的是私有变量m_Data？）
+	3.是的，通过 glfwSetWindowUserPointer(m_Window, &m_Data) 将 m_Data 绑定到 GLFW 窗口对象 m_Window 上。而在 glfwSetWindowSizeCallback 的	  回调函数中，通过 glfwGetWindowUserPointer(window) 获取绑定在窗口上的 m_Data 结构体的指针，并将其转换为 WindowData& data 引用。
+	  因此，回调函数中的 data 是直接引用并操作了 m_Data 结构体，而不是新声明的结构体。
+
+
+
+》》》》为什么在 glfwSetWindowSizeCallback 中要执行 data.EventCallback(event) 这样的操作？
+流程：
+	当窗口大小变化（或是触发某一操作对应的回调函数）时，GLFW 提供的回调函数  glfwSetWindowSizeCallback  会被自动触发，
+	然后根据我们对该回调函数的定义（定义包含在我们填入的lambda表达式或者函数指针中），在  glfwSetWindowSizeCallback  被自动调用时，
+	我们会执行到创建相应的事件对象  Event，然后调用之前在  Data  的EventCallback中存入的函数（ EventCallback 所指向的函数 OnEvent），
+	并将 event 作为参数传递给这个函数。
+	而这个函数我们是在  m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));  这里初始化给Data 的。
+
+效果/目的：
+	为了确保在特定事件发生时能够调用已经设置好的事件回调函数
+
+
+
+》》》》OnEvent为什么要被这样设置？为甚么在每一个回调函数之后都要写一次？
+对每一个回调函数实际上都有调用  data.EventCallback(event)  ; 这用来调用存入data结构体的OnEvent函数，
+然而在OnEvent中，你可以传入任何事件，
+但是只有当事件为WindowClose时候，有对应的处理方式：
+	dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose)); 这用来实现对窗口关闭时要执行的操作，
+但是	HZ_CORE_TRACE("{0}", e);  则是每个回调函数在  data.EventCallback(event);  时都会调用到的语句 ，是每一个回调函数都能触发的记录的操作。
+
+
+》》》但是OnEvent仅仅只是关于WindowClose有对应的操作设计，为什么在Cherno的视频中其他的回调函数依旧能正常运行并相应？
+1.
+glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			data.Width = width;
+			data.Height = height;
+
+			WindowResizeEvent event(width, height);
+			data.EventCallback(event);
+		});
+中关键的是
+data.Width = width;
+data.Height = height;
+data是对M_Data引用，因此Width和Height发生更改时，实际上在glfwCreateWindow这里，窗口就会因为参数的变化而让窗口变化
+
+m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+但关于为什么这里Cherno设置是  props.Width  而不是  m_Data.Width，我不很理解
+
+2.
+glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			WindowCloseEvent event;
+			data.EventCallback(event);
+		});
+当然像我们上面所说的，通过  data.EventCallback(event); 进入  OnEvent  中时，
+成功满足了  dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+故成功关闭
+
+3.
+glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
+glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
+这几个函数，现在并没有去设置按下时应该触发事件，这并不影响当前的操作，
+我猜之后可能会在OnEvent中继续续写需要对应执行的一些函数，让事件分发器继续起作用。但现在并没有写。
+
+关于 HZ_CORE_TRACE  能够响应对应键位按下的日志追踪，是因为诸如
+KeyPressedEvent event(key, 0);
+MouseButtonPressedEvent event(button);
+MouseScrolledEvent event((float)xOffset, (float)yOffset);
+MouseMovedEvent event((float)xPos, (float)yPos);
+都是从程序自动反复调用回调函数时，从其中的参数中获取了数据，声明了对应的EventCallback对象（通过构造函数传入数据）
+然后使用  data  的  EventCallback  中存入的  OnEvent，这里有  HZ_CORE_TRACE
+OnEvent  接受了这个  Event  对象，然后通过  OnString  成功的获取数据并且打印出来了
+
+（关于为什么会调用了OnString，请看 3game engine 中的这个问题描述：
+》》》》WindowResizeEvent WRE(1280, 720);
+	     NUT_TRACE(WRE);
+为什么能将WRE作为字符型的类型的参数传入NUT_TRACE这个宏中，并让其中的 trace( ) 函数接受WindowResizeEvent类中ToString函数的结果并输出日志？）
+
+
+
+》》》》回调函数的定义结构：理解
+glfwSetWindowSizeCallback(m_Window, 
+			[](GLFWwindow* window, int width, int height) 
+			{
+				WindowData& data = *(WindowData*) glfwGetWindowUserPointer(window);
+				data.Width = width;
+				data.Height = height;
+
+				WindowResizeEvent event(width, height);
+				data.EventCallback(event);
+			}
+		);										//lambda表达式作为第二个参数
+
+使用位置：通常在实际使用中，会在主函数（包括渲染循环）之前，初始化GLFW窗口之后进行回调函数的定义。
+接受参数：一般回调函数接受两个参数，1.窗口对象，2.一个函数。
+逻辑流程：在特定的事件比如窗口大小发生变化时候，回调函数会自动的监测到操作，并且获取数据。
+		（具体的说，应该是  GLFW 负责传递相应的数据给回调函数，然后回调函数再将这些数据传递给用户定义的处理函数。）
+		随后便会自动的去调用用户自己传入的函数，因为回调函数本身并不会进行任何操作，这些都需要用户自己定义。
+提示：	这个函数可以是在某处定义的，然后传入这个函数指针，或者也可以是一个lambda表达式（在作为参数的时候，可以就地定义的函数）
+
+
+》》》》对于一个数据 double pos，使用 (float)pos 和 float(pos) 这两种方式的类型转换有什么不同
+
+1.(float)pos 是一种 C 风格的类型转换方式。这种方式在 C++ 中仍然有效，但不够安全，因为它可以进行任意类型的转换，包括隐式转换和强制转换，可能会导致潜在的错误。
+2.float(pos) 是一种 C++ 风格的类型转换方式，称为函数风格的强制类型转换（functional cast）。这种方式在 C++ 中更为推荐，因为它提供了更明确的类型转换操作，同时在某些情况下还能提供更好的类型安全性。（会有警告但不会影响正常运行）
+
+
+
+》》》》关于事件分发器Dispatcher的语法分析：
+1. using EventFn = std::function<bool(T&)>;
+声明了  EventFn  作为一个类型，这个类型代表一个接受  T  类型参数并返回  Bool  类型的函数，所以在我们后续使用时候，填入的  WindowCloseEvent
+
+2.
+EventDispatcher(Event& event)
+			:m_Event(event)  {}
+
+首先初始化一个对象
+
+3，
+template<typename T>					
+	bool Dispatch(EventFn<T> func) {						//（这里将会在未来使用中填入一个函数指针）
+		if (m_Event.GetEventType() == T::GetStaticType()) {		//！！！静态函数在使用时需要使用类名或类型名来调用（T::）
+			m_Event.m_Handled = func(*(T*)&m_Event);		//*(T*) 表示：用 * 解引用（T*）所声明的T类型指针，实现强制类型转换
+			return true;  }
+		return false;
+	}
+
+后续我们会这样使用：
+Event& e;		//作为  OnEvent  的一个参数传入的
+EventDispatcher dispatcher(e);
+dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+
+思路：
+首先用  e  初始化了一个对象，然后通过  dispatcher  的成员函数  Dispatch  将一个接收  T   类型的返回  bool  类的函数作为对象填入
+（这个函数是  OnWindowClose  ，只不过用  std::bind  将其作为函数对象传入，因为我们将延迟一些操作，所以不使用  std::functional）
+
+然后，我们标明了  template<typename T>  为  WindowCloseEvent  ，于是我们进行判断：
+			如果通过  OnEvent  传入的  Event e  与我们标明的  typename T  一致，
+			则说明这个事件与我们想要允许调用  BIND_EVENT_FN(OnWindowClose)  的事件是一致的
+			这就是：if (m_Event.GetEventType() == T::GetStaticType())  的作用。
+
+进入条件判断语句内部之后，m_Handled  被赋予了我们填入的函数的返回值，否则返回  false，即不允许该事件类型执行此函数
+
+
+
+》》那么那一句是他执行我们定义的函数的语句呢？
+
+首先我们  dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+将函数传入，但是通过  std::bind  我们使用一个占位符延缓了参数填入的时间，在  Dispatch  中，
+在  if (m_Event.GetEventType() == T::GetStaticType())  的条件下使用了  m_Event.m_Handled = func(*(T*)&m_Event);
+func(*(T*)&m_Event)  便是对填入的自定义函数的调用，同时将  m_Event  强制转换为允许的类型，在此处调用函数
+
+
+
+》那为什么在赋值的过程中还可以进行函数中的操作呢？？
+流程：
+1.当调用一个函数时，函数体内的语句会被按顺序执行。
+2.函数可以有返回语句或者没有返回语句。如果没有返回语句，则函数会自动返回一个默认值（对于 bool 类型，未显式返回的函数会返回 false）。
+3.当函数执行完所有语句后，会将返回值传递给调用者。
+
+
+--------------------------------------layers------------------------------------------------------
+
+》》》》LayerStack.cpp中的语句大致意思：
+LayerStack::LayerStack()：
+	初始化了 m_LayerInsert，它是一个迭代器，用于指示下一个被插入图层的位置。初始时，它指向 m_Layers 的开始位置。
+LayerStack::~LayerStack()：
+	释放所有图层的内存。它遍历 m_Layers 并使用 delete 删除每个图层的指针，确保不会发生内存泄漏。
+LayerStack::PushLayer(Layer* layer)：
+	将一个 “普通图层” 推入图层列表的前半部分。使用 m_Layers.emplace 在 m_LayerInsert 位置之前插入新图层，然后更新 m_LayerInsert 指向新的位置。
+LayerStack::PushOverlay(Layer* overlay)：
+	将一个 “覆盖图层” 推入图层列表的后半部分。使用 m_Layers.emplace_back 在 m_Layers 的末尾添加新图层。
+LayerStack::PopLayer(Layer* layer) 和 
+LayerStack::PopOverlay(Layer* overlay)：
+	从图层列表中删除指定的图层。它们使用 std::find 在 m_Layers 中找到要删除的图层，并使用 erase 函数从列表中移除。在删除图层后，m_LayerInsert 更新为指向正确的位置。
+
+
+
+》》》》关于“普通图层”和“覆盖图层”的理解
+在CS:GO游戏中
+普通图层：一般是游戏场景和玩家角色，它们包含了游戏世界的内容以及玩家的交互。
+覆盖图层：一般是设置菜单、商店界面等UI，它们会覆盖在游戏场景上方，用于显示各种菜单、选项、提示等用户界面元素。
+
+
+
+》》》》层的传入顺序
+层的设置：
+	层这个数组整体分为两部分：前半部分为普通图层，后半部分为覆盖图层。
+	就绪后从头到尾开始绘制。（layer3, layer2, layer1, overlay1, overlay2, overlay3）
+
+层的就绪：
+	上述的函数：
+	void LayerStack::PushLayer(Layer* layer) {
+		m_LayerInsert = m_Layers.emplace(m_LayerInsert, layer);
+		//此操作不仅将 layer 插入到指定位置，还会将返回的迭代器赋值给 m_LayerInsert，
+		以便下次插入时插入在这个位置，并将此前这个位置的元素后移一位。 }
+
+	void LayerStack::PushOverlay(Layer* overlay) {
+		m_Layers.emplace_back(overlay); }
+
+解释与结果：
+调用 PushLayer 推入普通图层到数组前半部分时，新图层会被插入到 m_LayerInsert 迭代器所指向的位置之前。因此，如果 m_LayerInsert 最初指向 layer1，那么插入 layer1 应该是这样的顺序：layer3, layer2, layer1。
+
+调用 PushOverlay 函数将覆盖图层推入图层列表的后半部分时，新图层会被添加到列表的末尾。因此，使用overlay1, overlay2, overlay3 分别表示推入的覆盖图层应该是这样的顺序：overlay1, overlay2, overlay3。
+
+
+》》》运行流程（ 以CSGO举例的话 ）
+1.图层将会是
+（ layer3, layer2, layer1, overlay1, overlay2, overlay3 ）
+其中普通图层先后由  layer1：游戏UI 、layer2：游戏角色、layer3：游戏背景
+覆盖图层先后由  overlayer1：菜单、overlayer2：设置、overlayer3：设置中的一个选项
+
+	层栈结构：
+		overlay3	某一设置选项图层
+		overlay2	设置图层
+		overlay1	菜单图层
+		layer1	游戏中的UI（击杀敌人时显示的图标）
+		layer2	游戏角色
+		layer3	游戏背景
+
+2.事件将会是：
+从最后的图层开始处理。（要对最顶层的界面进行交互，退出后才能对低一层的界面操作，否则不符合直觉和视觉。）
+所以以一直在进行交互的这个图层永远是最顶层的图层。
+
+》》拓展：
+（即便是在一个图层上新生成一个图层，也是由此前作为最顶层的图层做处理，由他生成一个图层，
+   然后该屈居较低一层，使新图层作为最顶层，以便进行操作）
+
+》》事件反向处理的原因：
+1.符合人的操作习惯：先处理最上层的图层可以更快地响应用户的操作。
+2.符合人的视觉习惯：保持游戏画面的逻辑性，避免混乱和不连贯的情况出现。
+
+
+
+》》》》层栈结构的理解
+
+层栈结构：
+		overlay3	某一设置选项图层
+		overlay2	设置图层
+		overlay1	菜单图层
+		layer1	游戏中的UI（击杀敌人时显示的图标）
+		layer2	游戏角色
+		layer3	游戏背景
+	  
+问题发现与分析：
+	1.层栈只是一个理想上的栈结构，实际上Cherno只设置了一个  vector  来存储图层，所以这个图层结构是
+	   layer3, layer2, layer1, overlay1, overlay2, overlay3  躺地上的。
+	
+	！！！！
+	2.因为在 pushlayer 函数中我发现emplace函数会将元素插入到当前位置之前，
+	   所以我一直在考虑传入普通图层的时候是否要特定顺序，比如先传入较高层次的图层？
+	   但是覆盖图层却是先传入较低层次的图层（这和两个push函数传入元素的方向有关系）
+
+	2.另外我注意到Cherno所说，“我们将覆盖图层放在列表最后，我们总是希望他最后渲染”，所以我猜测在这里，Cherno决定的渲染顺序是
+	   直接从栈底（vector头部）开始向上（vector尾部）处理
+
+最终总结：
+	1.事件处理：从栈顶到栈底（从vector尾部到头部）
+	2.渲染处理：
+		第一种（当普通图层先传入较高层次，覆盖图层先传入较低层次情况下）
+			overlay3	某一设置选项图层
+			overlay2	设置图层
+			overlay1	菜单图层							↑
+			layer1	游戏中的UI（击杀敌人时显示的图标）		↓
+			layer2	游戏角色
+			layer3	游戏背景
+		渲染方向：从栈底到栈顶（从vector头部到尾部）
+		
+		第二种（当普通图层和覆盖图层都是先传入较低层次时）
+			overlay3	某一设置选项图层
+			overlay2	设置图层
+			overlay1	菜单图层				↑
+			layer1	游戏背景				↓
+			layer2	游戏角色
+			layer3	游戏中的UI（击杀敌人时显示的图标）
+		渲染方向：普通图层部分从顶到底，之后覆盖图层从底到顶
+
+不知道我的分析是否正确，但以此看来两种方法各有裨益。
+还是要根据Cherno后续的操作来分析
+
+
+》》》》emplace函数实际情况
+1.循环通过 emplace 向 vector 中传入元素时，会将新元素放在先前元素之前，并且返回一个指向最新的元素的指针
+
+   layer3 layer2 layer1
+   ↑
+   指针
+
+2.越晚传入的元素地址越大
+
+   		layer3  layer2  layer1
+指针地址：3	   2	      1
+
+
+
+》》》》pop函数中Insert--的作用？？？？？？？？，判断条件可以用来删除除栈顶元素以外的其他元素吗
+在我反复观看代码，并且理解层栈结构之后，我认为：
+前提：
+	在推入三个layer之后，Insert是在Layer3这里指着的。
+1.递减的设计思考：
+	虽然 Insert-- 确实会将指针指向下一个元素，但是这完全建立在删除的元素一定是最晚传入（栈顶元素）的基础上。
+	如果删除栈顶元素，  Insert  由栈顶被移到下一个元素上，并且这下一个元素接替栈顶的位置。
+	否则 Insert-- 在删除其他元素时是完全没有其他意义的。
+2.判断条件的思考：
+	2.那既然已经这样设计了，那Insert--就只能在删除固定的、明确的、栈顶元素情况下使用了
+	  所以，这前面的判断条件便仅仅为了确保所要删除的元素存在 vector 中
+	  并不存在用 std::find 去寻找除栈顶以外的元素并将其删除的思路了。
+
+结论：
+在层栈中，PopLayer函数用于删除普通图层这一部分的栈顶，
+1.Insert--的作用是将指向头部的指针位置移向下一个充当栈顶的元素这里
+2.判断条件式确保删除操作的安全性，避免删除其他数据。并无其他作用。
+
+对于PopOverlay来讲，并没有提供  Insert  这一指针（实际上是迭代器类型，可以这样理解）
+所以只需传入  overlay  的栈顶元素，直接调用erase即可。
+
+
+
+》》》》erase 函数的参数及其用法
+1.erase(iterator pos)：
+	删除指定位置的元素。pos是一个指向待删除元素的迭代器。
+2.erase(iterator first, iterator last)：
+	删除指定范围内的元素。first和last是表示范围的迭代器，删除的元素包括first指向的元素，但不包括last指向的元素。
+
+
+
+》》》》layer stack中的
+std::vector<Layer*>::iterator begin() { return m_Layers.begin(); }	
+std::vector<Layer*>::iterator end() { return m_Layers.end(); }
+
+为什么需要这两个函数？
+1.首先要了解基于范围的 for 循环这个概念：
+  概念：基于范围的 for 循环也称 for each 循环，是一种简化遍历容器元素的语法。
+  使用要则：允许使用者直接遍历容器中的元素，而不必使用迭代器和循环索引。
+2.现在了解这两个函数的作用;
+  因为在 for each 循环中，会使用容器确定整个 for each 循环的范围，这就要求使用的容器具有 begin() 和 end() 成员函数来返回迭代器。
+  以便正确遍历容器中的元素。
+
+
+
+》》》》一个错误分析
+for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
+{
+	(*--it)->OnEvent(e);
+	if (e.Handled)
+		break;
+}
+
+这里的  (*--it)  可以写为  *(--it)  吗?
+理论上来讲，这二者并没有区别，但是在实际使用中可能会由于优先级的问题发生问题。
+所以要么  (*--it)->OnEvent(e);  要么  (*(--it))->OnEvent(e);
+
+
+
+
+》》》》sandbox 中的函数和 项目Nut ( Hazel ) 有什么关系，这些函数是怎样能够影响到 application 中的函数的？
+他们是怎样传递的？
+
+1.在代码中，Sandbox 类的构造函数
+Sandbox() {
+    PushLayer(new ExampleLayer());
+}
+通过 PushLayer ( ) 创建 ExampleLayer 图层对象并将其添加到 LayerStack 中，
+（而且 PushLayer 函数是 Nut 项目中 LayerStack 类中的一个函数）
+
+2.在项目 Sandbox 中，ExampleLayer 这个类继承自 Nut::Layer，并且重写了 OnUpdate 和 OnEvent 函数。
+   这意味着当你创建 ExampleLayer 对象并将其添加到 LayerStack 中后
+   这些重写的函数会在你对 ExampleLayer 对象进行操作时被"对应的"调用
+  （因为在 ExampleLayer 中，这几个函数被重写了，并且作为 ExampleLayer 这个类的成员函数）
+
+比如在 application.cpp 中，(*--iter)->OnEvent(e); 就是自动辨别 iter 的类型，然后自动的使用了这个类下的成员函数 OnEvent
+---
+所以，在 Application 类的 Run 函数中，你遍历 m_LayerStack 并调用其每个图层的 OnUpdate 函数。
+但是由于 ExampleLayer 是 Layer 的子类，所以当你对刚才传入的 LayerStack 的 ExampleLayer 类型的对象进行操作时，
+ExampleLayer 中重写的 OnUpdate 函数会被调用。
+---
+同样，在 Application 类的 OnEvent 函数中，你也遍历 m_LayerStack 并调用每个图层的 OnEvent 函数。
+由于 ExampleLayer 也重写了 OnEvent 函数，所以在这里也会调用 ExampleLayer 中重写的 OnEvent 函数。
+
+
+
+
+------------------------OpenGL & Glad-----------------------------------------------------
+》》》》int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);是在干嘛?
+作用：
+使用 glfwGetProcAddress 获取当前环境下的 OpenGL 函数的地址，并通过 gladLoadGLLoader 将这些函数指针加载到程序中，从而使得程序可以调用 OpenGL 提供的各种函数进行图形渲染等操作。
+
+之前都在使用glfw，经此之后可以使用gl的函数，以此获取用来进行图形渲染的函数。
+
+
+
+》》》》一个不同：
+Cherno在程序中为了避免 glad.h 和 glfw3.h 包含两个 gl.h（好像是这个问题？）导致的错误
+选择加入一个宏定义以确保 gl.h 不会被包含两次。
+
+但是我记得在之前学习图形渲染的时候，有一个方法也行，就是先包含 glad.h ：
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+于是我在WindowsWindow.h中按照这样的方式同时包含两个文件，并在 WindowsWindow.cpp 中删除 glad.h。
+这样也是可以正常运行的。参考：（https://learnopengl-cn.github.io/01%20Getting%20started/03%20Hello%20Window/）
+
+-----------------------ImGui----------------------------------------------
+》》》》

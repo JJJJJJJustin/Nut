@@ -1,0 +1,59 @@
+》》》》写在前面（一些指令）
+>>>ping 域名
+				可以用于测试与目标网站（域名）之间的网络连接
+>>>$ git difftool --dir-diff
+				用于使用绑定的difftool(BeyondCompare)进行远程仓库和本地仓库的差异代码查看
+				（保存于  C:\Users\"username"\AppData\Local\Temp\git-difftool.）
+>>>
+>>>
+>>>
+>>>
+>>>
+>>>
+>>>
+
+》》》》
+									！！！！！！！！！！！！！！！！！！！！！
+don't konw why but since i use VScode terminal to run the git command,the error which always appered in cmd is disapper.(like fatal:........)
+不知道为什么，但是由于我使用 VScode 终端运行 git 命令（从github desktop选项"Open in Visual Studio Code"进入的），（库存在目录下打开的） cmd中使用Git命令时总是出现的错误消失了。（如 fatal:........）
+
+
+
+
+》》》》git bash第一次使用需要绑定用户信息
+>>>git config --global user.name"your name"
+>>>git config --global user.name"your email"
+
+
+
+
+》》》》CMD（命令提示符）和 PowerShell 的区别。
+功能和语法：PowerShell 是更现代化和功能更强大的命令行工具，提供了许多强大的功能，如管道操作、脚本编写、自定义函数、异常处理等。
+		   与此相比，CMD 较为简单，功能相对有限，其语法和命令选项也受限制。
+跨平台支持：PowerShell 是跨平台的，可以在 Windows、Linux 和 macOS 等多个操作系统上运行。
+		   而 CMD 只能在 Windows 系统中使用。
+脚本支持：   PowerShell 是一种强大的脚本编程语言，并且与 .NET 框架深度集成，可以直接调用和操作 .NET 类库。因此可以用于编写复杂的自动化脚本和管理任务。
+		   CMD 也支持一些简单的脚本编写，但脚本功能和灵活性相对较弱。
+命令和别名 ：PowerShell 提供了大量的命令和模块，涵盖了广泛的系统管理和任务自动化需求。此外，PowerShell 还支持别名和函数。
+		    CMD 的命令和功能相对较少，没有别名和函数的概念。
+
+
+
+
+》》》》IP 地址、域名和网址、URI、主机名、端口
+
+IP 地址（Internet Protocol Address）：是一组数字，用于唯一标识计算机网络中的设备。IP 地址通常是由网络服务提供商（ISP）分配的，表示你的计算机在互联网上的位置。IPv4 地址由 4 个十进制数构成，每个数之间用点号分隔，如 192.168.1.1；而 IPv6 地址则更长，包含冒号和字母。
+
+域名（Domain Name）：是一个易于记忆的英文名称，用于代替 IP 地址来访问互联网上的服务器和网站。域名可以由多个部分组成，每个部分之间用点号分隔，例如 google.com 或 baidu.com。域名需要通过域名解析系统将其映射到相应的 IP 地址上，才能实现访问。
+
+网址（URL，Uniform Resource Locator）：是一个指向互联网上资源的地址，包括协议、域名、路径和查询参数等组成部分。网址通常用于浏览器中输入以访问网页或其他资源。例如，https://www.google.com/ 是一个网址，其中 https 是协议，www.google.com 是域名，后面的 / 是资源路径。
+
+URI（Uniform Resource Identifier）：用于标识互联网上的资源，包括 URL 和 URN（Uniform Resource Name）。与 URL 不同，URN 仅用于标识资源名称，而不包含访问该资源所需的协议和位置信息。
+
+主机名（Hostname）：是域名中的一部分，表示互联网上的服务器或设备的名称。主机名通常位于域名的最左侧部分，例如 www.google.com 中的 www。
+
+端口（Port）：用于标识计算机上运行的网络服务。每个网络服务都有一个唯一的端口号，例如 HTTP 服务的默认端口为 80，HTTPS 服务的默认端口为 443。在 URL 中，可以使用冒号和端口号将请求发送到正确的端口，例如 https://www.google.com:443/。
+
+
+
+》》》》

@@ -1,0 +1,396 @@
+》》》》写在前面
+win + x 			打开快速访问菜单（包含一系列常用的系统管理工具和设置选项）
+win + i 			打开设置
+Ctrl+shift+a 		在文件资源管理器中打开当前文件
+ctrl +j （alt + → ） （在VS中）可以强制弹出当前对应的补全内容，这样就不用每次都删了重写来显示补全的信息了，很常用的一个小功能
+Ctrl + Tab：	      （VS中）按住Ctrl键并连续按下Tab键，可以在打开的文件之间进行切换。
+Alt + D：			浏览器窗口中的地址栏会被选中并高亮显示，这使您可以立即开始输入网址或搜索内容
+Win +  R，输入Notepad：
+				打开记事本
+.LOG：			为记事本使用时间戳
+Shift + Ctrl + N：	新建文件夹
+..\   ：			表示上一级文件
+## 				是预处理操作符，用于将宏参数连接起来。（EventType::##type 就会被展开为 EventType::Mouse）
+# 				是字符串化操作符，将宏参数转换为字符串。return #type; 如果 type 是 Mouse，那么 #type 就会被展开为 "Mouse"。
+ctrl + n:			创建一个新的文件资源管理器界面（在文件资源管理器界面）
+
+
+
+
+
+》》》》“x64(active) 平台”和“x64 平台”的区别：
+
+x64(active) 平台：在Visual Studio中，"x64(active)" 是指针对 64 位处理器架构的项目配置。选择这个配置意味着项目将会被编译成针对 64 位处理器的可执行文件，可以充分利用 64 位处理器的性能和内存寻址能力。
+x64 平台：同样也是指针对 64 位处理器架构的项目配置。在较早的版本的Visual Studio中，可能会看到简单的 "x64" 选项，它与 "x64(active)" 实质上是相同的，都代表了针对 64 位处理器的项目配置。
+
+在新版的Visual Studio中，可能会看到 "x64(active)" 选项，这是为了更清晰地表示当前项目配置是针对 64 位处理器的。因此，在这种情况下，“x64(active) 平台”和“x64 平台”其实是指同一个概念，只是一种是较早版本的表示方式，另一种是较新版本的表示方式。
+
+
+
+
+》》》》宏（条件判断的实现逻辑）
+
+#define 宏名称 值或代码
+
+#ifdef 标识符
+    // 如果标识符已经被定义，则编译这部分代码
+#else
+    // 如果标识符没有被定义，则编译这部分代码
+#endif
+
+宏不会自动定义。如果在 属性页 -> C++ -> 预处理器 中填入一个宏XXX，这意味着在编译代码时会自动在预处理阶段为XXX这个宏定义一个值。
+这样不用手动编写一个宏，可以直接使用#ifdef语句进行条件判断。
+
+
+
+
+》》》》什么是打包？
+封装（Packaging）可以理解为打包的一种表达方式，在软件开发中常用来指代将相关文件和资源封装到一个独立的包中以便于分发和使用。
+（打包和封装在大部分情况下可以视作同义词。）
+
+打包（Packaging）指的是将软件或应用程序的源代码、依赖项和其他必要的资源组合在一起，以便在其他环境中进行部署或分发。
+它可以将一个或多个文件或目录打包成一个单独的可执行文件、库文件、安装程序、容器镜像等形式。
+
+打包通常包括以下内容：
+	源代码：包括软件的原始代码文件，用于编译和构建可执行文件或库。
+	依赖项：软件所依赖的库文件、框架、工具或其他第三方组件。这些依赖项可能需要事先安装或打包到同一个包中，以确保软件在目标环境中能够正常运行。
+	资源文件：例如配置文件、模板、静态文件、图像、文档等，这些文件通常是软件运行所需的辅助资源。
+
+eg:
+class Calculator {
+public:
+	int func( int a ){
+		return XXX::complex_function( a );
+	}
+};
+
+int main(){
+	Calulator calc;
+	std::cout << "result is " << calc.func( X );
+}
+
+
+
+
+》》》》共享指针（智能指针）
+特点：
+1.引用计数：共享指针使用引用计数来追踪有多少个指针共同拥有一个对象。并自动管理对象的生命周期。
+	case 1 :每当创建一个共享指针指向对象时，引用计数加一；
+	case 2 :当销毁一个共享指针或者将其重新分配给其他对象时，引用计数减一。
+	case 3 :当引用计数为零时，表示没有指针指向对象，对象会被自动销毁。
+
+2.多个指针共享所有权：共享指针允许多个指针同时拥有对同一个对象的所有权，这使得多个部分可以共享对象的状态和数据。
+eg:
+使用 std::shared_ptr 创建两个共享指针 ptr1 和 ptr2，它们都指向同一个 MyClass 对象。
+通过共享指针，我们可以同时使用 ptr1 和 ptr2 访问和管理对象。
+
+
+
+
+
+》》》》静态函数
+静态函数是属于类而不是对象的函数，它们没有隐式的 this 指针，并且可以直接通过类名进行调用。
+（静态函数适用于执行与类相关但不依赖于类的实例的操作，共享资源或封装辅助函数的场景。）
+特点：
+	1.在一个静态成员函数中，只能访问静态声明的成员变量。
+	2.对于静态成员变量，你必须在某个地方进行定义。（并且定义处可以选择是否进行初始化）
+	这是因为静态成员变量属于类而不属于类的对象，所以需要在类外进行定义。
+	如果你没有提供定义，编译器将无法找到静态成员变量的实际存储位置，从而导致链接错误。
+eg:
+class log.h：
+	class NUT_API Log
+	{
+	private:
+		static std::shared_ptr<spdlog::logger> s_CoreLogger;			//要点1
+	public:
+		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
+	};
+
+log.cpp:
+	std::shared_ptr <spdlog::logger> Log::s_CoreLogger;					//要点2
+
+
+
+》》》》 ::namespace::func();
+"::Nut" 中的 "::" 表示全局命名空间，即根命名空间。表示访问全局命名空间中的 Nut 命名空间。
+eg:
+namespace Nut {
+    void foo() {}
+}
+
+int main() {
+    ::Nut::foo();  		// 调用全局命名空间中的 Nut 命名空间下的 foo 函数
+    return 0;
+}
+
+
+
+
+
+》》》》双下划线   "__"   ---->   预定义的宏
+定义：双下划线 "" 表示这是一个预定义的宏，由编译器或标准库定义。
+目的：一些预定义的宏都包含双下划线 "__"，例如 __cplusplus、LINE、FILE 等等。这样设计的目的是为了避免与用户自定义的标识符冲突，并且提供一些方便的功能。
+
+
+
+
+》》》》(...) 和 __VA_ARGS__配对使用
+
+1.(...) 是可变参数模板的语法，表示宏函数可以接受任意数量的参数。
+2.VA_ARGS 是一个预定义的宏，在 C++ 中用于表示可变参数列表。它将被展开成实际传入的可变参数列表。
+
+一般情况下，在宏定义中使用 (...) 来接受可变数量的参数，在宏展开时使用 VA_ARGS 来引用这些参数。
+下面是一个示例来说明 (...) 和 VA_ARGS 的配对使用：
+
+#define PRINT_VALUES(format, ...) \
+    printf(format, __VA_ARGS__);
+
+int main() {
+    PRINT_VALUES("%d %s\n", 10, "Hello");  // 输出：10 Hello
+    return 0;
+}
+在这个例子中，PRINT_VALUES 宏使用了可变参数模板 (...) 来接受可变数量的参数，然后使用 VA_ARGS 来引用这些参数。在宏展开时，VA_ARGS 将被实际传入的可变参数替换。
+
+
+
+
+》》》》什么是bat文件
+概念：BAT 文件是批处理文件的一种，它是一种包含一系列命令的文本文件，用于在 Windows 操作系统中批量执行命令。批处理文件使用扩展名为 .bat 或 .cmd。
+用处：BAT 文件可以包含命令行命令、控制流语句（如条件判断和循环）、变量定义和其他批处理脚本语言的特性。
+	  在BAT文件中输入call commands_in_cmd可以实现启动此BAT文件时，在当前路径的命令行中执行该命令。
+
+
+
+
+》》》》什么是premake，什么是Lua
+概念：Premake 使用 Lua 作为其脚本语言。Lua 是一种轻量级、高效、可嵌入的脚本语言，非常适合用于配置文件和脚本语言的编写。
+eg:     以下是 Premake 中 Lua 的一些基本语法和使用方法：
+
+								1.注释：使用双连字符 "--" 进行单行注释，或者使用长注释形式 "--[[ ... ]]"
+									--  单行注释
+									--[[
+									这是一个
+									多行注释
+									]]
+
+
+								2.变量：无需声明变量类型，直接赋值即可。
+									name = "John"
+									age = 25
+
+								3.表（Table）：类似于字典或哈希表的数据结构，可以存储键值对。
+									person = {
+									  name = "John",
+									  age = 25,
+									  gender = "male"
+									}
+
+								4.函数：使用 function 关键字定义函数。
+									function greet(name)
+									  print("Hello, " .. name .. "!")
+									end
+									
+									greet("John") -- 输出：Hello, John!
+									
+								5.控制流：支持条件语句（if-else）和循环语句（for、while）。
+									if condition then
+									  -- 条件为真时执行的代码
+									else
+									  -- 条件为假时执行的代码
+									end
+									
+									for i = 1, 5 do
+									  print(i)
+									end
+									
+									while condition do
+									  -- the 循环体
+									end
+									
+								6.Premake API：Premake 提供了一组 API 来定义项目的属性、构建规则和配置等。
+									-- 定义项目
+									project "MyProject"
+									  kind "ConsoleApp"
+									  language "C++"
+									  files { "src/*.cpp", "include/*.h" }
+									  includedirs { "include" }
+									  links { "LibraryA", "LibraryB" }
+									
+									-- 定义构建规则
+									filter "system:windows"
+									  defines { "WINDOWS" }
+									  
+									filter "system:linux"
+									  defines { "LINUX" }
+									
+								7.".." 是字符串连接操作符。
+									local str1 = "Hello"
+									local str2 = "World"
+									local result = str1 .. " " .. str2  -- 将两个字符串连接在一起，中间加一个空格
+									print(result)  -- 输出: Hello World
+									
+									详见官方文档：（https://premake.github.io/docs/）
+
+
+
+
+
+》》》》友元类和派生类的区别：
+1.友元类是一种权限控制机制，用于让一个类可以访问另一个类的私有和受保护成员，而不是继承关系。
+2.派生类是一种继承关系，用于创建一个新的类并从另一个类继承属性和方法，可以对继承的成员进行扩展和修改。{ 重写（override）}
+   派生类可以访问基类中的公有和受保护的成员，但不能直接访问基类中的私有成员。
+
+
+
+》》》》预编译头 ，看视频吧
+（【【72】【Cherno C++】【中字】C++的预编译头文件】 https://www.bilibili.com/video/BV1eu411f736/?share_source=copy_web&vd_source=ca2feff7d155a2579964dfa2c3173769）
+
+
+》》》》premake脚本中的 include
+
+      作用：：通常情况下，在 Premake 脚本中使用 include 语句的主要目的是为了包含并执行指定目录下的 Premake 脚本文件。
+
+      解释：：
+      当你在外部的一个 Premake 脚本中写下 include "Nut/vendor/GLFW" 时，这一句实际上是告诉 Premake 构建系统去包含并执行 Nut/vendor/GLFW 目录下的 premake5.lua 文件。这里的含义是引入这个目录下的 Premake 脚本，并将其中定义的项目配置等内容合并到当前的 Premake 脚本中。
+      虽然 GLFW 目录下可能包含很多文件，但在构建系统中，通常会有一个用于配置和管理该库的专门的构建脚本（比如 premake5.lua）。通过在外部 Premake 脚本中使用 include "Nut/vendor/GLFW"，你实际上是在告诉 Premake 去处理 GLFW 这个目录作为一个整体，而不需要手动列出其中的所有文件。
+
+      实际逻辑：：在 Premake 中的 include 语句并不是简单的文本替换或复制粘贴操作。当执行 include 语句时，Premake 会实际上去加载并执行指定目录下的 Premake 文件，并将其中定义的项目配置、编译选项等内容合并到当前的 Premake 上下文中。
+
+
+》》》》占位符格式化输出信息
+eg.
+NUT_CORE_INFO("Creating window: {0} ( {1} * {2} )", props.Title, props.Width, props.Height); 就是在使用占位符来格式化输出信息。
+{0}，{1}，{2}分别代表后面的三个参数信息
+
+
+
+》》》》》》》》对于一个数据 double pos，使用 (float)pos 和 float(pos) 这两种方式的类型转换有什么不同
+
+1.(float)pos 是一种 C 风格的类型转换方式。这种方式在 C++ 中仍然有效，但不够安全，因为它可以进行任意类型的转换，包括隐式转换和强制转换，可能会导致潜在的错误。
+2.float(pos) 是一种 C++ 风格的类型转换方式，称为函数风格的强制类型转换（functional cast）。这种方式在 C++ 中更为推荐，因为它提供了更明确的类型转换操作，同时在某些情况下还能提供更好的类型安全性。（会有警告但不会影响正常运行）
+
+
+
+》》》》函数指针、std::bind 返回的对象、std::function 返回的对象和 lambda 表达式都可以用来表示函数，但它们之间有一些区别
+
+1.函数指针（Function Pointers）：
+	概念：函数指针是指向函数的指针，可直接调用目标函数。
+		  使用函数指针可以直接传递函数地址，或者调用函数。
+	适用情况：适用于简单的函数调用，无需状态或额外参数。
+
+2.std::bind ：
+	概念：std::bind 可以用来将成员函数、自由函数、函数对象等绑定到一个函数对象上，并延迟执行。
+		  可以绑定函数、成员函数、lambda 表达式等，以及提供额外参数。
+	适用情况：通常用于创建包装了函数调用和参数的可调用对象。适用于需要延迟执行函数调用或传递额外参数的情况。
+
+3.std::function ：
+	概念：std::function 是一个通用的可调用对象包装器，可以容纳任意可调用实体（函数指针、函数对象、成员函数指针、lambda 等）。
+		  可以像函数指针一样调用 std::function 对象。
+	适用情况：通常用于需要在运行时确定要调用的函数的情况，或者需要存储不同类型的可调用对象。
+
+4.Lambda 表达式：
+	概念：Lambda 表达式是一种用于定义匿名函数的语法，可以捕获外部变量。
+		  可以直接在需要函数的地方定义并使用，比较灵活。
+	适用情况：适用于需要编写临时的、较短小的函数，以及需要捕获外部作用域变量的情况。
+
+使用情况：
+1.使用函数指针当您只需要简单地传递函数地址或进行函数调用时。
+2.使用 std::bind 当您需要绑定函数及其参数，并且可能需要延迟执行函数。
+3.使用 std::function 当您需要一个通用的可调用对象容器，并且希望能够存储不同类型的可调用实体。
+4.使用 lambda 表达式当您需要编写临时的、较短小的函数，以及需要捕获外部作用域变量的情况。
+
+
+
+》》》》封装和包装
+
+1.概念：封装（Encapsulation） 指的是将数据和行为（方法）捆绑在一个单元中，并对外部隐藏对象的内部状态（实现细节），只通过公共接口来访问和操作对象。
+   目的：封装提供了一种保护对象状态的机制，可以有效地控制对象的访问权限。更容易维护。
+2.概念：包装（Wrapper）用于将一个对象或函数封装在另一个对象或函数中，以提供额外的功能或修改原始对象或函数的行为，同时保持原始接口不变。
+   目的：包装器通常用于添加额外的功能、修改行为或者适应不同的需求，而不会改变原始对象或函数的核心逻辑。
+
+区别：
+   封装更侧重于“隐藏对象的内部细节和提供公共接口”，以实现数据和行为的封装；
+   包装则更侧重于在不改变接口的情况下，“为对象或函数添加额外的功能或修改其行为”。
+
+
+
+》》》》封装的演示：
+			#include <iostream>
+			#include <stdexcept>
+
+			// 原始函数，模拟需要进行权限验证的功能
+			void sensitiveOperation( auto args )
+			{
+			    std::cout << "Sensitive operation performed" << std::endl;
+			    //Or some codes for operate
+			}
+
+			// 用户类，用于存储用户权限信息
+			class User {
+			public:
+			    bool hasPermission(const std::string& permission) const {
+			        // 检查用户是否具有特定权限
+			        // 这里简化为直接返回 true
+			        return true;
+			    }
+			};
+
+			// 权限验证包装器
+			template <typename Func>
+			auto permissionWrapper(Func func, const User& user)
+			{
+			    return [ func,  &user ]( auto args ) {
+			        if (user.hasPermission("execute")) {
+			            // 具有权限，调用原始函数
+			            func( args );
+			        } else {
+			            // 没有权限，抛出异常或返回错误信息
+			            throw std::runtime_error("Permission denied");
+			        }
+			    };
+			}
+
+			int main()
+			{
+			    // 创建一个用户
+			    User currentUser;
+			
+			    // 使用权限验证包装器
+			    auto wrappedFunc = permissionWrapper(sensitiveOperation, currentUser);
+
+			    // 调用被包装的函数
+			    try {  wrappedFunc( //args or none );  } 
+				catch (const std::exception& e) {  std::cerr << "Error: " << e.what() << std::endl;  }
+
+			    return 0;
+			}
+
+
+》》》》关于emplace 和 push
+emplace & push
+emplace_back & push_back
+在用法和语义上都是一样的，之不过push会额外复制一次用来传输
+
+
+》》》》emplace 和 emplace_back
+emplack_back( ) 只接受一个参数，就是传入的元素，因为会直接插入到vector的末尾
+emplace( ) 接受两个参数，一个是插入的位置，第二个是传入的元素。
+但是emplace有两个要点：
+	1.插入的元素的位置在填入的位置之前。
+	2.插入之后，会返回一个值，该值为新插入的元素的位置。
+
+
+
+》》》》vector.end( ) 是什么? std::find( ) 的返回值在什么时候与其相同？
+
+1.m_Layers.end( ) 返回的是指向容器中最后一个元素之后的位置（即尾后迭代器），而不是指向空的指针。
+2.当std::find( ) 没有找到所查证的元素时。就会返回vector.end( ) 相同的值。所以
+	auto it = std::find(m_Layers.begin(), m_Layers.end(), layer);
+		if (it != m_Layers.end()) {
+			XXXXXX
+		}
+多可以用来在vector中从头到尾的查询一个值，并做出判断。
+
+
+
+》》》》
