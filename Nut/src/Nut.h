@@ -2,6 +2,7 @@
 
 //For use by Nut applications
 #include "Nut/Application.h"
+#include "Nut/Layer.h"
 #include "Nut/Log.h"
 
 //---------------EntryPoint-------------------------------

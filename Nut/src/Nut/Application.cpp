@@ -20,6 +20,15 @@ namespace Nut {
 	{
 
 	}
+	void Application::PushLayer(Layer* layer)
+	{
+		m_LayerStack.PushLayer(layer);
+	}
+
+	void Application::PushOverlay(Layer* overlay)
+	{
+		m_LayerStack.PushOverLay(overlay);
+	}
 
 	void Application::OnEvent(Event& e)
 	{
@@ -27,6 +36,15 @@ namespace Nut {
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 
 		NUT_CORE_TRACE("{0}", e);
+
+		for (auto iter = m_LayerStack.end(); iter != m_LayerStack.begin(); )				//图层的事件处理是反向的（从尾到头）
+		{
+			(*--iter)->OnEvent(e);														//从最后一个迭代器所指的元素开始，逐个逆向相应事件
+			if (e.Handled)																//如果在OnEvent中成功进行处理并将Handled变为true，则跳出循环
+			{
+				break;
+			}
+		}
 	}
 
 	void Application::Run()
@@ -44,7 +62,12 @@ namespace Nut {
 		{
 			glClearColor(1, 0, 1, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
-			m_Window->OnUpdate();
+
+			for (Layer* layer : m_LayerStack)				//更新图层
+			{
+				layer->OnUpdate();
+			}
+			m_Window->OnUpdate();							//更新窗口
 		}
 	}
 

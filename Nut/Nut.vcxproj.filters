@@ -37,6 +37,12 @@
     <ClInclude Include="src\Nut\Events\MouseEvent.h">
       <Filter>Nut\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\Nut\Layer.h">
+      <Filter>Nut</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Nut\LayerStack.h">
+      <Filter>Nut</Filter>
+    </ClInclude>
     <ClInclude Include="src\Nut\Log.h">
       <Filter>Nut</Filter>
     </ClInclude>
@@ -50,6 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Application.cpp">
+      <Filter>Nut</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Nut\Layer.cpp">
+      <Filter>Nut</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Nut\LayerStack.cpp">
       <Filter>Nut</Filter>
     </ClCompile>
     <ClCompile Include="src\Nut\Log.cpp">

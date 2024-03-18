@@ -75,14 +75,17 @@ project "Nut"                       --项目
 
         filter "configurations:Debug"                       -->>> !!!  configurations, not configuration   !!!
             defines "NUT_DEBUG"
+            buildoptions "/MDd"
             symbols "On"            --编译器是否生成带有调试符号的可执行文件
 
         filter "configurations:Release"
             defines "NUT_Release"
+            buildoptions "/MD"
             optimize "On"           --是否开启优化
 
         filter "configurations:Dist"
             defines "NUT_DIST"
+            buildoptions "/MD"
             optimize "On"
 
 -- -------------------------------------------------------------------------------------------------------------
@@ -124,12 +127,15 @@ project "Sandbox"
 
         filter "configurations:Debug"
             defines "NUT_DEBUG"
+            buildoptions "/MDd"
             symbols "On"            
 
         filter "configurations:Release"
             defines "NUT_Release"
+            buildoptions "/MD"
             optimize "On"           
 
         filter "configurations:Dist"
             defines "NUT_DIST"
+            buildoptions "/MD"
             optimize "On"
