@@ -160,18 +160,22 @@
     <ClInclude Include="src\Nut\Events\Event.h" />
     <ClInclude Include="src\Nut\Events\KeyEvent.h" />
     <ClInclude Include="src\Nut\Events\MouseEvent.h" />
+    <ClInclude Include="src\Nut\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Nut\Layer.h" />
     <ClInclude Include="src\Nut\LayerStack.h" />
     <ClInclude Include="src\Nut\Log.h" />
     <ClInclude Include="src\Nut\Window.h" />
+    <ClInclude Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\nutpch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Application.cpp" />
+    <ClCompile Include="src\Nut\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Nut\Layer.cpp" />
     <ClCompile Include="src\Nut\LayerStack.cpp" />
     <ClCompile Include="src\Nut\Log.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\nutpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>

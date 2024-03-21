@@ -10,8 +10,13 @@ namespace Nut {
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)		//绑定一个成员函数，并占位参数，稍后使用  !!!是_1而不是 1,宏定义最后不要写;!!!
 
+	Application* Application::s_Instance = nullptr;										//! ! !初始化唯一实例的静态成员s_Instance
+
 	Application::Application()
 	{
+		NUT_CORE_ASSERT(!s_Instance, "Application already exists! (The class Application is a Singleton, it just support one instance!)");
+		s_Instance = this;																//! ! !对唯一实例的静态成员的定义
+
 		m_Window = std::unique_ptr<Window>(Window::Create());							//这里的m_Window和WindowsWindow.h中的m_Window不是同一个
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 	}
@@ -23,11 +28,14 @@ namespace Nut {
 	void Application::PushLayer(Layer* layer)
 	{
 		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
+
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
 		m_LayerStack.PushOverLay(overlay);
+		overlay->OnAttach();
 	}
 
 	void Application::OnEvent(Event& e)

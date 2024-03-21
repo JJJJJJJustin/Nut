@@ -21,13 +21,7 @@
 
 #pragma once
 
-// Set default OpenGL loader to be gl3w
-#if !defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)     \
- && !defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)     \
- && !defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)     \
- && !defined(IMGUI_IMPL_OPENGL_LOADER_CUSTOM)
-#define IMGUI_IMPL_OPENGL_LOADER_GL3W
-#endif
+#include "imgui.h"
 
 IMGUI_IMPL_API bool     ImGui_ImplOpenGL3_Init(const char* glsl_version = NULL);
 IMGUI_IMPL_API void     ImGui_ImplOpenGL3_Shutdown();

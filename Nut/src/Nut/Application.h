@@ -21,12 +21,18 @@ namespace Nut {
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
+
+		inline Window& GetWindow() { return *m_Window; }			//返回下面这个指向Window的指针
+		inline static Application& Get() { return *s_Instance; }	//! ! !返回的是s_Instance这个指向Application的指针
+																	//（为什么函数是引用传递？：因为application是一个单例，如果不使用&则会多出一个复制，这有悖于单例模式的只有一个对象的要求
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);
 
-		std::unique_ptr<Window> m_Window;				//指向Windows的指针
+		std::unique_ptr<Window> m_Window;				//指向Window的指针
 		bool m_Running = true;
 		LayerStack m_LayerStack;
+	private:
+		static Application* s_Instance;					//! ! !唯一实例的静态成员（static类型，需要初始化定义）
 	};
 
 	//To be defined in CLIENT
