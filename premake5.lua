@@ -15,6 +15,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"                 
 IncludeDir = {}                                                                 --创建一个名为IncludeDir的表
 IncludeDir["GLFW"] = "Nut/vendor/GLFW/include"                                  --将表的"GLFW"键索引到此路径
 IncludeDir["Glad"] = "Nut/vendor/Glad/include"                                  --将表的"Glad"键索引到此路径
+IncludeDir["ImGui"] = "Nut/vendor/imgui"                                        --将表的"ImGui"键索引到此路径
 
 ---------------------------------------------------------------------------------------
 --[[包含Nut/Nut/vendor/GLFW中的premake文件并合并到这里]]
@@ -24,6 +25,11 @@ include "Nut/vendor/GLFW"
 ]]
 --[[包含Nut/Nut/vendor/Glad中的premake文件并合并到这里]]
 include "Nut/vendor/Glad"
+--[[
+    XXXX
+]]
+--[[包含Nut/Nut/vendor/imgui中的premake文件并合并到这里]]
+include "Nut/vendor/imgui"
 --[[
     XXXX
 ]]
@@ -53,13 +59,15 @@ project "Nut"                       --项目
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",
         "%{IncludeDir.GLFW}",                                                   --将IncludeDir表中GLFW键索引的值（地址）作为一个库文件路径
-        "%{IncludeDir.Glad}"                                                    --将IncludeDir表中Glad键索引的值（地址）作为一个库文件路径
+        "%{IncludeDir.Glad}",                                                   --将IncludeDir表中Glad键索引的值（地址）作为一个库文件路径
+        "%{IncludeDir.ImGui}"                                                   --将IncludeDir表中ImGui键索引的值（地址）作为一个库文件路径
     }
 
     links                           --为Nut项目(.dll)链接文件
     {
         "GLFW",                                                                 --链接上方项目GLFW
         "Glad",                                                                 --链接上方项目Glad
+        "ImGui",                                                                --链接上方项目ImGui
         "opengl32.lib"
     }
 
