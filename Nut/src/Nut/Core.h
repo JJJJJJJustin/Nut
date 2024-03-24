@@ -29,3 +29,5 @@
 
 //将1在二进制数中左移x位: Bit(2)->00000100
 #define Bit(x) (1 << x)
+
+#define NUT_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)

@@ -10,9 +10,9 @@ namespace Nut {
 			:m_MouseX(x), m_MouseY(y) {}
 
 		EVENT_CLASS_TYPE(MouseMoved)
-			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)						//事件：输入事件   输入设备：鼠标
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)						//事件：输入事件   输入设备：鼠标
 
-			std::string ToString() const override
+		std::string ToString() const override
 		{
 			std::stringstream ss;
 			ss << "MouseMovedEvent: " << m_MouseX << ',' << m_MouseY;
@@ -35,7 +35,7 @@ namespace Nut {
 		EVENT_CLASS_TYPE(MouseScrolled)
 			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)						//事件：输入事件   输入设备：鼠标
 
-			std::string ToString() const override
+		std::string ToString() const override
 		{
 			std::stringstream ss;
 			ss << "MouseScrolledEvent: " << GetXOffset() << ", " << GetYOffset();
@@ -49,12 +49,13 @@ namespace Nut {
 		float m_XOffset, m_YOffset;
 	};
 
+
 	class NUT_API MouseButtonEvent : public Event
 	{
 	public:
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)						//事件：输入事件  输入设备：鼠标
 
-			inline int GetMouseButton() const { return m_Button; }
+		inline int GetMouseButton() const { return m_Button; }
 	protected:
 		int m_Button;
 
@@ -62,36 +63,36 @@ namespace Nut {
 			:m_Button(button) {}
 	};
 
-	class NUT_API MouseButtonPressedEvent : public MouseButtonEvent
-	{
-	public:
-		MouseButtonPressedEvent(int button)
-			:MouseButtonEvent(button) {}
+		class NUT_API MouseButtonPressedEvent : public MouseButtonEvent
+		{
+		public:
+			MouseButtonPressedEvent(int button)
+				:MouseButtonEvent(button) {}
 
-		EVENT_CLASS_TYPE(MouseButtonPressed)
+			EVENT_CLASS_TYPE(MouseButtonPressed)
 
 			std::string ToString() const override
+			{
+				std::stringstream ss;
+				ss << "MouseButtonPressedEvent: " << m_Button;
+				return ss.str();
+			}
+		};
+
+		class NUT_API MouseButtonReleasedEvent : public MouseButtonEvent
 		{
-			std::stringstream ss;
-			ss << "MouseButtonPressedEvent: " << m_Button;
-			return ss.str();
-		}
-	};
+		public:
+			MouseButtonReleasedEvent(int button)
+				:MouseButtonEvent(button) {}
 
-	class NUT_API MouseButtonReleasedEvent : public MouseButtonEvent
-	{
-	public:
-		MouseButtonReleasedEvent(int button)
-			:MouseButtonEvent(button) {}
-
-		EVENT_CLASS_TYPE(MouseButtonReleased)
+			EVENT_CLASS_TYPE(MouseButtonReleased)
 
 			std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "MouseButtonReleasedEvent: " << m_Button;
-			return ss.str();
-		}
-	};
+			{
+				std::stringstream ss;
+				ss << "MouseButtonReleasedEvent: " << m_Button;
+				return ss.str();
+			}
+		};
 
 }

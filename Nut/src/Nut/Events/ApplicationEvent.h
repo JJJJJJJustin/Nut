@@ -10,9 +10,9 @@ namespace Nut {
 			:m_Width(width), m_Height(height) {}
 
 		EVENT_CLASS_TYPE(WindowResize)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 
-			std::string ToString() const override {
+		std::string ToString() const override {
 			std::stringstream ss;
 			ss << "WindowResizeEvent: " << m_Width << ',' << m_Height;
 			return ss.str();
@@ -30,7 +30,7 @@ namespace Nut {
 		WindowCloseEvent() {}
 
 		EVENT_CLASS_TYPE(WindowClose)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
 	class NUT_API AppTickEvent : public Event
@@ -39,7 +39,7 @@ namespace Nut {
 		AppTickEvent() {}
 
 		EVENT_CLASS_TYPE(AppTick)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
 	class NUT_API AppUpdateEvent : public Event
@@ -47,7 +47,7 @@ namespace Nut {
 		AppUpdateEvent() {}
 
 		EVENT_CLASS_TYPE(AppUpdate)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
 	class NUT_API AppRenderEvent : public Event
@@ -56,6 +56,6 @@ namespace Nut {
 		AppRenderEvent() {}
 
 		EVENT_CLASS_TYPE(AppRender)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 }
