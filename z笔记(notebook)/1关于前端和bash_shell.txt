@@ -3,9 +3,11 @@
 				可以用于测试与目标网站（域名）之间的网络连接
 >>>$ git difftool --dir-diff
 				用于使用绑定的difftool(BeyondCompare)进行远程仓库和本地仓库的差异代码查看
-				（保存于  C:\Users\"username"\AppData\Local\Temp\git-difftool.）
->>>
->>>
+			      （保存于  C:\Users\"username"\AppData\Local\Temp\git-difftool.）
+>>>git clone --branch <version_number> <URL>
+				克隆对应版本的库
+>>>git checkout <version_number>
+				克隆最新版本之后，进行本地库文件的版本更换
 >>>
 >>>
 >>>

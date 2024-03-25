@@ -566,4 +566,27 @@ bool ImGuiLayer::OnKeyTypedEvent(KeyTypedEvent& e)
 即KeyTypedEvent event(keycode);
 此时我们就获取了键盘上输入的关键字，而且存入了这个事件对象中，
 然后在之后的ImGuiLayer上的demo窗口中，我们使用int keycode = e.GetKeyCode();获取了Keycode，
-所以相当于我们从回调函数中获取了keycode这个数据，然后在demo窗口中我们就能够使用它
+所以相当于我们从回调函数中获取了keycode这个数据，然后在demo窗口中我们就能够使用它。
+
+------------------Github & Repo----------------------------------
+》》》》
+------------------Pull requests----------------------------------
+》》》》startproject "Sandbox"，为什么Error: unable to set startproject in project scope, should be workspace
+startproject 命令应该在工作区的作用域内.
+要放置在 Premake 脚本的顶层.
+
+eg:
+workspace "Work_space"
+    configurations { "Debug", "Release" }
+    ......
+
+    startproject "Sandbox"  -- 将启动项目设置为 "Sandbox"
+
+project "Sandbox"
+    kind "ConsoleApp"
+    language "C++"
+    ......
+
+
+
+》》》》

@@ -2,6 +2,7 @@
 
 workspace "Nut"                     --工作区
     architecture "x64"              --架构
+    startproject "Sandbox"          --[[启动项目]]
 
     configurations
     {                               --配置
@@ -18,17 +19,17 @@ IncludeDir["Glad"] = "Nut/vendor/Glad/include"                                  
 IncludeDir["ImGui"] = "Nut/vendor/imgui"                                        --将表的"ImGui"键索引到此路径
 
 ---------------------------------------------------------------------------------------
---[[包含Nut/Nut/vendor/GLFW中的premake文件并合并到这里]]
+--包含Nut/Nut/vendor/GLFW中的premake文件并合并到这里
 include "Nut/vendor/GLFW"
 --[[
     XXXX
 ]]
---[[包含Nut/Nut/vendor/Glad中的premake文件并合并到这里]]
+--包含Nut/Nut/vendor/Glad中的premake文件并合并到这里
 include "Nut/vendor/Glad"
 --[[
     XXXX
 ]]
---[[包含Nut/Nut/vendor/imgui中的premake文件并合并到这里]]
+--包含Nut/Nut/vendor/imgui中的premake文件并合并到这里
 include "Nut/vendor/imgui"
 --[[
     XXXX
@@ -40,6 +41,7 @@ project "Nut"                       --项目
     location "Nut"                  --项目文件的输出目录（填写解决方案Nut之下的路径 "Nut/Nut"）
     kind "SharedLib"                --类型（动态库）
     language "C++"                  --语言
+    staticruntime "off"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")                           --输出目录(.. XX ..中 ".."是字符串连接符)
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")                          --中间目录
@@ -73,43 +75,43 @@ project "Nut"                       --项目
 
     filter "system:windows"         --过滤器(如果系统是windows)   >>> !!!  filter, not filters  !!!
         cppdialect "C++17"          --C++标准（编译时）
-        staticruntime "On"          --是否静态链接运行时库（dll属性的文件需要打开）
+        --staticruntime "On"          是否静态链接运行时库（dll属性的文件需要打开）
         systemversion "latest"      --windows SDK 版本
 
         defines
         {                           --宏的声明
             "NUT_PLATFORM_WINDOWS",
-            "NUT_BUILD_DLL",
-            "NUT_CORE_ASSERT"
+            "NUT_BUILD_DLL"
         }
 
         postbuildcommands           --构建项目完成后执行的指令
         {
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
+            ("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
             --将当前项目的构建目标文件复制到 "../bin/" 下的一个名为 "Debug/Sandbox" 或 "Release/Sandbox" 的子目录中
         }
 
-        filter "configurations:Debug"                       -->>> !!!  configurations, not configuration   !!!
+        filter "configurations:Debug"                       -->>> !!!  configurations, not configuration  !!!
             defines "NUT_DEBUG"
-            buildoptions "/MDd"
+            runtime "Debug"
             symbols "On"            --编译器是否生成带有调试符号的可执行文件
 
         filter "configurations:Release"
             defines "NUT_Release"
-            buildoptions "/MD"
+            runtime "Release"
             optimize "On"           --是否开启优化
 
         filter "configurations:Dist"
             defines "NUT_DIST"
-            buildoptions "/MD"
+            runtime "Release"
             optimize "On"
 
--- -------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
 
 project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
     language "C++"
+    staticruntime "off"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -132,27 +134,25 @@ project "Sandbox"
     }
 
     filter "system:windows"        
-        cppdialect "C++17"          
-        staticruntime "On"          
+        cppdialect "C++17"                  
         systemversion "latest"
 
         defines
         {                          
-            "NUT_PLATFORM_WINDOWS",
-            "NUT_ASSERT"
+            "NUT_PLATFORM_WINDOWS"
         }
 
         filter "configurations:Debug"
             defines "NUT_DEBUG"
-            buildoptions "/MDd"
+            runtime "Debug"
             symbols "On"            
 
         filter "configurations:Release"
             defines "NUT_Release"
-            buildoptions "/MD"
+            runtime "Release"
             optimize "On"           
 
         filter "configurations:Dist"
             defines "NUT_DIST"
-            buildoptions "/MD"
+            runtime "Release"
             optimize "On"

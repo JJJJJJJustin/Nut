@@ -10,6 +10,10 @@
 	#error Nut only supports Windows!
 #endif
 
+#ifdef NUT_DEBUG
+	#define NUT_ENABLE_ASSERTS
+#endif
+
 #ifdef NUT_ENABLE_ASSERTS
 	//断言（如果x表示错误则语句运行，{0}占位的"__VA_ARGS__"代表"..."所输入的语句）
 	#define NUT_CORE_ASSERT(x, ...) \
