@@ -3,6 +3,7 @@
 
 #include "Events/Event.h"
 #include "Nut/Log.h"
+#include "Input.h"
 
 #include <GLFW/glfw3.h>
 
@@ -75,6 +76,10 @@ namespace Nut {
 			{
 				layer->OnUpdate();
 			}
+
+			auto [x, y] = Input::GetMousePos();
+			NUT_CORE_TRACE("{0},{1}", x, y);
+
 			m_Window->OnUpdate();							//¸üÐÂ´°¿Ú
 		}
 	}
