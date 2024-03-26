@@ -44,7 +44,7 @@ namespace Nut {
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 
-		NUT_CORE_TRACE("{0}", e);
+		//NUT_CORE_TRACE("{0}", e);
 
 		for (auto iter = m_LayerStack.end(); iter != m_LayerStack.begin(); )				//图层的事件处理是反向的（从尾到头）
 		{
@@ -76,9 +76,9 @@ namespace Nut {
 			{
 				layer->OnUpdate();
 			}
-
-			auto [x, y] = Input::GetMousePos();
-			NUT_CORE_TRACE("{0},{1}", x, y);
+			
+			//auto [x, y] = Input::GetMousePos();
+			//NUT_CORE_TRACE("{0},{1}", x, y);
 
 			m_Window->OnUpdate();							//更新窗口
 		}

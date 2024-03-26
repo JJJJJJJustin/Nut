@@ -9,12 +9,19 @@ public:
 
 	void OnUpdate() override
 	{
-		NUT_INFO("ExampleLayer::Updata");
+		//NUT_INFO("ExampleLayer::Updata");
 	}
 
 	void OnEvent(Nut::Event& event) override
 	{
-		NUT_TRACE("{0}", event);
+		//NUT_TRACE("{0}", event);
+		if (event.GetEventType() == Nut::EventType::KeyPressed)
+		{
+			Nut::KeyPressedEvent& e = (Nut::KeyPressedEvent&)event;			//将参数中未知的事件event转换成相应类型，并传递给e
+			if (e.GetKeyCode() == NUT_KEY_TAB)
+				NUT_TRACE("{0} is pressed", "Tab");
+			NUT_TRACE("{0} is pressed",(char)e.GetKeyCode());
+		}
 	}
 };
 
