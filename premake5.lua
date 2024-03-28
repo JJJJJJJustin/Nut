@@ -17,6 +17,7 @@ IncludeDir = {}                                                                 
 IncludeDir["GLFW"] = "Nut/vendor/GLFW/include"                                  --将表的"GLFW"键索引到此路径
 IncludeDir["Glad"] = "Nut/vendor/Glad/include"                                  --将表的"Glad"键索引到此路径
 IncludeDir["ImGui"] = "Nut/vendor/imgui"                                        --将表的"ImGui"键索引到此路径
+IncludeDir["glm"] = "Nut/vendor/glm"                                            --将表的"ImGui"键索引到此路径
 
 ---------------------------------------------------------------------------------------
 --包含Nut/Nut/vendor/GLFW中的premake文件并合并到这里
@@ -50,19 +51,22 @@ project "Nut"                       --项目
     pchsource "Nut/src/nutpch.cpp"                                              --(实际上编译器不需要 但是VS需要这个.cpp文件)
     
 
-    files                           --将源代码文件添加到特定的项目中
+    files                           --将源代码文件包含到项目中
     {
        "%{prj.name}/src/**.h",
-       "%{prj.name}/src/**.cpp"
+       "%{prj.name}/src/**.cpp",
+       "%{prj.name}/vendor/glm/glm/**.hpp",
+       "%{prj.name}/vendor/glm/glm/**.inl"
     }
 
-    includedirs                     --库文件
+    includedirs                     --库文件（包含库目录）
     {
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",
         "%{IncludeDir.GLFW}",                                                   --将IncludeDir表中GLFW键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.Glad}",                                                   --将IncludeDir表中Glad键索引的值（地址）作为一个库文件路径
-        "%{IncludeDir.ImGui}"                                                   --将IncludeDir表中ImGui键索引的值（地址）作为一个库文件路径
+        "%{IncludeDir.ImGui}",                                                  --将IncludeDir表中ImGui键索引的值（地址）作为一个库文件路径
+        "%{IncludeDir.glm}"                                                     --将IncludeDir表中glm键索引的值（地址）作为一个库文件路径
     }
 
     links                           --为Nut项目(.dll)链接文件
@@ -125,7 +129,8 @@ project "Sandbox"
     includedirs                      
     {
         "Nut/vendor/spdlog/include",
-        "Nut/src"
+        "Nut/src",
+        "%{IncludeDir.glm}"
     }
 
     links                           --链接

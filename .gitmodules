@@ -7,3 +7,6 @@
 [submodule "Nut/vendor/imgui"]
 	path = Nut/vendor/imgui
 	url = https://github.com/JJJJJJJustin/imgui
+[submodule "Nut/vendor/glm"]
+	path = Nut/vendor/glm
+	url = https://github.com/g-truc/glm
