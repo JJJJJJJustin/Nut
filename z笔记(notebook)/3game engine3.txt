@@ -1,0 +1,202 @@
+------------------ImGui docking & viewport 停靠和视口---------------------------------------
+》》》》我所做的：
+
+选择要使用的版本：
+Cherno 使用的应该是1.67或者1.68版本中正在开发的、还未合并至主分支的 docking 中的代码。
+做法：
+所以我从ImGui v1.68 版本拉取了 docking 分支，将其作为个人库的一个 docking 分支（之前将 v1.66b 拉取到了个人库中）
+然后在 docking 分支中上传对应的 premake5.lua 文件，以备使用。
+
+报错：
+对了，在子模块根目录下一开始 git checkout docking 时候，会报错
+（error: pathspec 'docking' did not match any file(s) known to git）
+此时 git branch 查看分支状况时候发现只有一个分支，这表明子模块还未更新
+解决方法：
+需要运行 git pull 拉取一下，然后可以查看到 docking 分支
+（我的电脑上是这样的，虽然git pull 之后提示 Already up to date.）
+
+》》注意：
+由于我之前并没有定义 GLFW_INCLUDE_NONE,也没有像 Cherno 一样将 glad.h 和 GLFW.h 按照一定顺序包含
+所以会导致一些错误，现已修复
+可以参考：（http://t.csdnimg.cn/ogOD3）
+
+
+》》》》关于库，分支的问题：
+
+》》》一般情况下，一个库的不同分支中的文件一样吗？
+答：
+一个库的不同分支中的文件可能会有一些差异
+不同分支可能会有针对不同功能需求的变化，比如新添加的特性或优化，这导致文件的更改。
+或者说一个分支会是另一个开发路线，进行下一个版本的更新，这都将导致文件的不同。
+
+
+》》》这两个分支一般会是什么关系，是两个相互没有什么联系的文件区域吗？
+答：
+分支之间可以相互独立，也可以有一定程度的关联。
+一般来讲，一个库的不同分支之间通常是有一定联系的，他们可能代表着同一库的不同版本、不同特性或不同目标的开发路径。
+
+
+》》》两个分支可以被单独的下载或者使用吗？
+答：
+分支通常可以单独下载或使用，具体取决于代码管理工具（如Git）的支持和库的发布方式。
+
+
+》》》不同分支的文件管理的状态？
+不同的分支中的文件可以分开单独管理。
+可以在不同的分支中对同一个仓库中的文件进行不同的修改，而不会相互影响。
+
+
+》》》tags 和 branches 的区别
+tags:
+	标签通常用于标识特定的版本或提交，一旦创建就不会随着新的提交而改变
+
+branches:
+	分支用于代表不同的代码开发路径，可以持续地进行提交和修改
+
+
+
+
+》》》》git clone 克隆的代码来自哪个分支？
+如果没有指定特定的分支或标签，git clone 命令会默认克隆源库的主分支（通常是 master 或 main 分支）。
+
+
+
+》》》》关于 ImGui ，docking 分支从哪个版本开始正式投入使用？
+
+从 ImGui 版本 1.80 开始，docking 功能被添加到主分支（master branch）中
+因此在 1.80 版本及之后的版本，在主分支上便可以找到对 docking 功能的支持。
+
+
+》》》从 1.80 开始，docking 功能已经被添加到主分支，为什么在主分支之外仍然存在一个 docking 分支呢？
+因为开发团队为了保持代码的整洁和稳定性，在主分支之外继续维护一个用于开发和测试新功能的分支。
+
+》》》如何理解被添加到主分支？
+首先要知道，不同分支一般存放的代码有什么区别？
+主分支：
+	在开源项目中，通常会有一个主要的代码库，其中包含了当前版本的稳定代码以及最新的功能开发。
+	这个主要的代码库就是主分支（master branch）或者叫主线。
+其他分支：
+	其他分支一般用于不同的目的，比如开发新功能、修复 bug、实验性质的功能等。
+
+添加到主分支的意思？
+一个项目通常包含多个分支，docking 恰恰就是用来开发和测试 docking（停靠）功能的。
+当 docking 功能开发完成并被认为稳定时，开发者就将其合并到主分支中，成为主要代码库的一部分。
+
+这就是添加到主分支的意思。
+
+
+
+》》》》origin 在 Git 中的意思
+
+origin 是默认的远程仓库名称，通常指向你从中克隆或者拉取代码的远程仓库。
+我们一般使用 origin 来表示默认的远程仓库，就而不必每次都指定完整的远程仓库名称。
+
+例如：
+git checkout -b docking origin/docking。
+从 ImGui 的源仓库克隆到本地，并且将其命名为 origin，同时你在个人的远程仓库也叫 ImGui，
+那么 origin/docking 表示从名为 origin 的远程仓库中获取 docking 分支的引用。
+
+
+
+》》》》子模块切换分支的方法
+
+1. 进入子模块目录，找到想要切换分支的子模块目录，然后进入它的根目录切换到想要的分支：
+git checkout branch_name		//这会将子模块切换到名为 branch_name 的分支。
+
+2. 返回到子模版目录：
+cd ..
+
+3.1 提交主项目的变更：
+git add path/to/submodule
+
+3.2 git commit -m "Switch submodule to branch_name"
+（可选：如果你只是想在本地切换子模块的分支，而不需要将这个更改记录在主项目的提交历史中，那么提交主项目的变更就不是必须的。）
+
+之后如果需要将父仓库推送到远程仓库，使用命令 git push 进行推送
+
+
+
+》》》》Git 指令中 fetch 和 pull 的区别
+fetch:
+	fetch 命令会从远程仓库下载新的提交和分支，但不会自动合并任何下载的更改到你当前的工作分支上，即不会修改你的工作目录中的文件
+pull:
+	pull 命令实际上是执行了 fetch 命令，然后立即将远程分支的更改合并到当前分支中
+	（即 git fetch 和 git merge 命令的组合）
+
+
+
+
+》》》》和 void ImGuiLayer::Begin( ) , void ImGuiLayer::End( ) ,void ImGuiLayer::OnImGuiRender( ) 的关系？
+实际上参考 main.cpp 中的例子可以知道，m_ImGuiLayer 的 begin和end 分别对应
+
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+	和
+
+	// Update and Render additional Platform Windows
+        // (Platform functions may change the current OpenGL context,
+	// so we save/restore it to make it easier to paste this code elsewhere.
+        //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+
+Begin 是在真正的渲染前所做准备的工作（创建新帧）。
+End 是对渲染内容进行的渲染呈现。
+
+所以 OnImGuiRender ( )函数中对应main.cpp，应该实现的是
+	// 1. Show the big demo window 
+            if (show_demo_window)
+                 ImGui::ShowDemoWindow(&show_demo_window);
+
+	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+        {
+            static float f = 0.0f;
+            static int counter = 0;
+
+            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+            ImGui::Text("This is some useful text.");           // Display some text (you can use a format strings too)
+	    ........
+	    ........
+            ImGui::End();
+        }
+
+        // 3. Show another simple window.
+        if (show_another_window)
+        {....省略......}
+
+这便是真正要渲染的内容，其中正使用了 ImGui::Begin( ) ,ImGui::End( ) 
+所以void ImGuiLayer::Begin( ) , void ImGuiLayer::End( ) ,void ImGuiLayer::OnImGuiRender( ) 的关系一目了然
+
+
+
+
+》》》》关于 Cherno 所说的 OnUpdate 和 OnImGuiRender 的区别怎么理解
+
+Application.cpp中：
+		for (Layer* layer : m_LayerStack)
+			layer->OnUpdate();				//执行逻辑更新
+
+		m_ImGuiLayer->Begin();
+		for (Layer* layer : m_LayerStack)
+			layer->OnImGuiRender();			// 进行渲染操作（执行渲染更新）
+		m_ImGuiLayer->End();
+
+OnUpdate:
+	OnUpdate() 函数被用来执行逻辑更新。通常情况下，OnUpdate() 函数用于更新应用程序的逻辑状态。
+	例如更新对象的位置、处理输入事件、执行物理模拟等等。这个过程在每一帧都会执行，以确保实时修正逻辑操作内容。
+
+在每一帧的渲染过程中，首先进行逻辑更新，然后才进行渲染操作
+
+OnImGuiRender:
+	得到正确的逻辑状态，进行内容的最新渲染结果。
+
+

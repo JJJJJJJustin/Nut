@@ -5,7 +5,7 @@
 #include "Nut/Log.h"
 #include "Input.h"
 
-#include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 namespace Nut {
 
@@ -20,6 +20,9 @@ namespace Nut {
 
 		m_Window = std::unique_ptr<Window>(Window::Create());							//这里的m_Window和WindowsWindow.h中的m_Window不是同一个
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+
+		m_ImGuiLayer = new ImGuiLayer();												//初始化 m_ImGuiLayer 为原始指针，并推入层栈
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application()
@@ -58,27 +61,21 @@ namespace Nut {
 
 	void Application::Run()
 	{
-		WindowResizeEvent WRE(1280, 720);
-		if (WRE.IsInCategory(EventCategoryApplication))
-		{
-			NUT_TRACE(WRE);
-		}
-		if (WRE.IsInCategory(EventCategoryMouseButton))
-		{
-			NUT_TRACE(WRE);
-		}
 		while (m_Running)
 		{
 			glClearColor(1, 0, 1, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			for (Layer* layer : m_LayerStack)				//更新图层
-			{
-				layer->OnUpdate();
-			}
+				layer->OnUpdate();							// ? ? ?执行逻辑更新(什么作用？）
 			
 			//auto [x, y] = Input::GetMousePos();
 			//NUT_CORE_TRACE("{0},{1}", x, y);
+
+			m_ImGuiLayer->Begin();
+			for (Layer* layer : m_LayerStack)
+				layer->OnImGuiRender();						// ? ? ?进行渲染操作（和上面有什么不同？）
+			m_ImGuiLayer->End();
 
 			m_Window->OnUpdate();							//更新窗口
 		}

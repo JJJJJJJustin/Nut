@@ -4,6 +4,7 @@
 
 #include "Window.h"
 #include "LayerStack.h"
+#include "Nut/ImGui/ImGuiLayer.h"
 
 #include "Nut/Events/ApplicationEvent.h"
 
@@ -28,6 +29,7 @@ namespace Nut {
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);
 
+		ImGuiLayer* m_ImGuiLayer;
 		std::unique_ptr<Window> m_Window;				//指向Window的指针
 		bool m_Running = true;
 		LayerStack m_LayerStack;

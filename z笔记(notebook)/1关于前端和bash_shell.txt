@@ -7,7 +7,16 @@
 >>>git clone --branch <version_number> <URL>
 				克隆对应版本的库
 >>>git checkout <version_number>
-				克隆最新版本之后，进行本地库文件的版本更换
+				1.克隆最新版本之后，进行本地库文件的版本更换（通常 version_number 在 tags 中）
+				2.或者说是用来切换分支的时候使用，<version_number>括号里面就可以从 tags 换为 branches
+>>>git status
+				查看当前分支的状态（暂存区中是否有未提交、工作树状态）
+>>>git submodule add <URL> <path_you_want_save>
+				添加子模块
+>>>git pull origin <branch_name>
+				对本地库的一个分支进行更新并将更改合并到本地
+>>>
+>>>
 >>>
 >>>
 >>>

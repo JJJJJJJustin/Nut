@@ -5,6 +5,8 @@
 #include "Nut\Events\KeyEvent.h"
 #include "Nut\Events\MouseEvent.h"
 
+#include <glad/glad.h>
+
 namespace Nut
 {
 	static bool s_GLFWInitialized = false;

@@ -85,7 +85,8 @@ project "Nut"                       --项目
         defines
         {                           --宏的声明
             "NUT_PLATFORM_WINDOWS",
-            "NUT_BUILD_DLL"
+            "NUT_BUILD_DLL",
+            "GLFW_INCLUDE_NONE"
         }
 
         postbuildcommands           --构建项目完成后执行的指令

@@ -79,7 +79,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>nutpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>NUT_PLATFORM_WINDOWS;NUT_BUILD_DLL;NUT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NUT_PLATFORM_WINDOWS;NUT_BUILD_DLL;GLFW_INCLUDE_NONE;NUT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -101,7 +101,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>nutpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>NUT_PLATFORM_WINDOWS;NUT_BUILD_DLL;NUT_Release;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NUT_PLATFORM_WINDOWS;NUT_BUILD_DLL;GLFW_INCLUDE_NONE;NUT_Release;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -127,7 +127,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>nutpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>NUT_PLATFORM_WINDOWS;NUT_BUILD_DLL;NUT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NUT_PLATFORM_WINDOWS;NUT_BUILD_DLL;GLFW_INCLUDE_NONE;NUT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -165,7 +165,6 @@
     <ClInclude Include="src\Nut\Log.h" />
     <ClInclude Include="src\Nut\MouseButtonCodes.h" />
     <ClInclude Include="src\Nut\Window.h" />
-    <ClInclude Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\nutpch.h" />
@@ -588,11 +587,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Application.cpp" />
+    <ClCompile Include="src\Nut\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Nut\Layer.cpp" />
     <ClCompile Include="src\Nut\LayerStack.cpp" />
     <ClCompile Include="src\Nut\Log.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\nutpch.cpp">
