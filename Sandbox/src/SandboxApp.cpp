@@ -1,5 +1,6 @@
 #include "Nut.h"
 
+#include "imgui/imgui.h"
 
 class ExampleLayer : public Nut::Layer
 {
@@ -11,6 +12,13 @@ public:
 	void OnUpdate() override
 	{
 		//NUT_INFO("ExampleLayer::Updata");
+	}
+
+	void OnImGuiRender()
+	{
+		ImGui::Begin("Test");
+		ImGui::Text("Hello world");
+		ImGui::End();
 	}
 
 	void OnEvent(Nut::Event& event) override

@@ -131,6 +131,7 @@ project "Sandbox"
     {
         "Nut/vendor/spdlog/include",
         "Nut/src",
+        "Nut/vendor",
         "%{IncludeDir.glm}"
     }
 
