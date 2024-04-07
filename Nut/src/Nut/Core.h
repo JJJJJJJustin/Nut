@@ -1,10 +1,14 @@
 #pragma once
 
 #ifdef NUT_PLATFORM_WINDOWS
-	#ifdef NUT_BUILD_DLL
-		#define NUT_API __declspec(dllexport)
+	#ifdef NUT_DYNAMIC_LINK
+		#ifdef NUT_BUILD_DLL
+			#define NUT_API __declspec(dllexport)
+		#else
+			#define NUT_API __declspec(dllimport)
+		#endif
 	#else
-		#define NUT_API __declspec(dllimport)
+		#define NUT_API
 	#endif
 #else
 	#error Nut only supports Windows!

@@ -40,9 +40,10 @@ include "Nut/vendor/imgui"
 --[[项目Nut]]
 project "Nut"                       --项目
     location "Nut"                  --项目文件的输出目录（填写解决方案Nut之下的路径 "Nut/Nut"）
-    kind "SharedLib"                --类型（动态库）
+    kind "StaticLib"                --类型（动态库）
     language "C++"                  --语言
-    staticruntime "off"
+    cppdialect "C++17"              --C++标准（编译时）
+    staticruntime "on"              --是否将运行时库静态链接运行时库（dll属性的文件需要关闭）
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")                           --输出目录(.. XX ..中 ".."是字符串连接符)
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")                          --中间目录
@@ -57,6 +58,11 @@ project "Nut"                       --项目
        "%{prj.name}/src/**.cpp",
        "%{prj.name}/vendor/glm/glm/**.hpp",
        "%{prj.name}/vendor/glm/glm/**.inl"
+    }
+
+    defines
+    {
+        "_CRT_SECURE_NO_WARNINGS"
     }
 
     includedirs                     --库文件（包含库目录）
@@ -78,8 +84,6 @@ project "Nut"                       --项目
     }
 
     filter "system:windows"         --过滤器(如果系统是windows)   >>> !!!  filter, not filters  !!!
-        cppdialect "C++17"          --C++标准（编译时）
-        --staticruntime "On"          是否静态链接运行时库（dll属性的文件需要打开）
         systemversion "latest"      --windows SDK 版本
 
         defines
@@ -89,26 +93,29 @@ project "Nut"                       --项目
             "GLFW_INCLUDE_NONE"
         }
 
-        postbuildcommands           --构建项目完成后执行的指令
+        --  //////////////////////////////////////////////////////////////////////
+        --  ////  NOW WE USE NUT AS A STATIC LIB, SO DON'T NEED THIS COMMAND  ////
+        --  //////////////////////////////////////////////////////////////////////
+        --[[postbuildcommands           --构建项目完成后执行的指令
         {
             ("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
             --将当前项目的构建目标文件复制到 "../bin/" 下的一个名为 "Debug/Sandbox" 或 "Release/Sandbox" 的子目录中
-        }
+        }   ]]
 
-        filter "configurations:Debug"                       -->>> !!!  configurations, not configuration  !!!
-            defines "NUT_DEBUG"
-            runtime "Debug"
-            symbols "On"            --编译器是否生成带有调试符号的可执行文件
+    filter "configurations:Debug"   -->>> !!!  configurations, not configuration  !!!
+        defines "NUT_DEBUG"
+        runtime "Debug"
+        symbols "on"                --编译器是否生成带有调试符号的可执行文件
 
-        filter "configurations:Release"
-            defines "NUT_Release"
-            runtime "Release"
-            optimize "On"           --是否开启优化
+    filter "configurations:Release"
+        defines "NUT_Release"
+        runtime "Release"
+        optimize "on"               --是否开启代码优化
 
-        filter "configurations:Dist"
-            defines "NUT_DIST"
-            runtime "Release"
-            optimize "On"
+    filter "configurations:Dist"
+        defines "NUT_DIST"
+        runtime "Release"
+        optimize "on"
 
 ---------------------------------------------------------------------------------------------------------------
 
@@ -116,7 +123,8 @@ project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
     language "C++"
-    staticruntime "off"
+    cppdialect "C++17"
+    staticruntime "on"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -141,7 +149,6 @@ project "Sandbox"
     }
 
     filter "system:windows"        
-        cppdialect "C++17"                  
         systemversion "latest"
 
         defines
@@ -152,14 +159,14 @@ project "Sandbox"
         filter "configurations:Debug"
             defines "NUT_DEBUG"
             runtime "Debug"
-            symbols "On"            
+            symbols "on"            
 
         filter "configurations:Release"
             defines "NUT_Release"
             runtime "Release"
-            optimize "On"           
+            optimize "on"           
 
         filter "configurations:Dist"
             defines "NUT_DIST"
             runtime "Release"
-            optimize "On"
+            optimize "on"

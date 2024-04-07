@@ -235,3 +235,10 @@ Sandbox 是 .exe
 然后成功实现了。（这个方法是我在youtube某一个视频下方找到的）
 
 ----------------------------------静态库和无警告-------------------------------------------
+》》》》关于使用静态库的好坏，截取了一条评论作为参考。
+
+Static libraries for these kinds of projects are totally fine! The reason is that the user is not gonna run more than 2-4 applications at the same time, actually, 90% of the users will probably run only one application at a time. Dlls make sense when creating OS-level libraries that are being used by hundreds of processes at the same time, like a windowing API (win32) for example, or Xorg (Linux). Then yes, it would be a waste of memory, but in the application layer usually, users run one application at a time.
+
+熟肉：
+此类项目的静态库完全没问题！ 原因是用户不会同时运行超过 2-4 个应用程序，实际上，90% 的用户可能一次只会运行一个应用程序。 当创建同时被数百个进程使用的操作系统级库时，Dll 很有意义，例如窗口 API (win32) 或 Xorg (Linux)。 是的，这会浪费内存，但在应用程序层中，用户通常一次运行一个应用程序。
+
