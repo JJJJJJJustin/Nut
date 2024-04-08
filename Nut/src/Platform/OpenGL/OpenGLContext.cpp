@@ -18,6 +18,11 @@ namespace Nut
 			//通过glad加载OpenGL提供的各种图形渲染函数
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		NUT_CORE_ASSERT(status, "Failed to initialize Glad!");
+
+		NUT_CORE_INFO("OpenGL info: ");
+		NUT_CORE_INFO("	Vendor: {0}",	(const char*)glGetString(GL_VENDOR));
+		NUT_CORE_INFO("	Renderer: {0}", (const char*)glGetString(GL_RENDERER));
+		NUT_CORE_INFO("	Version: {0}",	(const char*)glGetString(GL_VERSION));
 	}
 
 	void OpenGLContext::SwapBuffers()

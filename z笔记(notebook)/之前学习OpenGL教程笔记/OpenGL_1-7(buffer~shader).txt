@@ -1,0 +1,681 @@
+-----------------------------------------------配置类库和创建窗口-----------------------------------------------------
+创建一个跨平台的窗口并初始化上下文
+
+1.创建依赖项文件夹
+2.包含include库目录
+3.链接lib库（先在General中配置了附加库目录，后在input中配置了附属依赖项
+		 但是那些默认的链接实际上已经被包含 在默认的库中，故可以删掉）
+4.在GLFW官网的documentation中复制窗口创建的源码（build项目之后，发现输出窗口有一大堆报错，是因为删除了默认的链接）
+
+											1>glfw3.lib(win32_init.obj) : error LNK2019: 无法解析的外部符号 __imp__TranslateMessage@4，函数 														__glfwPlatformInit 中引用了该符号
+
+											故查询 MSDN或直接搜索对应函数，例如<TranslateMessage >
+												Minimum supported client 	Windows 2000 Professional [desktop apps on														Minimum supported server 	Windows 2000 Server [desktop apps only]
+												Target Platform 		Windows
+												Header 				winuser.h (include Windows.h)
+											->	Library 			User32.lib
+												DLL 				User32.dll
+												API set 			ext-ms-win-ntuser-message-l1-1-0 (introduced in Windows 8)													并在linker input 中补充lib库
+
+
+											同理：__imp__CreateDCW，__imp__DeleteDC，__imp__GetDeviceCaps等都包含于Gdi32.lib库
+5.使用传统的OpenGL方法画一个三角形
+
+														while (!glfwWindowShouldClose(window))
+												    		{
+												        		/* Render here */
+												        		glClear(GL_COLOR_BUFFER_BIT);
+												
+												        		glBegin(GL_TRIANGLES);             
+												        		glVertex2f(0.0f, 0.5f);
+												        		glVertex2f(0.5f, -0.5f);
+												        		glVertex2f(-0.5f, 0.0f);
+												        		glEnd();
+												
+												        		/* Swap front and back buffers */
+												        		glfwSwapBuffers(window);
+												
+												        		/* Poll for and process events */
+												        		glfwPollEvents();
+    														}
+												
+												
+--------------------------------------------------使用现代化的OpenGL---------------------------------------------------------
+
+OpenGL函数是在显卡驱动中被实现的，为了使用相对较新的函数，我们需要去访问这些驱动，取出函数（得到函数声明然后链接到对应的函数上）并调用他们。
+如果是自己访问显卡驱动并从中获取函数，因为跨平台和工作量导致其不可行。所以我们需要一个库帮助我们（GLEW）访问驱动，用来提供API接口规范。
+(api specification)库的实现方法为进入EDI，在你使用的显卡驱动签名中查找对应的动态链接文件然后载入所有这些函数指针。
+
+													关于文件路径的正斜杠（/）与反斜杠（\）的总结：
+
+										  		1.只有windows系统中用\，其他的项目中，linux中都使用/,这是历史原因，不解释.
+										  		2.Unix使用斜杆/ 作为路径分隔符，而web应用最先使用在Unix系统上面，所以目前所有的网络地址												   都采用斜杆/作为分隔符。
+										  		3.Windows由于使用 斜杆/ 作为DOS命令提示符的参数标志了，为了不混淆，所以采用反斜杠\ 作为									路径分隔符。所以目前windows系统上的文件导航栏都是用 反斜杠\ 作为路径分隔符。随着发展，DOS系统已经被淘									汰了，命令提示符也用的很少，斜杆和反斜杠在大多数情况下可以互换，没有影响。
+
+1.包含任何其他OpenGL相关的头文件之前就需要包含glew.h，glfw的包含需要放在gl.h之后
+2.在属性面板->C++->预处理器 中定义GLEW_STATIC
+										
+								   				在glew.h中有这样一段代码，GLEW_STATIC is defined for static library.
+															GLEW_BUILD  is defined for building the DLL library.
+								   				如果没有定义GLEW_STATIC和GLEW_BULID,宏的条件编译就会定义GLEWAPI为一个从dll文件导入												的外部变量。因为目前我们使用的是静态库预编译的二进制文件而不是动态库，所以链接会出错。
+
+													/*
+													* GLEW_STATIC is defined for static library.
+ 													* GLEW_BUILD  is defined for building the DLL library.
+ 													*/
+
+													#ifdef GLEW_STATIC
+													#  define GLEWAPI extern
+													#else
+													#  ifdef GLEW_BUILD
+													#    define GLEWAPI extern __declspec(dllexport)
+													#  else
+													#    define GLEWAPI extern __declspec(dllimport)
+													#  endif
+													#endif
+3.移动glewInit()到 有效的上下文 和 有效的窗口 之后									
+										
+										
+												（https://glew.sourceforge.net/basic.html）
+
+												文档中标明：
+												you need to create a valid OpenGL rendering context and call glewInit()
+					 							to initialize the extension entry points.
+
+												即需要在调用glewInit之前创造一个有效的OpenGL渲染上下文（rendering context）,然而我们在													glfwMakeContextCurrent(window);创建了OpenGL上下文 
+
+现在便可以访问所有的OpenGL函数了。通过std::cout << glGetString(GL_VERSION);可以得到其版本号。
+
+------------------------------------------顶点缓冲区和现代OpenGL画三角形--------------------------------------------------------------
+
+使用现代化的OpenGL去画一个三角形，需要创建一个顶点缓冲区，着色器等。
+
+-->概论：
+顶点缓冲区（vertex buffer）作用在显卡上（实际上是在VRAM——Video RAM 显存中），此时我们需要定义一些数据来表示三角形，放入VRAM显存中，并发出DrawCall绘制指令（CPU发出DrawCall指令指导显卡）。
+此时需要对显卡编程，用来控制显卡读取、解释并在屏幕上放置数据。着色器应运而生。着色器（shader）是运行在显卡上的程序，可以在显卡上编写
+
+							
+
+1.在while循环外定义一个缓冲区，通过gl渲染循环绘制数据
+
+  			函数  glGenBuffers()  
+  			释义  generate buffer object names
+  			原型  void glGenBuffers(GLsizei n,GLuint * buffers);            <--------- *buffers
+  			参数    1是要生成的缓冲对象的数量
+	  			2是要输入用来存储缓冲 对象 名称的数组
+
+										
+												1.OpenGL可以一次性生成一堆缓冲区，第一个参数填需要生成的缓冲区个数
+												2.第二个参数需要一个无符号整型指针，因为函数不返回生成区的id(void)，所以需要提供一														  为参数填入
+										
+2.绑定对象（缓冲绑定）
+
+  			函数   glBindBuffer()
+    			释义   bind a named buffer object（也就是我们在上一个函数里生成的名称，使用该函数将缓冲对象绑定到OpenGL上下文环境中以便使用。）
+  			原型   void glBindBuffer(GLenum target,GLuint buffer);          <------------buffer
+  			参数   1是缓冲对象的类型
+    						GL_ARRAY_BUFFER：顶点属性数据缓冲区。
+   						GL_ELEMENT_ARRAY_BUFFER：索引数据缓冲区。
+    						其他可能的目标，用于不同的OpenGL扩展。
+	    		      2是要绑定的缓冲 对象 的名称
+									
+												-------------------------------------Gen和Bind的关系----------------------------------	
+													glGenBuffers() 和 glBindBuffer() 是在OpenGL中一起使用的函数，用于管理缓冲对象。
+
+										  			首先使用 glGenBuffers() 函数生成一个或多个缓冲对象的名称。这些名称是无类型的，只是一													个标识符，表示一个缓冲对象。生成的名称由OpenGL分配，并存储在指定的数组中。
+
+													然后使用 glBindBuffer() 函数,将生成的缓冲对象名称绑定到特定的缓冲对象目标上。通过指定												目标参数，可以选择将缓冲对象绑定为顶点属性数据缓冲区、索引数据缓冲区或其他可能的目标
+
+													绑定缓冲对象后，后续的操作将作用于该缓冲对象。比如顶点缓冲类型																	GL_ARRAY_BUFFER,glBufferData是通过指定目标缓冲类型来进行数据传输的，而每一个目标													缓冲类型再使用前要提前绑定一个缓冲对象
+
+													因此，glGenBuffers() 用于生成缓冲对象的名称，而 glBindBuffer() 用于将缓冲对象名称绑定													到特定的缓冲对象目标上以进行后续操作。
+												----------------------------------------------------------------------------------------
+										
+3.指定数据  可以直接提供或稍后更新数据    将数据放置在数组中，通过sizeof来计算大小
+
+  			函数  glBufferData()
+  			释义  创建并初始化缓冲区对象的数据存储
+   			原型  void glBufferData（GLenum target,GLsizeiptr size,const GLvoid * data,GLenum usage）;
+  			参数  target 指定目标缓冲区对象（类型）。 			 符号常量必须为GL_ARRAY_BUFFER或GL_ELEMENT_ARRAY_BUFFER
+	    		      size   指定缓冲区对象的新数据存储的大小（以字节为单位）
+	  		      data   指定进行初始化的数据的指针，如果不复制数据，则指定NULL。
+										如果数据存储在数组中，则填入数组名（本身就是指针）
+
+	  		      usage  指定数据存储的预期使用模式。 		 	符号常量必须为GL_STREAM_DRAW，GL_STATIC_DRAW或GL_DYNAMIC_DRAW。
+										STATIC是填入一次数据，绘制每一帧。DYNAMIC是不断更新数据，每一帧都重绘
+
+4.通常也创建一个索引缓冲区
+
+5.在while循环中为缓冲区发出一个DrawCall指令
+    在没有索引缓冲区的情况下使用glDrawArrays()函数，有索引缓冲区时使用glDrawElements()
+
+   			函数  glDrawArrays()
+  			释义  提供绘制功能，从数组数据中提取数据渲染基本图元。
+    			原型  void glDrawArrays(  GLenum mode,    GLint first,    GLsizei count);  
+    			参数   mode  需要渲染的图元类型，包括 GL_POINTS, GL_LINE_STRIP,GL_LINE_LOOP,
+						     	   GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN ，GL_TRIANGLES。
+	 		      first  从数组缓存中的哪一位开始绘制，一般为0(起始顶点)
+	 		      count  数组中顶点的数量，要渲染的索引（顶点）数量
+
+  			
+			函数  glDrawElements()
+  			释义  使用count个元素定义一个几何序列，这些元素的索引值保存在indices数组中。
+  			原型  void glDrawElements(GLenum mode,GLsizei count,GLenum type,const GLvoid *indices);
+  			参数     mode   接受的值和在glBegin()中接受的值一样，可以是GL_POLYGON、GL_TRIANGLES、
+									       GL_TRIANGLE_STRIP、GL_LINE_STRIP等。
+	  			count   组合几何图形的元素的个数，是索引的个数。
+	  			type   索引数据（indeices数组）的数据类型，既然是索引，一般是整型的。
+	  			indices  指向索引数组的指针。（可以填入nullptr）
+												--------------------------------注意---------------------------------------------
+												       	glArrayElements()、glDrawElements()glDrawRangeElements()能够对数据数组进行随机存													取，但是glDrawArrays()只能按顺序访问它们。因为前者支持顶点索引的机制。
+
+												      	如果要 glDrawArrays 和 glDrawElements 正确进行绘制的话，必须在之前调用带有相应参数													的glEnableClientState 方法。 
+												----------------------------------------------------------------------------------
+	
+												-->基本知识
+													RAM随机存取存储器（Random Access Memory）：也叫主存，是与CPU直接交换数据的内														部存储器。										
+														它可以随时读写（刷新时除外），而且速度很快，
+													RAM和ROM的区别（https://zhuanlan.zhihu.com/p/88202063）
+
+													顶点缓冲区：是包含顶点数据的内存缓冲区；将处理顶点缓冲区中的顶点以执行转换、照明和																剪裁。
+													索引缓冲对象: (Element Buffer Object，EBO，也叫Index Buffer Object，IBO）
+													着色器：Shaders以不同功能进行分类。
+
+																	第一种是顶点着色器Vertex shader，
+																	第二种是像素着色器Pixel shader，
+																	第三种是几何着色器Geometry shader，
+																	第四种是计算着色器Compute shader，
+																	第五种为细分曲面着色器Tessellation or hull shader。
+
+
+																顶点>图元>片元>像素
+
+
+													像素：(pixels）
+													图元：(primitives) 全称为图形输出原语(graphics output primitive)，是图形软件包中用来																  描述各种图形元素的函数。
+
+														描述对象几何要素的输出图元一般称为几何图元(点的定位和直线段是最简单的几何图元。
+
+													片元:（element）的区别，片元就是以后的像素点，它比像素多一些位置、法向量等属性。
+
+													    	逐个片元操作有像素所有权操作（确定目标像素可见还是被一个重叠的窗口盖住了），剪													切测试、Alpha测试、模板测试、混合等
+
+													片段：(fragments）是指具有相同属性的一小部分像素区域。
+													对象: (object) 图元指的是图形数据，所对应的就是绘图界面上看得见的实体。与图元对应的是														图面看不见的信息，如图层，文字样式，标注样式等等，
+	
+														这些信息被称为“对象”。对象多为图形的属性或绘图界面的信息，针对的不是个别单个													的图形，可以指定单个图形为不同的属性，却不能通过单个图形修改属性的信息。修改“对													象”的信息要通过特定的命令，如layer、style等
+
+													glGenBuffers与glBindBuffer理解：（http://t.csdn.cn/5MIoZ）
+
+-----------------------------------------------顶点属性和布局--------------------------------------------------------------
+
+1.glEnableVertexAttribArray()启用顶点属性
+			函数  glEnableVertexAttribArray()
+			释义  启用指定索引的顶点属性数组,在渲染过程中，需要告诉OpenGL要使用哪些顶点属性，并启用这些属性才能在渲染中生效。
+			原型  void glEnableVertexAttribArray(GLuint index);
+			参数  index  
+			     要启用的顶点属性数组的索引。索引从0开始，对应于顶点着色器中的顶点属性变量。
+
+												1如果没有启用相应的顶点属性数组，即使提供了相关数据，OpenGL也不会使用它们进行渲染。
+
+												2启用顶点属性数组后，直到显式禁用（通过glDisableVertexAttribArray()）或者上下文被销毁前													  该属性数组会一直保持启用状态。
+
+2.使用glVertexAttribPointer()调控顶点数据
+
+  			函数  glVertexAttribPointer()
+  			释义  用于告诉OpenGL如何从顶点数据数组中提取出每个顶点的属性，并将其传递给顶点着色器进行处理。这样，就能够正确地渲染出具有不同属性的顶点，实现更复杂的图形效果。
+    			原型  void glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
+  			参数  
+     	 			index：顶点属性的索引，对应于顶点着色器中的属性变量，指定我们要配置的顶点属性			
+    	 			size：每个顶点属性的分量数量。
+    	 			type：每个分量的数据类型。
+    	 			normalized：是否对非浮点类型的数据进行归一化处理。
+    	 			stride：相邻两个顶点属性之间的字节偏移量，如果顶点属性是紧密排列的，则可以设置为0。			<--------可以使用宏来自动化计算
+    	 			pointer：要传递给顶点着色器的顶点属性数据数组的起始地址					(const void*)		<--------
+			
+			需要注意的是，glVertexAttribPointer函数必须在启用对应的顶点属性数组之前调用。通常，在调用该函数之前，我们需要先通过glEnableVertexAttribArray函数启用对应的顶点属性数组。这样，OpenGL才能正确地使用glVertexAttribPointer指定的顶点属性信息进行渲染。
+
+											--------------------------index的理解	
+
+								https://img-blog.csdnimg.cn/20200517224911533.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2NoZW5oYW54dWFuMTk5OQ==,size_16,color_FFFFFF,t_70
+
+									
+
+											--------------------------size的理解
+
+												size参数用于指定每个顶点属性的分量数量。
+
+											在OpenGL中，顶点属性可以由多个分量组成。例如，一个三维位置属性通常具有3个分量（x、y、z），											一个颜色属性通常具有4个分量（r、g、b、a），一个二维纹理坐标属性通常具有2个分量（s、t）等。
+
+											size参数告诉OpenGL每个顶点属性包含多少个分量。它的取值通常为1、2、3或4，对应于属性的分												量数量。例如如果我们有一个三维位置属性，则size应设置为3。
+
+												（该参数的值决定了OpenGL如何解释顶点属性数据。在顶点着色器中，对应的属性变量也需要与											size相匹配。例如，如果我们使用了一个三维位置属性，并且在顶点着色器中定义了一个vec3类型的属性变											量，那么size参数应该设置为3，以确保顶点属性被正确地传递给顶点着色器。）
+
+											----------------------------normalized的理解
+
+											normalized参数用于指定是否对非浮点类型的数据进行归一化处理。
+
+											当我们使用整数类型的数据表示顶点属性时																					（GL_BYTE、GL_UNSIGNED_BYTE、GL_SHORT、GL_UNSIGNED_SHORT等），
+											它们的取值范围通常是有符号或无符号的，不是0到1之间的标准化坐标。
+											而在顶点着色器中，往往需要将这些属性值转换为标准化坐标以便进行计算。
+
+											normalized参数允许我们在传递顶点属性数据给OpenGL之前进行归一化处理。如果该参数被设置为												GL_TRUE，则OpenGL会将非浮点类型的数据映射到范围[0,1]之间。例如，对于8位的无符号字节类型												（GL_UNSIGNED_BYTE）,实际的属性值255将被映射为1.0。
+
+												但需要注意的是，对于浮点类型的数据，normalized参数没有任何影响，因为它们已经是标准化的。											所以在处理浮点类型的顶点属性时，可以将normalized参数设置为GL_FALSE。
+
+
+											----------------------------stride的理解
+
+												stride参数用于指定连续顶点属性之间的字节偏移量。
+
+										在OpenGL中，顶点属性可以包含多个数据，如位置、颜色、法线等。这些数据可以作为一个整体存储在缓冲区										中，也可以按属性逐个存储。当数据按属性逐个存储时，每个顶点属性之间可能存在一些额外的字节间隔。
+
+												stride参数指定了连续顶点属性之间的字节偏移量，即每个顶点属性之间的距离。它可以用来在缓冲												区中定位不同顶点属性的数据。
+
+												例如，假设有一个顶点结构体包含位置和颜色属性：
+												struct Vertex {
+    													glm::vec3 position																										glm::vec3 color;
+												};
+
+												如果将这种顶点数据存储在缓冲区中，可以通过以下方式指定顶点属性的位置和格式：
+
+
+									glVertexAttribPointer(positionIndex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+									glVertexAttribPointer(colorIndex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+
+												在这里，stride参数被设置为sizeof(Vertex)，表示连续顶点属性之间的字节偏移量。这样，OpenGL												就能够正确地解析顶点数据，并将其传递给顶点着色器进行处理。
+
+											-------------------------pointer的理解
+
+												pointer参数表示要传递给顶点着色器的顶点属性数据数组的起始地址。
+
+												具体来说，pointer参数是一个指向顶点属性数据数组第一个元素的指针。该数组存储了每个顶点的												属性数据，例如位置、颜色、法线等。通常情况下，这些数据以浮点数的形式存储。
+
+										在使用glVertexAttribPointer函数时，你需要先绑定一个顶点缓冲对象（Vertex Buffer Object，VBO），然后										通过该函数告诉OpenGL如何解析这个VBO中的数据。pointer参数就用来指定从VBO中读取数据的起始位置。
+
+										需要注意的是，pointer参数的类型是const void*，这是因为OpenGL并不关心具体的数据类型，它只会按照你										提供的格式进行解析。但是，为了保持数据的连续性，通常会将数据以特定的格式（如浮点数）进行存储传递。
+
+----------------------------------------------着色器--------------------------------------------------------
+
+shader可以说是一段运行在GPU上的程序
+														着色器：Shaders以不同功能进行分类。
+
+															第一种是顶点着色器Vertex shader，																							第二种是像素着色器Pixel shader（片段着色器），
+															第三种是几何着色器Geometry shader，
+															第四种是计算着色器Compute shader，
+															第五种为细分曲面着色器Tessellation or hull shader。
+
+主要使用的是两种着色器 1顶点着色器 2片段着色器。usually，我们在CPU上绑定缓冲对象，写入数据，并发出DrawCall指令，着色器实际处理并绘制图案，这个特定的过程基本上是渲染管道。
+
+而顶点着色器和片段着色器是顺着管道的两种类型，在发出DrawCall指令后，顶点着色器-->片段着色器-->光栅化处阶段（此处省略了一些详细步骤）
+
+1.顶点着色器	作用：顶点着色器多用于指定顶点的位置，（也被用来从解析属性进入片段着色器阶段）如果图形发生旋转，便需要着色器逐帧渲染		
+		调用次数：会为每个顶点调用（例如一个三角形，顶点着色器会被调用三次，每个顶点都调用一次）
+		
+2.片段着色器	作用：用来确定当前像素应该是什么颜色。
+		调用次数：为每个需要光栅化的像素运行一次，调用次数取决于图形所占据的空间（像素点）
+		
+3.光栅化处理	作用：用像素来填充顶点着色器指定的图形
+----------------------------------------在OpenGL中写一个着色器---------------------------------------------
+
+1.创建顶点着色器对象
+2.设置顶点着色器源代码
+3.编译顶点着色器
+
+1.创建片段着色器对象
+2.设置片段着色器源代码
+3.编译片段着色器
+
+
+
+函数：	定义编译函数CompileShader()
+要求：	我们可以将其抽象到他自己的函数中，我们可以调用两次避免重复。
+    
+步骤：
+											------------------------关于glCreateShader()--------------------------------------------------
+主函数之前												
+										函数： glCreateShader()
+										释义： 是用于创建着色器对象的OpenGL函数。
+										原型： GLuint glCreateShader(GLenum shaderType);
+										参数： shaderType是一个枚举值，表示要创建的着色器的类型。在OpenGL中，有两种常见的着色器类型：
+    												      	GL_VERTEX_SHADER：顶点着色器，用于处理输入顶点数据。
+    												      	GL_FRAGMENT_SHADER：片段着色器，用于处理生成像素颜色输出。
+											-----------------------------------------------------------------------------------------------
+
+	
+
+	
+		在main之前	  --->  static unsigned int CompileShader(unsigned int type,const std::string& source){						
+							//参数为（const srting&），和着色器类型（unsigned int）。unsigned是为了适配多图形接口，使用GL类型限制了普适性
+
+		创建着色器对象	  --->  unsigned int id = glCreateShader(type);	//返回id
+				  --->  const char* src = source.c_str();	//函数需要一个c原始字符串而不是C++的数据字符串data string.  而c_str()返回一个指向正规C字符串的指针常量（null结尾的、不可变数组的 指针）指向当前字符串的首字符地址
+													
+														
+												-------------------关于c_str()----------------------------------------------------
+														
+												标准库的string类提供了3个成员函数   来从一个string得到c类型的字符数组																		c_str()、data()、copy(p,n)。
+												c_str()函数返回一个指向正规C字符串的指针常量，内容与本string串相同。这是为了与C语言兼容
+
+														c_str()
+
+													原型：const char*c_str() const;	
+													返回：c_str()是String类中的一个函数，它返回一个常量指针，即当前字符串的首字符地址
+													注意：
+
+													1.一定要确保字符串有效。例如下面这样写就是错误的
+
+															char* c; 
+															string s="1234"; 
+															c = s.c_str();
+
+													上述代码中，c最后指向的内容是垃圾，因为s对象被析构，其内容被处理。
+													同时编译器将会报错，均是因为c_str函数的返回值是const char*的，不能直接赋值给char*
+
+													2.c_str()返回的是一个临时指针，不能对其进行操作。
+											---------------------------------------------------------------------------------------		
+
+				
+		设置着色器源代码	  --->  glShaderSource(id,1,&src,nullptr);	//调用glShaderSource()指定我们着色器的源码
+										
+
+
+
+												-------------关于glShaderSource()----------------------------------------------
+														
+													函数： glShaderSource()
+													释义： 是OpenGL中用于指定着色器源代码的函数。	
+													原型： 
+											void glShaderSource(GLuint shader, GLsizei count, const GLchar** string, const GLint* length);
+													参数： 
+    														shader：指定要设置源代码的着色器对象的标识符。
+															该标识符是通过调用glCreateShader函数创建的。
+
+    														count：指定源代码字符串的数量。
+															通常情况下，我们只需要指定一个源代码字符串，因此count的值为1。
+
+    														string：一个指向源代码字符串的指针数组。（双精度指针）
+															每个元素都是一个指向以null结尾的源代码字符串的指针。
+
+    														length：一个指向整数数组的指针，用于指定每个源代码字符串的长度。
+															如果传递nullptr，则表示源代码字符串以null结尾。
+												----------------------------------------------------------------------------------
+					
+		编译着色器	 --->  glCompileShader(id);	//调用glCompileShader()
+
+
+												--------------关于glCompileShader()---------------------------------------------
+
+													函数： glCompileShader()
+													释义： 是OpenGL中用于编译着色器的函数
+													原型：  void glCompileShader(GLuint shader);
+													参数：
+													    shader：指定要编译的着色器对象的标识符。该标识符通过调用glCreateShader函数创建。
+													返回值：无返回值																					-------------------------------------------------------------------------------------
+↑以上便是为了编译实际着色器我们需要写的代码
+
+
+123.1 错误处理		    	  --->  //TODO  error handling
+
+				  --->	int result;
+				  --->	glGetShaderiv(id,GL_COMPILE_STATUS,&result);	  //获取指定着色器对象的参数检查错误状态
+				  --->	if(result == GL_FALSE){			 //dosomething(单击GL_FALSE，接着按alt + F12，可以在glew.h中快捷查找GL_FALSE）
+
+
+												----------------------glGetShaderiv()--------------------------------------------------
+													函数：  glGetShaderiv()
+													释义： 用于获取指定着色器对象的参数值。
+													原型： void glGetShaderiv(GLuint shader, GLenum pname, GLint *params);
+													参数： 
+    														shader：表示要查询的着色器对象的标识符（一个无符号整数）。
+   											 			pname：表示要查询的参数名称（一个枚举值）。
+
+															常用的参数名称包括：
+        														GL_SHADER_TYPE：获取着色器类型。
+        														GL_DELETE_STATUS：获取着色器删除状态。
+       														 	GL_COMPILE_STATUS：获取着色器编译状态。
+        														GL_INFO_LOG_LENGTH：获取着色器信息日志的长度。
+        														GL_SHADER_SOURCE_LENGTH：获取着色器源代码字符串的长度。
+
+    														params：一个指向整数的指针，用于接收查询结果。
+												--------------------------------------------------------------------------------
+
+					  --->	int length;		
+					  --->	glGetShaderiv(id,GL_INFO_LOG_LENGTH,&lengrh);		//先检索错误信息的长度
+					  --->  char* message = (char*) alloca(sizeof(char) * length);	//动态分配message
+
+												-------------------------------在栈上动态分配------------------------------------------
+												//char message[length]，length是一个变量，所以会出错。（new在堆上也是一种方法）
+												//想要在栈上动态分配，需要侵入。alloca出length个char大小的内存然后转成指针。过大会爆栈
+												-------------------------------------------------------------------------------
+
+					  --->  glGetShaderInfoLog(id,length,&length，message);		//获取日志，存储数据
+					  --->  std::cout << "failed to compile" << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << "shader!" << std::endl;  
+													//指明错误的着色器
+					  --->	std::cout << message << std::endl;			//打印错误信息
+
+
+												--------------------------------glGetShaderInfoLog()--------------------------------------
+													函数： glGetShaderInfoLog()
+													释义： 获取着色器对象的信息日志。
+													原型：
+												 void glGetShaderInfoLog(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar*infoLog);
+													参数： 
+    														shader：要查询的着色器对象的标识符。
+    														bufSize：缓冲区的大小，即接收信息日志的字符数。（字符长度）
+    														length：用于接收实际写入缓冲区的字符数的整数指针。（实际字节长度）
+														infoLog：一个字符 指针或字符 数组，用于存储返回的日志信息。
+													返回值： 该函数没有返回值，
+														通过 length 参数将实际写入缓冲区的字符数返回，并将信息日志写入到 infoLog 缓冲区
+																																			---------------------------------------------------------------------------------------
+
+					  --->    glDeleteShader(id);		//着色器编译没有成功，delete掉
+					  --->    return 0;			//unsigned,不返回-1
+				  --->  }
+				  --->  return id;	//id是unsigned int型的
+			  --->  }
+
+
+
+4.创建程序对象
+5.将顶点着色器和片段着色器附加到程序对象
+6.
+7.使用程序对象
+8.渲染...
+9.删除着色器对象和程序对象
+
+
+函数：	定义静态函数CreateShadee()	（静态防止链接到其他C++文件）
+要求：	1.传入两个const字符（提供着色器实际的源码   可以使自己写的、文件读取的、网上下载的）
+	2.在函数中编译两个着色器的代码
+	3.将着色器链接到一个独立的程序中
+	4.返回着色器的唯一标识符（以便绑定和使用 就像顶点缓冲区一样 ）
+步骤：	
+			
+			定义			--->  static unsigned int CreateShader(const std::string& vertexShader,const std::string& fragmentShader){
+						
+			创建一个程序		--->  unsigned int program = glCreateProgram();		//函数glCreateProgram()不需要传入整数引用之类的东西，其会返回一个无符号整数
+
+				 
+			使用自己创建的函数  CompileShader() ↑ (创建顶点对象,设置着色器源代码,编译着色器)
+	 					--->  unsigned int vs = CompileShader(GL_VERTEX_SHADER,vertexShader);
+				 		--->  unsigned int fs = CompileShader(GL_FRAGMENT_SHADER,fragmentShader);
+
+
+				
+			将顶点着色器和片段着色器附加到程序对象 
+						--->  glAttachShader(program,vs);	//把两个着色器附加到程序上,有点像是把两个不同的文件链接到一个程序中以便同时使用	
+						--->  glAttachShader(program,fs);
+
+
+											------------------------------glAtrachShader()--------------------------------------------
+												函数： glAttachShader()
+												释义： 是OpenGL中用于将着色器附加到程序对象的函数。
+												原型： void glAttachShader(GLuint program, GLuint shader);
+												参数： 
+													program：指定程序对象的标识符。
+														 该标识符是通过调用glCreateProgram函数创建的。
+													shader：指定要附加到程序对象的着色器对象的标识符。
+														这个参数应该是一个已经编译的着色器对象标识符。
+											-------------------------------------------------------------------------------------------
+
+			链接程序对象		--->  glLinkProgram(program);	//传入程序id
+
+											--------------------------glLinkProgram()-------------------------------------------------
+												函数： gllinkprogram()
+												释义： 用于将一个顶点着色器和一个片段着色器链接为一个可执行的着色器程序。
+												参数： 
+													program，表示要链接的着色器程序对象。
+
+																		glCreateProgram()创建着色器程序对象，
+																		glAttachShader()将着色器附加到该程序对象上。
+																		glLinkShader()链接
+											------------------------------------------------------------------------------------------
+			
+			验证程序对象		--->  glValidateProgram(program);
+
+
+											------------------------------------glValidateProgram---------------------------------------
+												函数： glValidateProgram()
+												释义： 用于验证一个程序对象的有效性
+												原型： void glValidateProgram(GLuint program);
+												参数： program 无符号整数，表示要验证的程序对象的标识符。
+												      这个标识符是通过调用 glCreateProgram 创建程序对象后返回的
+											------------------------------------------------------------------------------------------------
+
+
+
+			删除着色器		--->  glDeleteShader(vs);		//因为已经将着色器链接到程序中，所以可以删除这些中间文件
+						--->  glDeleteShader(fs);
+
+			
+											--------------------------------glDeleteShader()-------------------------------------------
+												函数： glDeleteShader()
+												释义：用于删除一个着色器对象
+												原型： void glDeleteShader(GLuint shader);
+												参数：shader 是一个无符号整数，表示要删除的着色器对象的标识符。
+												     这个标识符是通过调用 glCreateShader 创建着色器对象后返回的。
+											----------------------------------------------------------------------------------------------
+
+
+								--------------------glDelete和glDetach是OpenGL中用于删除和分离对象的函数--------------------------------------
+    									删除方式不同： 
+									glDelete函数用于直接删除对象并释放相关资源（彻底删除对象），并且相应的标识符将不再有效。
+									而glDetach函数用于分离对象（只是解除对象之间的关联），可以重新将其附加到其他程序对象上或者单独进行操作。
+  
+    									参数不同：
+											glDeleteShader(shader)、glDeleteProgram(program)等。
+   											glDetachShader(program, shader)。
+									------------------------------------------------------------------------------------------------------------
+			返回程序			--->  return program;
+			
+
+
+10.编写着色器
+
+   在顶点属性之后
+			编写vertexShader		--->  std::string vertexShader = 
+						  	"#version 330 core\n"		//定义了下文使用GL着色器语言
+							"\n"
+							"layout(location = 0) in vec4 position;\n"	//指定实际属性（为了在实际着色器中访问position）
+													//0  
+													  0与顶点属性中位置的索引相匹配
+													  glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,sizeof(float) * 2,0);
+													//vec4  
+													  虽然传入的是vec2，但gl_Position实际上是个vec4（四分量向量）.否则需要↓
+							"\n"
+							"void main (){\n"
+							" 	gl_Position= position; \n"		//gl_Position = vec4(position.xy);
+							"}\n"
+
+
+			编写fragmentShader	--->  std::string fragmentShader = 					
+							"#version 330 core\n"
+							"\n"
+							"layout(location = 0) = out vec4 color;\n"	//out
+							"\n"
+							"void main(){\n"
+							"   color = vec4(1.0,0.0,0.0,1.0);\n"		//RGBA颜色 (r, g, b, a)
+							"}\n"
+
+11.调用create函数	调用CreateShader函数   	--->  unsigmed int shader = CreateShader(vertexShader,fragmentShader);
+
+12.绑定着色器					--->  glUseProgram(shader);
+
+						---> ...
+
+13.删除程序					--->  glDeleteProgram(shader);
+
+-------------------gl_Position--------------------------------	
+gl_Position 是OpenGL中一个内置的变量，用于表示顶点在三维空间中的位置
+是一个vec4（四分量向量），
+其中的x、y、z分量表示顶点在齐次裁剪空间中的坐标，而w分量表示透视除法因子				
+-------------------------------layout(location)--------------------------------------------
+layout
+翻译： 布局
+语法： layout(location)
+释义： 显式的指定着色器中 变量 或 属性 的位置
+注意： layout(location)语法只能在顶点着色器和片段着色器中使用，
+支持程度： 1.可能会因OpenGL版本而有所不同。
+		2.不同的硬件和驱动程序也可能对layout(location)的限制和行为产生影响。
+
+location
+翻译： 布局限定符
+释义： location表示变量或属性在着色器中的位置索引。
+将变量与特定位置相关联，确保在渲染管线中正确传递数据。
+注意： location的值是非负整数。对于每个顶点属性或输出变量，都有唯一的location值。
+------------------------glUseProgram---------------------------------				
+
+函数： glUseProgram()										---------------对于顶点着色器
+释义： 用于激活一个程序对象，使其成为当前渲染状态下的使用程序
+原型：void glUseProgram(GLuint program); 								layout(location = 0)可以用于指定顶点属性的位置。
+参数： program 是一个无符号整数，表示要激活的程序对象的标识符。												
+      这个标识符是通过调用 glCreateProgram 创建程序对象后返回的。					例如：
+												layout(location = 0) in vec3 position;
+
+												position变量与顶点属性位置0相关联，表示该变量 接收 来自 顶点缓冲区对象中 位置属性的数据。
+
+											----------------对于片段着色器
+												layout(location = 0)可以用于指定输出颜色的位置。
+												
+												例如：
+												layout(location = 0) out vec4 fragColor;
+
+												fragColor变量与颜色输出位置0相关联，表示该变量 作为 片段着色器的 输出颜色。
+											------------------------------------------------------------------------------------------
+
+
+											------------------------------vec 2,3,4--------------------------------------------------------
+
+												vec2、vec3和vec4是OpenGL中的向量数据类型，分别代表二维、三维和四维向量。
+
+    												vec2  二维向量：
+        												由两个浮点数组成，通常用来表示二维坐标或纹理坐标。
+        												表示顶点的二维位置 (x, y) 、一个纹理坐标 (s, t)。
+
+    												vec3  三维向量：
+        												由三个浮点数组成，通常用来表示三维坐标、法线向量或颜色。
+        												表示顶点的三维位置 (x, y, z)、一个法线向量 (nx, ny, nz) 、一个RGB颜色 (r, g, b)。
+
+    												vec4  四维向量：
+        												由四个浮点数组成，通常用来表示四维坐标、颜色、纹理坐标等。
+        												表示顶点的四维位置 (x, y, z, w)、一个RGBA颜色 (r, g, b, a) 、一个投影坐标 (x, y, z, 																							    w)。
+											----------------------------------------------------------------------------------------------
+
+
+
+
+---------------------------------------OpenGL中的unsigned int------------------------------------------------------------
+
+
+OpenGL 使用unsigned int数据类型的主要原因是为了与底层图形硬件和OpenGL API进行交互的需要。
+
+    索引缓冲区：索引缓冲区用于指定顶点数组中顶点的索引，以构建图元（如三角形、线段等）。由于索引值必须是非负整数，因此使用unsigned int可以确保正确表示所有可能的索引。
+
+    纹理坐标：纹理坐标是一个二维坐标系统，用于在纹理图像上定位特定位置的像素。通常，纹理坐标的范围是0到1之间的浮点数，但在内部处理过程中，它们被转换为具有一定精度的整数值。使用unsigned int可以提供足够的精	     度，并确保无符号性质匹配。
+
+    缓冲区对象：OpenGL中的缓冲区对象（如顶点缓冲区、帧缓冲区等）通常使用unsigned int作为标识符或句柄。这是因为OpenGL中使用的大多数标识符都是正整数，并且使用无符号整数类型能够更好地反映其本质。
+
+    OpenGL API函数参数：OpenGL API函数的很多参数也使用unsigned int，这是出于与底层硬件的兼容性和一致性考虑。例如，顶点数组对象、纹理对象、着色器对象等的标识符通常使用unsigned int表示。
+
+需要注意的是，并非所有的数据在OpenGL中都使用unsigned int。例如，顶点坐标通常使用float类型，颜色通道可能使用unsigned char类型等。选择正确的数据类型取决于数据的本质和用途。

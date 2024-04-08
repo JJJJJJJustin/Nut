@@ -23,6 +23,30 @@ namespace Nut {
 
 		m_ImGuiLayer = new ImGuiLayer();												//初始化 m_ImGuiLayer 为原始指针，并推入层栈
 		PushOverlay(m_ImGuiLayer);
+
+		float vertices[3 * 3] = {
+			-0.5f, -0.5f, 0.0f,
+			 0.5f, -0.5f, 0.0f,
+			 0.0f,  0.5f, 0.0f
+		};
+
+		glGenBuffers(1, &m_VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER ,m_VertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glGenVertexArrays(1, &m_VertexArray);
+		glBindVertexArray(m_VertexArray);
+
+		glEnableVertexAttribArray(0);													//启用索引为0的那组数据并将其作为顶点属性
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);	//对索引为0的数据进行顶点属性设置
+
+		unsigned int indices[3]{
+			0, 1, 2
+		};
+
+		glGenBuffers(1, &m_IndexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	}
 
 	Application::~Application()
@@ -63,18 +87,21 @@ namespace Nut {
 	{
 		while (m_Running)
 		{
-			glClearColor(1, 0, 1, 1);
+			glClearColor(0.1f, 0.1f, 0.1f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			glBindVertexArray(m_VertexArray);
+			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+
 			for (Layer* layer : m_LayerStack)				//更新图层
-				layer->OnUpdate();							// ? ? ?执行逻辑更新(什么作用？）
+				layer->OnUpdate();							//执行逻辑更新(更新应用程序的逻辑状态）
 			
 			//auto [x, y] = Input::GetMousePos();
 			//NUT_CORE_TRACE("{0},{1}", x, y);
 
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)
-				layer->OnImGuiRender();						// ? ? ?进行渲染操作（和上面有什么不同？）
+				layer->OnImGuiRender();						// 进行实际渲染操作（逻辑更新后才能进行的渲染操作）
 			m_ImGuiLayer->End();
 
 			m_Window->OnUpdate();							//更新窗口

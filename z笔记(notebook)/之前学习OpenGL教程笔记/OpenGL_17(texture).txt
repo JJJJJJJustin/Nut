@@ -1,0 +1,285 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>OpenGL中的纹理<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+纹理是一种用于在3D模型表面上添加图像或图案的技术。通过将纹理映射到三角形网格的顶点上来实现。
+
+》》》》思路：
+
+1.加载图像文件到CPU中：将图像解码，转变为OpenGL可识别模式（使用stb_image库来加载.png格式图像）给予stb_image文件路径，它会返回一个指向RGBA像素缓冲区的指针
+2.通过OpenGL取得像素数组，上传到显卡中。所以像素（片段着色器会从纹理内存中读取并计算像素以及像素个构成元素）
+
+
+》》》》操作步骤：
+将图像加载到CPU内存中，然后发送给OpenGL
+
+1.配置解码文件
+  1.1 搜索并在GitHub中打开stb库
+  1.2 找的stb库中stb_image.h,单击打开									--------------------------DoThis-----------------------------------------
+  1.3 点击Raw按钮，然后选择全部并复制									Do this:
+  1.4 在src文件夹中创建一个文件夹Vender									#define STB_IMAGE_IMPLEMENTATION				
+  1.5 在Vender里面创意一个文件夹stb_image									before you include this file in *one* C or C++ file to create the implementation.
+  1.6 在stb_image中创建一个头文件stb_image.h								// i.e. it should look like this:
+  1.7 删除#pragma once,并复制自己的代码									#include ...
+    1.8  阅读摘抄的文档，在.cpp中进行宏定义，并包含头文件	 						#include ...
+    1.9 按F7，其会自动编译所有代码										#define STB_IMAGE_IMPLEMENTATION
+																#include "stb_image.h"	
+																-------------------------------------------------------------------------------	
+2.创建纹理类Texture 
+  2.1 在src中创建Texture.h 和 Texture.cpp（Renderer.h中包含所有需要使用的头文件）
+  2.2 在.h中声明一个类
+  2.3 私有成员声明unsigned int m_RendererID; 声明std::string m_Filepath;（纹理的实际问价路径）		------------unsigned int 和 unsigned char--------------------------------
+  2.4 用unsigned char* 声明m_LocalBuffer;(储存本地数据）										unsigned int是一个32位的无符号整数类型，它的范围要大得多，可以存储更大的数值。
+  2.5 用int 声明m_Width（宽度）m_Height（长度） m_BPP;（每个像素位数 Bits Per Pixel）			在处理像素数据时，使用unsigned char能够更好地匹配颜色值的范围，同时也节省了内存空间	
+  2.6 在公有成员中声明构造函数，接受(const std::string&  filepath)		<------------			----------------------------------------------------------------------------
+  2.7 析构函数为默认													
+  2.8 声明Bind Unbind （均为const只读函数）								----------------BPP----------------------------------------------------
+  2.9 声明捕获函数（在.h中内联）										BPP是指每像素位数（Bits Per Pixel），它表示在计算机图像处理中每个像素所占用的位数。
+      inline void GetWidth() const{ return m_Width; }							这决定图像的颜色深度 和 颜色范围。
+      inline void GetHeight() const{ return m_Height; }							较低的BPP意味着每个像素能表示的颜色数有限，而较高的BPP允许更多颜色选择。
+    													
+													1位（2色）：	    每个像素只能表示黑色和白色两种颜色。
+    													8位（256色）：	    每个像素可以表示256种不同的颜色。
+    													16位（65,536色）：   每个像素可以表示65,536种不同的颜色，  常用于 较早期的彩色图像显示。
+    													24位（16.7百万色）： 每个像素可以表示约1670万种不同的颜色，常用于 真彩色图像显示。
+    													32位（16.7百万色+透明度）：每个像素可以表示约1670万种不同的颜色，
+																 还可以包含一个透明度通道，常用于具有透明效果的图像。
+													-----------------------------------------------------------------------------
+      													
+													----------------纹理插槽---------------------------------------------------
+ 2.10 调整Bind参数，添加想要绑定纹理的插槽 ( unsigned int slot = 0)  等于0说明其是可选参数，不指定的话默认为0）
+
+
+3.在.cpp中创建方法，调整函数
+    3.1 在构造函数的参数列表中初始化m_Renderer(0),m_Filepath(filepath)，
+                                 m_LocalBuffer(nullptr),Width(0),Height(0),m_BPP(0)
+    3.2 在构造函数中加载纹理GLCALL(glGenTextures(1,&RendererID))
+    3.3 在构造函数中绑定纹理GLCALL(glBindTexture(GL_TEXTURE_2D,RendererID))
+
+4.加载图像
+
+  4.1 包含stb头文件（#include"Vendor/stb_image/stb_image.h"）
+  4.2 在加载纹理之前，加载图像。但我们要先stbi_set_flip_vertically_on_load(1);
+      垂直反转纹理，使其颠倒 										-----------stbi_set_flip_vertically_on_load------------------------------
+  4.3 将图像加载并传递给纹理的本地储存									因为OpenGL要求的y轴0.0坐标在图片底部，但图片的y轴0.0坐标通常在顶部。故使用
+      m_LocalBuffer = stbi_load(filepath.c_str(),&m_Width,&m_Height,&m_BPP,4);				flip_vertically在图像加载时帮助我们翻转y轴，
+													在加载任何图像前加入以下语句：stbi_set_flip_vertically_on_load(true);
+5.我们已经获取了纹理，接着做一些实际设置									-----------------------------------------------------------------------
+    5.1 GLCALL(glTextureParameteri())，i是一个可以更换的字母，表示处理int型数据				-------------stbi_load()-------------------------------------------------
+    5.2 glTextureParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR)
+    5.3 glTextureParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR)
+													
+													------------纹理环绕方式---------------------------------------------
+												引入：
+													纹理坐标的范围通常是从(0, 0)到(1, 1)，如果我们把纹理坐标设置在范围之外会发生什么？
+
+												处理方法：
+													使用glTexParameter*函数对单独的坐标轴 设置 纹理环绕方式
+													eg:
+													glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+													glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+-------------glTextureParameter*  (i/f/fv/...)----------------------------------------------
+												参数：
+	函数：glTextureParameter*  (i/f/fv/...)								第一个参数指定了纹理目标
+	释义：用于设置纹理对象的参数									第二个参数需要指定设置的选项 与 应用的纹理轴。我们打算配置的是WRAP选项，并指定S和T轴。
+	原型：												第三个参数需要传递一个环绕方式(Wrapping)
+		void glTexParameteri(GLenum target, GLenum pname, GLint param);				
+		void glTexParameterf(GLenum target, GLenum pname, GLfloat param);		纹理环绕方式：（当纹理坐标超出取值范围时）
+	参数：												GL_REPEAT 		默认行为:重复纹理图像。
+		target: 表示目标纹理类型									GL_MIRRORED_REPEAT 	和GL_REPEAT类似，每次重复的图片是镜像放置的。
+			GL_TEXTURE_1D：一维纹理								GL_CLAMP_TO_EDGE 	0到1之外超出的部分重复纹理坐标的边缘，产生一种边缘被拉伸的效果。
+			GL_TEXTURE_2D：二维纹理								GL_CLAMP_TO_BORDER 	超出的坐标为用户指定的边缘颜色。
+			GL_TEXTURE_3D：三维纹理																					GL_TEXTURE_CUBE_MAP：立方体贴图							GL_TILING：超出边界的坐标将被映射到图像另一侧(循环无缝平铺）。适用于创建连续的纹理表面。
+			等等						
+												提示：
+													若选择GL_CLAMP_TO_BORDER，我们还需指定一个边缘颜色。这需要使用
+		pname: 表示要设置的纹理参数的名称											glTexParameter函数的fv后缀形式，
+			GL_TEXTURE_MIN_FILTER：纹理缩小过滤器						即使用GL_TEXTURE_BORDER_COLOR作为它的选项，并传递一个float数组作为边缘的颜色值：
+			GL_TEXTURE_MAG_FILTER：纹理放大过滤器
+			GL_TEXTURE_WRAP_S：纹理的水平寻址模式						float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+			GL_TEXTURE_WRAP_T：纹理的垂直寻址模式						glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+			其他更多的纹理参数								--------------------------------------------------------------------------------
+		param: 表示要设置的纹理参数的值，根据参数的类型（整数或浮点数）来确定具体的取值范围和意义。											
+													---------------------纹理过滤-----------------------------------------------
+---------------------------------------------------------------------------------------------	引入：
+													纹理坐标不依赖于分辨率(Resolution)，可以是任意浮点值，
+													当你放大物体但是纹理的分辨率很低时这就变得很重要了。
+
+												作用：
+													对图像进行处理纹理采样，这避免纹理失真和锯齿状边缘，控制纹理采样的性能与质量平衡
+													
+		 										参数选项：
+													纹理过滤有很多个选项。最重要的两种：GL_NEAREST和GL_LINEAR。
+
+	pname:											param:
+
+													<产生颗粒状的图案>
+	1.GL_TEXTURE_MAG_FILTER										1.GL_NEAREST（也叫邻近过滤，Nearest Neighbor Filtering）				
+	是用于设置纹理放大过滤器的纹理参数。它决定了当纹理被放大显示时，采样器如何从纹理中获取颜色值			会选择距离中心点最接近的纹理坐标像素颜色
+
+													<更平滑但视感模糊的图案>
+	2.GL_TEXTURE_MIN_FILTER										2.GL_LINEAR（也叫线性过滤，(Bi)linear Filtering）
+	用于设置纹理缩小过滤器的纹理参数。它决定了当纹理被缩小显示时，采样器如何从纹理中获取颜色值。			基于纹理坐标附近的纹理像素，计算出一个插值，近似出像素之间的颜色。
+														像素的中心距离纹理坐标越近，那么这个像素颜色对最终的样本颜色贡献越大。
+
+												eg.
+													glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+													glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+													---------------------------------------------------------------------------------
+													
+													-----------还有多级渐远纹理，不做解释，自行查阅-------------------------------------
+
+													
+   5.4 指定环绕模式
+   5.5 GLCALL(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);	S:水平
+   5.6 GLCALL(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);	T:垂直					---------------Tips（纹理过滤和纹理环绕模式无先后顺序）--------------------
+													纹理过滤和纹理环绕模式的设置顺序是没有固定要求的
+													-------Tips--------------------------------------------------------
+6.发送数据
+    6.1 在构造函数中GLCALL(glTexImage2D())，并填入参数
+													-----------------glTexImage*D()------------------------------------------
+    6.2 用 stb库函数（stbi_load())读取图片文件时，它会将图片文件的像素数据解码为内存中的一系列(数字)字节。												每个字节表示一个像素的颜色分量值或其他相关信息.故 type 为  GL_UNSIGNED_BYTE				函数： glTexImage2D()
+        而又因图片数据通常以字节为单位存储，所以使用unsigned char来储存					释义： 将数据加载到纹理对象中，并设置纹理的格式、大小和像素数据。
+    6.3 设置完成后，使用glBindTexture(GL_TEXTURE_2D,0);来解绑						原型： 
+    6.4	在构造函数的最后添加上条件语句if(m_LocalBuffer)stbi_image_free(m_localBuffer);			void glTexImage2D(GLenum target, GLint level, GLint internalFormat, GLsizei width, 
+    6.5 如果m_Buffer中的确存在数据，最后释放图像内存							      GLsizei height, GLint border, GLenum format, GLenum type, const void *data);
+												      
+7.设置函数												参数： 
+    7.1	在Unbind()const{}中定义GLCALL(glBindTextures(GL_TEXTURE_2D,0))						target：目标纹理类型（GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D等。）
+    7.2 在析构函数中删除纹理对象											level：要设置的纹理细节级别，（0表示基本级别，逐渐递增。）
+    														internalFormat：纹理存储的内部格式（GL_RGBA, GL_RGB, GL_DEPTH_COMPONENT 等）
+   														width：纹理图像的宽度。
+    														height：纹理图像的高度。
+   														border：边框的宽度，一般设置为0。（历史遗留问题）
+  														format：源数据的格式，（ GL_RGBA, GL_RGB, GL_DEPTH_COMPONENT 等。）
+   														type：源数据的数据类型，（ GL_UNSIGNED_BYTE, GL_FLOAT 等。）
+8. 设置BInd函数   												data：源数据的指针。
+    8.1 GLCALL(glActiveTexture())填入一个GLenum（纹理插槽）							internal format：纹理数据在内存中 存储方式 的描述，与实际传递给函数数据类型无关
+	GL_TEXTURE0 ~ GL_TEXTURE*（取决于系统）是一些由逐渐地增幅的数字定义的枚举					format：实际传递给函数的纹理数据的格式
+	故填入GL_TEXTURE0 + slot	，得以使用填入的数字控制插槽						----------------------------------------------------------------------------------
+    8.2 GLCALL(glBindTexture(GL_TEXTURE_2D,&m_RendererID));													
+													------------------纹理单元和glActiveTexture()------------------------------------
+													
+9.返回application进行设置											
+    9.1 包含纹理的头文件
+    9.2 在绑定着色器之后创建纹理对象并传入图像文件的路径 Texture texture("...");	<------------
+    9.3 绑定纹理并使用默认参数 texture.Bind();
+   
+10.给着色器发送一个整数统一变量，并在着色器中使用那个采样器类型的整数 对 纹理进行采样。
+    10.1 在Shader.h中声明函数void SetUniform1i(const std::string& name,int value);
+    10.2 在Shader.cpp中定义函数GLCALL(glSetUniform1i(GetUniformLocation(name),value));
+ 				      
+    10.3 在Bind之后填入Shader.SetUniform("u_Texture",0);
+	//glUniform1i(location, 0);location是uniform变量的位置（或索引），
+	 //通过将纹理对象绑定到纹理单元，并设置uniform变量的值，我们告诉着色器程序使用哪个纹理单元进行纹理采样。
+				设置一个整型uniform变量的值。location是该统一变量的位置或索引，在这里代表sampler2D类型的纹理统一变量的位置。
+				而0表示我们要使用纹理单元0。表示将纹理单元0的索引值 传递给  着色器程序中的纹理统一变量(sampler2D) 以便采样。  
+
+11.告诉像素（片段）着色器对纹理进行采样，以检索像素应该是什么颜色
+   11.1 在positions中添加纹理坐标	（与位置坐标相对应）						---------------纹理坐标规范-----------------------------------------------------
+   11.2	通过接口（Push）将纹理顶点添加到布局中，								若只有纹理坐标而没有位置坐标，那么在某些情况下，纹理坐标的顺序可以是任意的。
+	layout.Push<float>(2);										若位置和纹理写在一起，纹理坐标的顺序应与位置坐标的顺序相对应，确保纹理正确地映射到物体表面
+   11.3	更改VertexBuffer对象传入的参数size使其包含新添加的顶点						--------------------------------------------------------------------------------
+																																				-------------多边形的纹理坐标怎么写----------------------------------------
+													如果纹理不是一个矩形，而是具有不规则形状的纹理图像
+													
+    													1.（多边形）UV映射（UV Mapping）：
+													这是最常见的纹理坐标映射方法之一。它使用2D坐标系中的U和V坐标来表示纹理坐标。
+													可以通过从3D模型上获取顶点的UV信息，或者手动创建UV坐标来实现UV映射。纹理就可以贴合正确。
+
+    													2.球面坐标映射（Spherical Coordinates Mapping）：
+													适用于球体表面的纹理贴图。将球面坐标转换为纹理坐标实现
+
+    													3.柱面坐标映射（Cylindrical Coordinates Mapping）：
+													适用于柱体表面的纹理贴图。将柱面坐标转换为纹理坐标实现。
+													-------------------------------------------------------------------------------
+------------关于顶点布局中stride、offset如何更新的理解-----------------------------------------------------------------------------------------------------------------------------------
+为什么在启用纹理单元后直接使用偏特化函数推入count（向量的组件数），同时stride和offset能保持正确，根据数据发生变换
+前提是在调用AddBufferLayout之前调用偏特化，m_Stride是会累积的，不会反复刷新。调用几个偏特化，stride就会随count逐次叠加。
+
+stride（同一个属性中每个顶点的距离<每字节>）：偏特化中，m_Stride += count * LayoutElements::GetSizeOfType(GL_FLOAT);值得注意的是，当所有顶点确定时，每一个属性顶点布局中的stride都是相同的。例如：↓
+					  所以在反复调用Push的时候，m_Stride也在累积，在调用顶点布局之前，其已经根据count和调用的次数累加到了正确的数值
+
+offset（某一个属性的顶点数据起始地址）：offset在VertexArray.cpp中的AddBufferLayout定义，offset初始值为0.第一次循环时对第一种属性的顶点进行布局，offset必然也为零。第一次布局结束后，offset将从返回的（包括第一种属性的顶点信息）结构体中获取第一种属性顶点的count，同时递增。在下一次循环中，element遍历成第二个结构体（包含第二种属性的顶点的信息），在进行顶点布局后，offset自然的获取上一个属性的顶点的count并计算出相关值，为下一次布局做准备。
+for (unsigned int i = 0; i < elements.size(); i++) {	//GetElements返回vector(包含多个结构体) => elements ; elements又将其中的结构体一个个遍历给element
+		const auto& element = elements[i];	//for循环中设置一个常量保存vector（elements）返回的单个结构体
+		GLCALL(glEnableVertexAttribArray(i));
+		GLCALL(glVertexAttribPointer(i, element.count, element.type, element.normalized,layout.GetStride(), (const void*)offset));
+		offset += element.count * LayoutElements::GetSizeOfType(element.type);
+	}
+
+
+
+float vertices[] = {
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
+    };
+
+// position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+// color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+// texture coord attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+12.更改Basic.shader的顶点着色器
+    12.1 进入Basic,shader在顶点着色器中添加 
+	  Layout(location = 1) in vec2 texCoord;								------------------着色器中的in & out------------------------------------
+	 在位置（索引）为1的地方取一个纹理坐标，声明为输入变量（从外部输入至着色器中）			
+    12.2 全局声明一个输出变量 out vec2 v_texCoord;（输出给片段着色器）					概念：在OpenGL或者其他图形编程中，着色器之间的in和out关键字用于进行数据传递和交换。
+
+    12.3 在Void main中将输入变量texCoord赋值给输出变量v_texCoord						关键字：
+														in：用于声明接收从应用程序传递过来的输入数据
+														out：用于声明将数据传递给片段着色器（Fragment Shader）的输出数据
+
+													注意：
+13.更改Basic.shader中的片段着色器										1.在顶点和片段着色器之间传递数据时，需要保持输入和输出的数据类型和名称一致，确保正确传递
+   13.1 在片段着色器中全局声明输入变量 in vec2 v_texCoord;(接收顶点着色器的纹理坐标输出）			2.其他类型的着色器（如几何着色器、计算着色器等）使用的具体细节可能有所不同。
+   13.2 同时声明纹理统一变量 uniform sampler2D u_Texture;							3.在顶点着色器中，位置变量也要传递到片段着色器中
+   13.3 在void main中声明纹理颜色 vec4 texColor
+   13.4 texColor的值是texture(u_Texure,v_texcoord)的计算值(输入和输出的数据类型和名称一致			步骤：
+   13.5 将texColor的值赋值给color,代替之前的color = u_Color;						1.输出变量在main函数内部声明（顶点着色器）
+															void main()
+															{
+   													 		vec4 position = // 计算顶点位置
+    													 		gl_Position = position; // 输出变量，在main函数内部声明
+															}
+														OpenGL提供一些内建的输出变量（gl_Position、gl_PointSize等）
+														可以直接赋值给这些变量，从而传递给片段着色器。
+
+													2.输出变量在main函数外部声明
+ 									layout 是指定变量布局限定符的关键字，   		layout (location = 0) in vec4
+									location 是布局限定符的参数，          		out vec4 outPosition; // 在main函数外部（全局）声明输出变量
+									用于指定  输入变量  在顶点着色器  输入阶段 的位置索引	 
+													     		void main()
+													    		{
+    													     		vec4 position = Positions;// 设置顶点位置
+    													     		outPosition = position;   // 将计算得到的顶点位置 赋值给 输出变量
+													    		}
+													---------------------------------------------------------------------------------
+
+													OpenGL3.3及以上版本或Vulkan中，varying变量已弃用，现使用in和out关键字在着色器间传递数据
+
+
+													---------texture()函数----------------------------------------------------
+													函数：texture()
+													释义：在着色器程序中用于对纹理进行采样操作
+													原型：vec4 texture(sampler2D sampler, vec2 coordinates)
+													参数：
+														sampler是sampler2D类型的纹理统一变量，用于表示要采样的纹理
+														coordinates是一个二维向量，表示纹理坐标。
+													-----------------------------------------------------------------------------
+
+
+
+14.单击F5，此时会出现一个模糊的图像（png通常带有透明度通道，而ChernoLogo的确有透明区域）
+     而此时没有启动透明渲染和混合
+
+     因此我们要调用混合函数，并启用混合(在有效的上下文之后）
+     14.1 启用混合 GLCALL(glEnable(GL_BLEND));
+     14.2 GLCALL(glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA));

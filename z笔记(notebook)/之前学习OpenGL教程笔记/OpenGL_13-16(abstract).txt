@@ -1,0 +1,472 @@
+>>>>>>>>>>>>>>>>>抽象顶点、索引缓冲区成类<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+将代码抽象到类中，避免乱七八糟
+
+《《《《 抽象步骤：
+
+1.在src目录下创建新项（renderer.cpp , renderer.h）
+2.在renderer.h中设置宏定义、错误处理函数
+  2.1 将宏定义、错误处理函数剪切进来
+  2.2 补全头文件，并取消掉static标识（将用于全局），在.h中留下宏定义和函数声明；在.cpp中加入头文件和错误处理函数的定义。
+  2.3 在application中补全头文件
+3.在src目录下创建新项（VertexBuffer.h , VertexBuffer.cpp）
+  3.1 在VertexBuffer.h中
+				#pragma once
+				
+				class VertexBuffer
+				{
+				private:
+					unsigned int m_RendererID;				//声明一个私有成员：渲染器ID
+				public:
+					VertexBuffer(cosnt void* data,unsigned int size);	//公共成员：构造函数（常量空指针data，unsigned int size）
+					~VertexBuffer();
+					
+					void Bind();						//
+					void Unbind();
+				};
+  3.2 在.cpp头文件中包含.h
+  3.3 在.h中使用视图辅助工具（右键类名，点击快速操作和重构，点击创建方法实现）
+      然后弹出窗口询问想要实现的成员函数，点击ok
+  3.3 转到.cpp文件
+      1.在构造函数中将ibo的Gen,Bind,Data填入，用m_RendererID代替buffer、用data代替positions，数据大小换做size
+      （为了使用GLCALL，包含渲染器头文件）									
+----------------------------分离式编译--------------------------------------
+      2.在析构函数中，         填入GLCALL(glDeleteBuffer(1,&m_RendererID));		像函数一样，将类的定义和声明分别放在不同文件中的方式被称为分离式编译
+      3.在成员函数bind中     填入GLCALL(glBindBuffer(GL_ARRAY_BUFFER,m_RendererID));
+      4.在成员函数Unbind中 填入GLCALL(glBindBuffer(GL_ARRAY_BUFFER,0));						步骤： 
+														1.创建头文件（.h）： 新建名为"ClassName.h"的头文件。
+  								  					  	  将类的声明放置在其中，包括类名、成员函数的原型、成员变量等。
+ 																// ClassName.h
+
+	VertexBuffer.h:														class ClassName 
+																{
+																public:
+    			#pragma once											  	    ClassName(); // 构造函数声明
+    															  	    void memberFunction(); // 成员函数声明
+			class VertexBuffer											private:
+    			{												  	    int memberVariable; // 成员变量
+			private:												};
+				unsigned int m_RendererID;	
+			public:											2.创建源文件（.cpp）： 新建一个名为"ClassName.cpp"的源文件，
+				VertexBuffer(const void* data,unsigned int size);			  	  并在源文件中实现和定义类的成员函数。
+				~vertexBuffer()											// ClassName.cpp
+			
+				void Bind();											#include "ClassName.h" // 包含头文件
+				void Unbind();
+			};													ClassName::ClassName() {
+    																    // 构造函数的定义
+	VertexBuffer.cpp													}
+																void ClassName::memberFunction() {
+    																    // 成员函数的定义
+			#include"VertexBuffer.h"										}
+
+			#include"Renderer.h"
+			
+			VertexBuffer::VertexBuffer(const void* data,unsigned int size)		3.使用类：在其他源文件中，可以通过包含"ClassName.h"头文件使用该类。
+			{													// main.cpp
+				GLCALL(glGenBuffer(1,&m_RendererID));
+				GLCALL(glBindBuffer(GL_ARRAY_BUFFER,m_RendererID));	
+					//在默认情况下构造函数已绑定缓冲区，成员bind用于重新绑定一个缓冲区				#include "ClassName.h"
+				GLCALL(glBufferData(GL_ARRAY_BUFFER,size,data,GL_STATIC_DRAW));
+			}													int main() {
+    													    			    ClassName obj;
+    			VertexBuffer::~VertexBuffer()										    obj.memberFunction();
+			{													    return 0;
+				GLCALL(glDeleteBuffer(1,&m_RendererID));				}
+			}
+													将类的定义和声明分开放置，实现了类的模块化和重用性。提高代码的可读性、可维护性和可扩展性
+			void VertexBuffer::Bind()							---------------------------------------------------------------------------
+			{
+				GLCALL(glBindBuffer(GL_ARRAY_BUFFER,m_RendererID));
+			}
+
+			void VertexBuffer::Unbind()
+			{
+				GLCALL(glBindBuffer(GL_ARRAY_BUFFER,0));
+			}
+													-----------------------常量空指针（const void* data）----------------------------
+													const void* data 是一个指向常量空类型(void)的指针。
+													这种指针有以下几个用途。
+
+												1.通用指针：const void* 可以作为通用指针使用，因为它可以指向任何类型的数据。
+														 但通用指针的特点是无法直接解引用，因为没有指定具体的类型信息。
+													（在需要于函数中传递不同类型数据，并且不需直接访问或修改的情况下很有用。）
+
+    												2.类型安全和多态性：通过使用 const void*实现对多态性的支持。
+													（在函数参数中使用 const void*，可接受不同类型的指针，而无需强制类型转换。）
+
+    												3.保护数据：由于 const void* 是指向常量的指针，在函数内部，不能修改通过该指针访问的数据。
+													这对于保护数据的完整性和避免数据修改非常有用，尤其在涉及到函数输入参数时。）
+
+    												4.兼容C语言代码：在与C语言代码进行交互时，常见的做法是使用 const void* 作为函数接口的参数												或返回值类型。
+													（这样以确保代码之间的兼容性，并且在C和C++之间更易进行数据传递。）
+
+												请注意，由于缺乏类型信息，解引用和直接操作指针所指向的数据是不允许的。
+													在使用 const void*时，通常需要将其转换为正确的类型以进行实际操作。
+													-------------------------------------------------------------------------------
+
+4.和抽象VertexBuffer类似，所以复制粘贴VB.h和VB.cpp，刷新，将其包含在项目中，
+    更名为IndexBuffer.h 和 IndexBuffer.cpp	   （Vertex -> Index）
+  4.1 在IB类的私有成员中添加unsigned int m_Count;用于记录索引的数量。
+  4.2 在IB类的公有成员中更新构造函数IndexBuffer参数
+      索引缓冲区的数据肯定是一系列整数，故不需要通用指针（const void* data -> const unsigned int* data）
+      data已不再是空指针，故size可计算，不用设为函参   （unsigned int size -> unsigned int count）
+
+5.转到.cpp中更新函数定义
+      5.1 glBindBuffer() 和 glBufferData() 中  GL_ARRAY_BUFFER -> GL_ELEMENT_ARRAY_BUFFER		
+															-------------------unsigned int 和 int 的内存区别------------------------------
+      5.2                                     size -> count * sizeof(unsigned int)			int 和 unsigned int 在大多平台上具有相同内存大小（4 字节）。
+      5.3 在构造函数的初始化列表中填入           :m_Count(count) 			但C++ 标准只规定最小位数要求，即 int 至少为 16 位，unsigned int 至少为 16 位。
+      5.4 构造函数第一个语句应是ASSERT(sizeof(unsigned int) == sizeof(GLuint));				
+															--------------GLuint 和 GL_UNSIGNED_INT 区别---------------------------------
+          													OpenGL中的无符号整形是GLuint而不是GLunsignedint,某些文档可能会使用后者。		//unsigned int 是 C++ 中的类型，而 GLuint 是在 OpenGL 库中定义类型。
+											    		  这个断言的确保在使用 OpenGL相关函数时，unsigned int可以安全地与 GLuint进行交换
+
+													GLuint 是OpenGL内部的数据类型，而 GL_UNSIGNED_INT 是用于描述像素数据的常量。
+6.在IB.h中声明并定义（inline内联函数）获取器							-----------------------------------------------------------------------------
+     public:
+              inline unsigned int GetCount() const {return m_Count;}
+
+7.将所有的Bind和Unbind声明为不可修改类成员的形式
+    void Bind() const
+    {
+        GLCALL();
+    }  
+    
+
+
+》》》》使用新类 ：
+
+    			//创建顶点数组(VAO
+
+  		------>	//顶点缓冲区(VBO
+    		------>	VertexBuffer VB(positions,4 * 2 * sizeof(float));		//调用构造函数创建对象
+
+    			//顶点属性
+    			GLCALL(glEnableVertexAttribArray(0));
+    			GLCALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));     
+    		------>//索引缓冲区(IBO
+    		------>IndexBuffer IB(indices,6);					//调用构造函数创建对象		
+				
+    			//调用函数
+    			//绑定着色器       
+   			//统一变量
+   			//解绑着色器、顶点数组、顶点缓冲区、索引缓冲区
+			float r = 0.5f;
+    			float increment = 0.05f;
+    			while (!glfwWindowShouldClose(window))
+   			{
+        			/* Render here */
+        			//重新绑定着色器、顶点数组、索引缓冲区
+        			GLCALL(glUseProgram(shader));
+        			GLCALL(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+
+        			GLCALL(glBindVertexArray(VAO));
+        	-------->	IB.Bind();
+
+        			//发送DrawCall指令
+
+
+
+关闭窗口后，命令行提示符并不会关掉，调试未终止。原因是GLGetError持续运行。
+解析： 在作用域结束时，类分配的对象会自动被析构，但在主函数结束前，我们调用glfwTerminal()来终止OpenGL的上下文，这会导致OpenGL上下文和GLGetError函数失效。
+解决：（我们可以使用堆分配，然后在terminal之前Delete，但这并不是常见的方法）
+       更常用的方法是：创建一个包含 positions之后 和 terminal之前 所有代码的作用域，
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>顶点数组和顶点布局的抽象<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+抽象顶点数组对象
+	---------VA类构造函数中不需对VA进行绑定，而在VB类、IB类中都要绑定缓冲区-----
+《《《《 思路：													
+	设置VA类，在类构造函数中进行基础操作，然后声明一个VA对象（将包括Gen,Bind）在创建和使用VAO时，我们需要设置使用的VBO和IBO，但不需要在构造函数中对其进行绑定。
+	创建完成后，创建一个VB（上一节已实现）因为VAO只是保存了对应的VBO和IBO的引用，并不需要直接操作它们
+	再创建一个缓冲区布局对象。并为缓冲区布局对象推入index,size,type,normalized,stride,pointer这些参数
+	你可以在之后的渲染过程中，通过绑定VAO来自动绑定相应的VBO和IBO
+	为VA对象添加VB缓冲区。为VA对象添加layout布局。								------------------------------------------------------------------------
+
+	这样顶点数组就能实现对特定的顶点缓冲区进行绑定，并设置布特定局。
+	
+
+《《《《 步骤：
+
+1.在src中创建一个新项：VertexArray.h，并创建一个类									
+																-----------------------------Tips-------------------------------------
+  1.1 在头文件的公有成员中加入构造（VertexArray()）和析构函数（~VertexArray()）	顶点数组并不存储实际的顶点数据，而是保存对应顶点缓冲区（Vertex 																	Buffer）的引用。
+																-------------------------------------------------------------------------
+  1.2 在头文件的公有成员中加入void AddBuffer(const VertexBuffer& vb,const VertexBufferLayout& layout);		
+                                                                     
+  1.3 加入VertexBuffer的头文件，加入VertexBufferLayout头文件（事实上顺便创建他）					
+														-----------------------vertexAttribPointer的参数-------------------------
+														
+    													1.index：要设置的顶点属性索引。对应于着色器程序中定义的顶点属性变量的位置。
+    													2.size：每个顶点属性的组成元素数量。3D坐标，size是3；颜色属性RGBA，size是4。
+    													3.type：顶点属性元素的数据类型。包括：GL_FLOAT、GL_DOUBLE、GL_INT等
+    													4.normalized：是否对顶点属性进行归一化处理。
+															GL_TRUE，则会将非浮点类型的数据映射到范围 [-1, 1] 或 [0, 1]；
+														 	GL_FALSE则不进行
+    													5.stride：连续顶点属性之间的字节偏移量。即顶点数组中一个属性到下一个属性的跨度。
+															若顶点属性是紧密打包的，可将 stride 设为0，表示相邻属性间无间隔。
+    													6.pointer：顶点属性数据在缓冲区中的起始地址 或者 在客户端内存中的指针地址。
+															这个参数可以是一个整数偏移量或者一个指针。
+														------------------------------------------------------------------------
+2.在src中创建VertexBufferLayout.h，并创建一个类	
+  2.1 在文件中创建一个结构体 struct LayoutElements{}
+  2.2 在类的私有成员中，声明一个动态数组，传入LayoutElements。 std::vector<LayoutElements> m_Elements;
+  2.3 在类的公有成员中，创建一个默认的构造函数 VertexBufferLayout();
+  2.4 在类的公有成员中，创建函数的模板偏特化。（用来在不同情况下推入参数）		----------------偏特化（Partial Specialization）--------------------------
+  2.5 在结构体中，加入unsigned int count,unsigned int type,unsigned char normalized			类似于虚函数的实现逻辑
+  2.6 偏特化设置一个参数count.			
+  2.7 偏特化中push_back进结构体{count,GL_数据类型,GL_TRUE或GL_FALSE}(包含相应头文件		
+															概念：偏特化是一种C++模板元编程的技术
+  2.8 对多个情况进项偏特化，设置多个push<>							用于根据特定的模板参数对模板进行特殊处理。以满足特定的需求或优化性能。
+														        		1.类模板的偏特化，    特化版本通常会提供额外或不同的实现。
+												     					2.函数模板的偏特化，特化版本可能会对函数参数进行特殊处理。
+3.在VertexBufferLayout中内内联一个GetStride函数，来获取步幅														
+															类型：1.类模板的偏特化 ：
+									 						  	    允许对一个或多个模板参数进行特化，并提供专门的实现
+4.内联一个获取元素的函数GetElements								 	2.函数模板的偏特化 ：
+									 						  	    允许对函数模板中的某些参数进行特化
+					
+5.在构造函数参数列表中设置stride初始值为0							规范： 
+														     	1.完整定义：在进行偏特化之前，必须先定义一个完整的模板。
+6.在偏特化中设置stride += count * sizeof（数据类型）					 2.特化语法的正确性：语法规范
+													     	     	3.特化优先级：针对特定参数的特化版本和通用版本可能同时存在。
+										        				          进行特化时，编译器会根据条件的匹配程度选择使用哪个版本。
+------------------函数的const、static---------------------------------------		步骤：
+1.const int foo();									    			 1.
+const表示函数返回值的类型为常量。									定义主模板：定义一个通用模板。将这个模板作为基础，用于生成特化版本
+表示调用该函数后返回的结果是一个常量，不能被修改。					 2.1 
+															创建类模板的偏特化：在主模板之后创建特化版本。
+2.int foo() const;												特化版本的语法是在template <>中指定特化的参数，并提供特定的实现。
+这里的 const 表示该成员函数是常量成员函数或只读成员函数。				2.2
+这意味着在该函数体内部，不能修改对象的非静态成员（除非它们被声明为 mutable）。				
+															创建函数模板的偏特化：在主模板之后创建特化版本。
+														        特化版本的语法是在template <>中指定特化的参数，并提供特定的实现。
+3.void foo(const int x);							     	     			3.
+这里的 const 表示函数参数 x 是一个只读参数。							使用特化版本：一旦定义了特化版本，就可以根据匹配的条件使用它们。
+在函数内部，无法通过参数 x 来修改传入的实参的值	
+
+4.static用于定义静态成员或静态函数。
+静态成员变量在类的所有对象之间共享，并且可以在没有创建对象的情况下访问。			函数模板的偏特化示例：
+静态函数属于类本身，而不是类的实例(对象)，因此可以直接通过类名调用。				template <typename T>			
+-------------------------------------------------------------------------					void MyFunction(T value) {
+														     		    	// 主模板的实现代码
+------------对于容器的.size()方法-----------------------------------------				}
+C++ 中容器的.size()方法通常用于获取元素的数量									template <>    
+容器（vector、map...）													void MyFunction<float>(float value) {
+----------------------------------------------------------------------					    // float类型的特化实现
+														     			}
+																																												------------------------------------------------------------------------				 		   
+1.  VertexArray::AddBufferLayout(VB, Layout); 这种写法使用作用域解析运算符::，表示调用类的静态成员函数AddBufferLayout。
+    静态成员函数是与特定类关联的函数，它们不依赖于类的实例而存在。							
+如果AddBufferLayout是一个静态成员函数，那么这种写法正确						--------------static_assert-------------------------------
+2.  VA.AddBufferLayout(VB, Layout); 这种写法通过一个对象（可能是类的实例）来调用AddBufferLayout函数。 		
+																	C++ 中的一个编译时断言机制	
+如果AddBufferLayout是一个非静态成员函数，则正确								函数： static_assert();	
+														释义： 在编译时对一个条件进行检查，并在条件不满足时触发编译错误。
+														原型： static_assert(condition, message);
+offset:偏移量												参数： 								
+      															condition：
+               													要进行断言检查的条件，也可以是编译时常量表达式（constexpr）。	
+7.在vertexarray中包含VertexBufferlayout头文件						若 condition 为 false，编译器会触发编译时错误，并显示指定的自定义错误信息。																message： 想要输出的自定义错误信息	
+8.将VertexArray中的函数快速构建在.cpp中								----------------------------------------------------------------------
+
+9.在AddBufferLayout中
+  9.1 绑定缓冲区 VB.Bind();
+  9.2 获取m_Elements到const auto& 变量 elements中
+  9.3 通过for循环将vector类型elements中的结构体遍历到element中
+    9.4 调用glEnableVertexAtribArray 和 glVertexAttribPointer 进行顶点布局，对参数进行调整.
+    9.5 调整偏移量offset
+  //由于stride是一个根据情况不断改变的量，所以不放在elements中，而是作为私有成员Get（捕获）他
+  
+10.在VertexArray的class私有成员中加入m_RendererID;
+
+11.在vertexArray的构造函数中Gen，析构函数中Delete
+
+12.在VA的.h中，void Bind()const; void Unbind() const; 做声明
+      然后在.cpp中，分别定义Bind和Unbind
+
+13.在主函数中实现
+      13.1 创建VA的对象
+   13.2 创建VB的对象（以实现）
+   13.3 创建Layout的对象
+   13.4 对layout对象调用push函数，选用相应类型并填入相应的参数
+   13.5 对VA对象调用AddBufferLayout，添加缓冲区和布局
+   13.6 使用VA的Bind代替之前的绑定
+   13.7 同样，Unbind代替之前的解绑
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>对着色器的抽象<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+14：39和17：44有变动
+
+》》》》思路： 
+1.着色器能够传递一个文件或者一个字符串，并编译
+2.能够绑定和解绑着色器
+3.能够设置着色器中各种不同的变量
+
+》》》》步骤： 
+1.src中创建shader.h,shader.cpp,并在.cpp中包含头文件
+2.在.h中创建一个类
+  2.1 私有成员中设置unsigned int m_RendererID,设置缓存存储统一变量的属性		
+      // (为了调试，也在私有成员中设置一个std::string m_Filepath,方便查找着色器所属文件
+  2.2 公有成员构造函数参数填为const std::string& filepath，声明析构函数
+  2.3 声明Bind和Unbind void --- () const;
+  2.4 声明一个设置uniform的函数void SetUniform4f(const std::string& name,float v0 , float v1, float v2,float v3);
+  2.5 私有成员中声明一个（内部方法）私有方法 unsigned int GetUniformLocation(const std::string& name);
+  2.6 私有成员中声明(内部方法)私有方法 unsigned int CompileShader();
+
+3.在.cpp文件中设置函数
+    3.1 快速创建方法
+    3.2 在构造函数的参数列表中初始化 :m_Filepath(filepath), 并在参数列表中初始化id为0  m_RendererID(0)
+    3.3  在.cpp中写CompileShader的定义  unsigned int Shader::CompileShader(){...}
+    3.4 返回application，将ParseShader 和 CreateShader的定义复制到.cpp中
+    3.5 返回application，将struct结构体ShaderProgramSource复制在.h中			
+        //（若文件不放在.h中，是因为只想在.cpp文件中使用。但.h声明成员函数时用到了结构体，最终将其放在.h中）
+    3.6 将所用到的头文件进行包含（fstream，sstream，ifstream，string...），当然也有Renderer（为了GLCALL）
+
+4.对函数进行调整
+    4.1  为ParseShader、CreateShader、CompileShader加上作用域限制（Shader::函数名），使其成为类的成员方法
+    4.2 删除CreateShader、CompileShader的static(静态标识)
+    4.3  在.h文件私有方法中，添加声明
+
+5.为了运行，对函数进行定义
+  5.1 在构造函数定义中，放置application中对着色器Basic.shader操作的代码，将ParseShader的参数从实际路径改为filepath变量
+  5.2 将CreateShader的返回值shader改为m_RendererID，去掉声明
+  5.3 在析构函数中填入GLCALL(glDeleteShader(ID));
+  5.4 Bind和Unbind中填入GLCALL(glUseProgram(ID)); 和 GLCALL(glUseProgram(0));	
+      //（在着色器中，"BindShader"是 UseProgram , "DeleteShader" 是 DeleteProgram）
+  5.5 在SetUniform4f中，填入GLCALL(glUniform4f(location,v0,v1,v2,v3));
+  5.6 在GetUniformLocation中，填入GLCALL(glGetUniformLocation(m_RendererID,name.c_str())); 
+      // (原型是GLCALL(glGetUniformLocation(shader,"u_Color"));  c_str()函数将name转为c格式)
+      //SetUniform4f,GetUniformLocation中都传入了name参数，name来代替查找的统一变量名称
+  5.7 创建location，为location赋值GLCALL(unsigned int location = glGetUniformLocation(m_RendererID,name.c_str();));
+  5.8 如果不存在，if(location == -1)std::cout<<"uniform"<<name<<"doesn't exist!"<<std::endl;	
+      //为什么location == -1（即统一变量不存在）时不中断，因为有时候我们故意声明uniform变量，但不使用，以此达到某种目的（声明不使用会导致变量被优化删除）
+  5.9 返回location。return location
+  5.10 更改SetUniform4f的定义，将glUniform4中的location改为GetUniformLocation(name);
+
+6.运行
+  6.1 在application中加入shader的头文件
+  6.2 声明一个shader对象 Shader shader;并填入文件路径
+  6.3 绑定着色器shader.Bind();
+  6.4 对shader对象调用SetUniform4f("u_Color",0.8f,0.3f,0.2f,1.0f);
+  6.5 解绑。将glUseProgram(0);改为Unbind
+  6.6 在while loop中，将绑定glUseProgram(shader)改为shader.Bind();
+  6.7 将设置统一变量改为SetUniform4f("u_Color",r,0.3f,0.2f,1.0f);
+
+7.在代码结尾去掉glDeleteProgram(shader);。我们的析构函数在作用域结尾会自行Delete掉着色器
+
+8.敲击f5即可													
+
+
+
+													-----------------哈希值的概念-----------------------------------------
+														
+													哈希（Hash）是一种常用的密码学算法和数据结构。
+													在计算机科学中，哈希函数是将任意大小的数据映射为固定大小的数据的一种方法
+													哈希函数将输入值经过计算得到一个固定长度的输出值，该输出值通常被称为哈希值或摘要。
+													-----------------------------------------------------------------------
+》》》》哈希值与哈希表
+													-------------哈希表的概念-------------------------------------------
+													哈希表（Hash Table），也称为散列表，是一种数据结构，用于实现键值对的存储和查找。														逻辑：通过将键映射到一个特定的索引位置来加快访问速度。
+														在哈希表中，使用哈希函数将键转换为唯一的索引，该索引对应着存储桶（或槽）。
+														每个存储桶可以存储一个或多个键值对。
+										当需要插入、查找或删除一个键值对时，通过哈希函数计算出相应的索引，然后在对应的存储桶中进行操作。
+														----------------------------------------------------------------
+
+
+														---------------------缓存和哈希表的关系--------------------------------
+
+														关系：      实现缓存功能时会使用哈希表作为底层数据结构。
+														缓存：      缓存可以将经常访问的数据存储在快速访问的介质（如内存）中，
+														         以减少对慢速介质（如磁盘或数据库）的访问次数。
+														哈希表：        哈希表是一种高效的查找和存储数据的数据结构，
+														         由于其快速的插入、查找和删除操作，适合用于实现缓存。
+》》》》性能优化													---------------------------------------------------------------------
+
+解析：在while循环中，每次绘制图形SetUniform4f()都会反复通过GetUniformLocation()获取统一变量的位置,这是没必要的。
+     通过缓存location？，我们可以只在外部获取到一次location，同时将其写入缓存，对性能进行提升				
+															----------------哈希表实现缓存数据的流程------------------------
+
+步骤：														1.定义一个哈希表，用于存储缓存的键值对。
+			
+															2.当需要访问某个数据时，首先检查该数据是否存在于缓存中。
+1.头文件														3.若存在于缓存中，则直接从哈希表中获取数据并返回。
+    1.1 包含 unordered_map（哈希映射或哈希表）						4.若不存在于缓存中，则从慢速的介质（如数据库）中获取数据，
+    1.2	在Shader.h 类的私有成员中声明缓存 									 并将数据写入到缓存中，同时更新哈希表
+	std::unordered_map<std::string,int>m_UniformLocationCache;			5.下次需要访问相同的数据时，直接从缓存的哈希表中获取，提高了数据的访问速度。
+															--------------------------------------------------------------------
+2.Shader.cpp中更改函数									逻辑：			
+    2.1 在GetUniformLocation(const std::string& name)中写入
+	if(m_UniformLocationCache.find(name) != m_UniformLocationCache.end())		//先在哈希表的键值对中寻找name键。
+	    return m_UniformLocationCache[name];					//若找到，则直接快速返回数据并退出函数。若没找到，则进行之后的语句(A[name]：查找哈希表对象A中键为name的值）							
+	GLCALL(unsigned int location = glGetUniformLocation(m_RendererID,name));	//从着色器中查找统一变量的位置
+	
+	if(location == -1)								//如果统一变量不存在，则打印提示语句
+	    std::cout<<"warning: uniform"<<name<<"Doesn't exist!"<<std::endl;
+															       location：实际位置 或 -1（不存在）
+	m_UniformLocationCache[name] = location;					//无论找到或没找到统一变量，都将其location写入缓存，更新哈希表。最后慢速返回数据
+	return location;									
+											//下一次循环时，无论是实际位置还是-1，都将通过哈希表快速返回
+
+3.f5 f5 f5 f5 f5
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>写一个基础的渲染类<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<	
+
+之前学的东西（创建类，绑定，绘制）都不是通过中心管道的，每一次绘制都在重复所有的工作。所以使用渲染器来组织这些功能	
+
+》》》》作用：渲染器地作用主要包括：
+
+1.设置渲染状态：渲染器负责设置OpenGL的状。决定如何处理和渲染几何体。
+2.设置投影矩阵和视图矩阵：渲染器负责设置投影矩阵和视图矩阵，定义观察者的视角 和 场景的投影方式。控制场景透视、缩放和旋转等效果。
+3.绑定顶点缓冲区和顶点数组对象
+4.绑定纹理和着色器
+5.执行绘制调用
+
+
+》》》》步骤：
+
+1.打开renderer.h
+  1.1 创建一个类（可以是普通类，也可以是单例类，取决于用途，这里演示普通类）
+  1.2 在类的公有成员中声明一个方法Draw 参数是绘制一个图像所需要的条件（顶点数组，索引缓冲，着色器），并标记为只读成员函数
+      void Draw(const VertexArray& va, const IndexBuffer& ib,const Shader shader)const;
+  1.3 包含涉及的头文件
+  1.4 在.cpp中创建方法													----------tips----关于解绑----------------------------------------
+  1.5 在方法中对顶点数组、索引数组、着色器进行绑定，然后加入DrawCall指令（DrawElements）					技术上讲，OpenGL并不需要解绑，因为在绑定新的东西时会自动剔除旧的东西
+      //关于统一变量的设置，暂时先不添加											好处：方便调试。坏处：影响性能
+  1.6 将glDrawElements()中的count参数换成ib.GetCount()									例外：但对于纹理、帧缓冲对象，显示的解绑会避免输出错误或意外修改
+ 															--------------------tips------------------------
+2.在解绑之后、r设定之前（while loop之前）创建一个Renderer的renderer对象
+3.对renderer使用Draw方法 来代替之前的glDrawElements
+
+》》》》错误： 在Renderer.h中我们包含了VertexArray.h，VertexArray.h包含VertexBufferLayout.h，而layout中包含Renderer.h
+	     这陷入了一个死循环
+	改正：
+	1.在VertexArray.h中去掉VertexArrayLayout.h，并在VArray.h中创建一个VALayout的类，类中不包含任何东西			
+																	-----------------类的声明和空类定义-----------------------------
+	  //（此举仅为了满足声明函数时的参数类型，删除头文件不影响操作）				class a; （forward declaration）
+	  注意 ：class VertexBufferLayout;不能写成class VertexBufferLayout{};！！！  		类的前向声明，它告诉编译器后续代码中会有一个名为 a 的类存在。 
+	         前者是类的声明，后者将其定义为了空类								通常用于解决循环依赖的问题，或在函数参数、返回类型中使用未完全定义的类。    													
+	2.在VertexArray.cpp中重新包含VALayout.h，这样 一来依旧可以使用layout定义的函数		class a{}; 
+	3.同时在application中包含VALayout.h（因为VArray.h中layout的仅是一个类声明）		类的定义，其中包含了类的成员变量、成员函数等具体实现。
+																这种定义是完整的，并且在编译器看到它时，会分配内存空间以及生成对应的代码
+																-------------------------------------------------------------
+4.想办法代替while中的glClear
+  4.1 在Renderer.h中声明void Clear()const;										
+  4.2 在Renderer.cpp中定义
+  4.3 将application中的glClear复制进clear中
+5.对对象调用其Clear函数，替代以前的glClear
+
+
+
+
+》》》》问题：在application中，while循环里我们仍留下了 
+	    Shader.Bind();
+            Shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+	    两行代码，因为renderer中未设置统一变量，要绑定统一变量只能在循环中新创建一个shader对象，然后对对象使用SetUniform的函数
+	    我们将通过设置材质(纹理）来调整这个问题
+

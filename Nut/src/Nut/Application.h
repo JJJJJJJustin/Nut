@@ -33,6 +33,8 @@ namespace Nut {
 		std::unique_ptr<Window> m_Window;				//指向Window的指针
 		bool m_Running = true;
 		LayerStack m_LayerStack;
+
+		unsigned int m_VertexBuffer, m_VertexArray, m_IndexBuffer;
 	private:
 		static Application* s_Instance;					//! ! !唯一实例的静态成员（static类型，需要初始化定义）
 	};

@@ -261,4 +261,16 @@ Static libraries for these kinds of projects are totally fine! The reason is tha
 为了拓展程序，增加其普适性。将上下文抽象，我们可以采用不同的API来进行上下文的设置。
 比如使用OpenGL、Vulcan、DirectX 等。
 
+----------------------------------------首个三角形-------------------------------------------------
+》》》》涉及到很多OpenGL中的函数和知识，
+可以看OpenGL的参考文档，
+当然也可以看cherno的教程。
+或者Learn OpenGL官网。
 
+我看完了Cherno 的教程，LearnOpenGL学了一半，所以没啥要记的。
+我可以把学习Cherno 时记得笔记放在笔记文件夹中，格式会有点乱，可以参考一下。
+
+
+
+》》》》后面很多东西其实都是Cherno在他教程里面所教的，一定去看看。
+基础知识和类的抽象什么的，稍有不同。Cherno的思路也很不错，赞。

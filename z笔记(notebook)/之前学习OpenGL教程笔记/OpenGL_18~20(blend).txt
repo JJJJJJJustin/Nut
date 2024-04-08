@@ -1,0 +1,83 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>混合<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+概念：
+	混合(Blending)通常是实现物体透明度(Transparency)的一种技术。
+	透明就是一个物体（或者其中的一部分）不是纯色(Solid Color)的，它的颜色是物体本身的颜色和它背后其它物体的颜色的不同强度结合。
+默认情况下OpenGL不执行任何混合
+
+控制方式：
+	1.启用和禁用blend（ glEnable(GL_BLEND),glDisable(GL_BLEND) ）
+	2.glBlendFunc(src,dest)
+
+混合属于高级OpenGL，将转到learnOpenGL文档中学习（https://learnopengl-cn.github.io/）
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>数学与矩阵<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+cherno讲的并不清楚，同样转到learnOpenGL文档中学习，本文中仅示例cherno的实际用法
+矩阵和向量均有在文档中详细解释...
+
+》》》》思路：
+在已经实现的程序中，我们得到了一个ChernoLogo，但是纵横比是错误的。默认情况下OpenGL给我们一个（-1~1）的投影矩阵
+因为窗口是4:3，所以图形的比例也发生了变化，所以需要动用矩阵实现一些变化。
+
+》》》》实现：
+1.安装免费的数学库glm_release（https://github.com/Groovounet/glm/tree/release）。
+使用这个库的原因是glm为OpenGL特定的，其中的矩阵是列主序而非行主序，其实际布局与OpenGL相适配不需要转置。
+
+2.配置glm库
+glm是一个只包含头文件的库，并不需要向stb_image一样创建cpp文件链接到库。
+所以在src中的vendor中放置解压后以glm命名的文件夹。
+
+3.选做：在c++通用配置中（src\vendor添加到实际的附加包含目录），可以省去配置头文件时写"vendor/..."的步骤
+
+
+
+》》》》通过矩阵进行转换：
+1.包含头文件：
+	#include"glm/glm.hpp"
+	#include"glm/gtc/matrix_transform.hpp"
+
+2.创建统一变量
+	创建投影矩阵：glm::mat4 proj = glm::ortho(-2.0f,2.0f,-1.5f,1.5f,-1.0f,1.0f);    //ortho正交矩阵(与透视矩阵相对，正交类似于三视图，没有远近和立体透视）
+	
+
+3.在Basic.shader中对顶点和矩阵进行相乘，对顶点进行转换
+    3.1 在Basic.shader中添加一个矩阵统一变量，将CPU端传入的position与其相乘
+      	  uniform mat4 u_MVP;			在输出变量之后声明统一变量
+     	 //model view projection matrix(模型视图投影矩阵
+    3.2 在main 函数中将u_MVP 与 position相乘，基于我们的矩阵将其移动到合适的空间       
+	gl_Position = position * u_MVP;	
+
+4.在CPU端将proj矩阵数据传递给统一变量u_MVP
+  4.1 创建一个SetUniformMat4f()函数
+                包含头文件
+     	在shader.h中声明 void SetUniformMat4f(const std::string& name,const glm::mat4& matrix)
+     	在shader.cpp中添加SetUM4f的定义 在定义的函数体中写入glUniformMatrix4fv();		//v的意思是我们在传入一个数组
+           	glUniformMatrix4fv(GetUniformLocation(name),1,GL_FALSE,&matrix[0][0]);					---------------------glUniformMatrix4fv----------------------------
+  4.2 在SetUniform4f(ucolor...)	之后										函数: glUniformMartix4fv()
+	SetUniformMatrix4f("u_MVP",proj);									释义：设置四维矩阵类型的uniform变量值
+														原型：
+												void glUMfv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+														参数：
+														location：要修改的uniform变量在着色器中的位置。
+														count：要设置的矩阵数量。
+														transpose：指示是否对矩阵进行转置操作。
+																GL_FALSE 传递的矩阵数据按列主序方式解释；
+																GL_TRUE，则传递的矩阵数据按行主序（row-major）方式解释
+
+														value：指向四维矩阵数组的指针，用于存储要设置的矩阵。
+														可以将多个矩阵的数据按顺序存储在连续的内存空间中，以便一次性设置多个矩阵的值。
+														-----------------------------------------------------------------------
+	
+														--------------ortho（）--------------------------------------------------
+														ortho()函数是一个用于创建正交投影矩阵的函数。它的参数包括：
+															left：指定了视景体在近平面上的最左边界。
+															right：指定了视景体在近平面上的最右边界。
+															bottom：指定了视景体在近平面上的最下边界。
+															top：指定了视景体在近平面上的最上边界。
+															near：指定了视景体距离摄像机的近平面的距离。
+															far：指定了视景体距离摄像机的远平面的距离。
+													这些参数定义了一个平行的盒子（也称为视景体或裁剪空间），通过将其映射到规范化设备坐标系														来定义可见区域。在正交投影中，平截头体的所有部分都等距地投影到NDC空间中，不产生透视效果
+														--------------------------------------------------------------------------
+														
+src\vender\glm\core\dummy.cpp
