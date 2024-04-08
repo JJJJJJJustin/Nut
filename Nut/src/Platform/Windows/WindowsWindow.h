@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Nut/Window.h"
+#include "Nut/Renderer/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>
 
 namespace Nut
 {
 
-	class WindowsWindow : public Window							//！！！这个类没有NUT_API标识
+	class WindowsWindow : public Window							//！！！这个类没有NUT_API标识（作为静态库使用）
 	{
 	public:
 		WindowsWindow(const WindowProps& props);				//声明了构造函数
@@ -28,6 +29,7 @@ namespace Nut
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;									//声明了一个GLFW的窗口对象
+		GraphicsContext* m_Context;								//声明一个上下文对象（GraphicsContext类 没有构造函数，在.cpp中为其new一个指针对象）
 
 		struct WindowData
 		{
