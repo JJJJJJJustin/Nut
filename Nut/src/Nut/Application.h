@@ -8,6 +8,8 @@
 
 #include "Nut/Events/ApplicationEvent.h"
 
+#include "Nut/Renderer/Shader.h"
+
 namespace Nut {
 
 	class NUT_API Application							//类的导出
@@ -29,10 +31,11 @@ namespace Nut {
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);
 
-		ImGuiLayer* m_ImGuiLayer;
 		std::unique_ptr<Window> m_Window;				//指向Window的指针
-		bool m_Running = true;
+		std::unique_ptr<Shader> m_Shader;
 		LayerStack m_LayerStack;
+		ImGuiLayer* m_ImGuiLayer;
+		bool m_Running = true;
 
 		unsigned int m_VertexBuffer, m_VertexArray, m_IndexBuffer;
 	private:
