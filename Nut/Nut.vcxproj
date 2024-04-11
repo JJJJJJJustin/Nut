@@ -157,6 +157,7 @@
     <ClInclude Include="src\Nut\MouseButtonCodes.h" />
     <ClInclude Include="src\Nut\Renderer\Buffer.h" />
     <ClInclude Include="src\Nut\Renderer\GraphicsContext.h" />
+    <ClInclude Include="src\Nut\Renderer\Renderer.h" />
     <ClInclude Include="src\Nut\Renderer\Shader.h" />
     <ClInclude Include="src\Nut\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
@@ -589,6 +590,7 @@
     <ClCompile Include="src\Nut\LayerStack.cpp" />
     <ClCompile Include="src\Nut\Log.cpp" />
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Nut\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Nut\Renderer\Shader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />

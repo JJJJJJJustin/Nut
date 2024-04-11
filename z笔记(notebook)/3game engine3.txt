@@ -403,4 +403,66 @@ glCreateBuffers 会自动将标识符和对象相关联，并将生成的缓冲�
 
 
 
-》》》》
+》》》》关于类的静态成员变量的初始化，注意！！！
+前提：
+	静态变量需要被初始化。
+
+正确示范：
+enum class RendererAPI
+	{
+		none = 0, OpenGL
+	};
+
+	class Renderer
+	{
+		static inline RendererAPI SetAPI(RendererAPI api) { s_API = api; }
+		static inline RendererAPI GetAPI() { return s_API; }
+	private:
+		static RendererAPI s_API;
+	};
+
+	RendererAPI Renderer::s_API = RendererAPI::OpenGL;
+	// 静态成员变量需要在类外被初始化
+
+错误示范1（有警告，很明显错了）
+enum class RendererAPI
+	{
+		none = 0, OpenGL
+	};
+
+	class Renderer
+	{
+		static inline RendererAPI SetAPI(RendererAPI api) { s_API = api; }
+		static inline RendererAPI GetAPI() { return s_API; }
+	private:
+		static RendererAPI s_API = RendererAPI::OpenGL;
+		// 静态变量不能在声明的时候进行定义
+	};
+
+错误示范2（无警告，但依旧错）
+enum class RendererAPI
+	{
+		none = 0, OpenGL
+	};
+
+	class Renderer
+	{
+		static inline RendererAPI SetAPI(RendererAPI api) { s_API = api; }
+		static inline RendererAPI GetAPI() { return s_API; }
+	private:
+		static RendererAPI s_API;
+		Renderer::s_API = RendererAPI::OpenGL;
+		// 实际上这是一个静态成员变量的声明和一个成员变量的定义，这实际上是两个不同的变量
+	};
+
+结论：
+静态成员变量的初始化只能在类的外部进行，不能在类内进行。
+静态成员变量的初始化只能在类的外部进行，不能在类内进行。
+静态成员变量的初始化只能在类的外部进行，不能在类内进行。
+
+
+
+》》》》#if 和 #ifdef 的区别
+#if 和 #ifdef 的作用类似，但是语义不同。
+#if 用来检查条件表达式的真假
+#ifdef 用来检查标识符是否已经被定义
