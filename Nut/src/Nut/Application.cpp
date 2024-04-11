@@ -18,7 +18,7 @@ namespace Nut {
 		NUT_CORE_ASSERT(!s_Instance, "Application already exists! (The class Application is a Singleton, it just support one instance!)");
 		s_Instance = this;																//! ! !对唯一实例的静态成员的定义
 
-		m_Window = std::unique_ptr<Window>(Window::Create());							//这里的m_Window和WindowsWindow.h中的m_Window不是同一个
+		m_Window = std::unique_ptr<Window>(Window::Create());							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
 		m_ImGuiLayer = new ImGuiLayer();												//初始化 m_ImGuiLayer 为原始指针，并推入层栈
@@ -30,9 +30,7 @@ namespace Nut {
 			 0.0f,  0.5f, 0.0f
 		};
 
-		glGenBuffers(1, &m_VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER ,m_VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		m_VertexBuffer.reset(VertexBuffer::Create( vertices, sizeof(vertices) ) );
 
 		glGenVertexArrays(1, &m_VertexArray);
 		glBindVertexArray(m_VertexArray);
@@ -44,9 +42,7 @@ namespace Nut {
 			0, 1, 2
 		};
 
-		glGenBuffers(1, &m_IndexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		m_IndexBuffer.reset(IndexBuffer::Create( indices, sizeof(indices) / sizeof(uint32_t) ));
 
 		std::string vertexSrc = R"(
 			#version 330 core
@@ -118,7 +114,7 @@ namespace Nut {
 
 			m_Shader->Bind();
 			glBindVertexArray(m_VertexArray);
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : m_LayerStack)				//更新图层
 				layer->OnUpdate();							//执行逻辑更新(更新应用程序的逻辑状态）
