@@ -307,14 +307,16 @@ std::make_ptr<>
 步幅（stride）指的是相邻顶点数据在数组中的字节间隔
 偏移量（offset）指的是每个顶点属性在数组中的起始位置于数组本身开始位置之间的字节偏移量。
 
+----------
+
 1.如果顶点是在结构体中放着的，像这样：
 struct vertices {
     float position [3] ();
     float color[3] ();
 }
 
-实际的结构就会是：
-{
+实际的结构就会是：（位置和颜色分开存储，但每个属性的数据块在其各自区域内紧密排列）
+{				//紧密排列指的是空间内存放的都是顶点数据，没有其他东西
 	x1, y1, z1,
 	x2, y2, z2,
 	x3, y3, z3,
@@ -322,11 +324,18 @@ struct vertices {
 	r2, g2, b2,
 	r3, g3, b3
 }
-因为 stride 是同一个属性中每一个点之间所隔的距离，称之为步幅。
-	所以 position 和 color 的 stride 就都会是 3 个浮点类型（3 * 4 = 12 byte），从 x1 到 x2、从r1 到 r2 都是相同的大小。
-因为 offset 是指一个顶点属性开始时的位置的偏移量。
+
+stride ：是相邻顶点数据在数组中的字节间隔
+	结果：
+	position 的 stride 就是 3 * sizeof(float)， color 的 stride 会是 4 * sizeof(float)
+	1.（能不能像下一个排列那样写成 7 * sizeof(float) ： 不能，因为位置和颜色分开储存了）
+	2.（能不能都写成 0 ：可以，因为每个属性的数据块是分开储存的，OpenGL可以不用知道 stride 有多大，直接顺着读取下一个相同属性的分量）
+offset ：是指一个顶点属性开始时的位置的偏移量。
+	结果：
 	position 的 offset 就会是 0 ，color 的 offset 就会是9个浮点类型（9 * 4 = 36 byte），offset 会根据顶点属性的不同而变化，
 	每一个都不同，越向后某一个属性的 offset 就越大（累加）。
+
+-----------
 
 2.如果顶点所有属性全都放在一个数组中，像这样：
 float vertices[] = {
@@ -341,11 +350,17 @@ float vertices[] = {
       x2, y2, z2, r2, g2, b2,
       x3, y3, z3, r3, g3, b3
 };
-因为 stride 是同一个属性中每一个点之间所隔的距离，称之为步幅。
-	所以 position 和 color 的 stride 就都会是 6个浮点类型（6 * 4 = 24 byte），从 x1 到 x2、从r1 到 r2 都是相同的大小。
-因为 offset 是指一个顶点属性开始时的位置的偏移量。
+stride ：指的是指的是相邻顶点数据在数组中的字节间隔
+	结果：
+	这里的一个完整的顶点应该是（x1, y1, z1, r1, g1, b1），position和color的stride 会是6个浮点类型（6 * 4 = 24 byte）
+	（能不能都写成 0 ：不能，这里的顶点不是分开储存的，OpenGL将无法正确地从一个顶点的属性跳到下一个顶点的相同属性）
+offset ：是指一个顶点属性开始时的位置的偏移量。
+	结果：
 	position 的 offset 就会是 0 ，color 的 offset 就会是3个浮点类型（3 * 4 = 12 byte），offset 会根据顶点属性的不同而变化，
 	每一个都不同，越向后某一个属性的 offset 就越大（累加）。
+
+通过相同的 stride ，得知一个完整的正确的顶点是什么样的。
+通过不同的 offset 我们可以去合适的地方访问到正确的顶点数据。
 
 
 这个问题曾让我犯难，希望这种解释足够明了。
@@ -466,3 +481,192 @@ enum class RendererAPI
 #if 和 #ifdef 的作用类似，但是语义不同。
 #if 用来检查条件表达式的真假
 #ifdef 用来检查标识符是否已经被定义
+
+-----------------------------------------------顶点缓冲区布局------------------------------------------------
+》》》》enum class A : uint8_t 其中“ : uint8_t ”是什么意思？
+这表示枚举类中每个枚举常量所分配的枚举值在内存中以 uint8_t 的形式存储，所以可以限制枚举值的范围。
+枚举值指的就是代表每一个枚举变量/常量的数字。（默认情况下从0到后累加）
+
+什么是 uint8_t ？
+C++标准库中定义的无符号 8 位整数类型，其取值范围是 0 到 255。
+
+
+
+》》》》什么是初始化列表 Initialized_list()
+概念：
+	是一种用于初始化对象的机制，它允许在对象创建时提供一个包含初始值的列表。
+用途：
+	通常用于初始化数组、容器、类的成员等。
+
+eg:
+// 使用初始化列表初始化数组
+    int arr[] = {1, 2, 3, 4, 5};
+
+// 使用初始化列表初始化 std::vector
+    std::vector<int> vec = {6, 7, 8, 9, 10};
+
+
+
+》》》》在设计完一切后，我发现一个问题，关于 stride 和 offset 的正确性。
+	     记得上面我们说过的两种形式下的顶点结构所对应的不同的 stride 和 offset吗
+1.
+（位置和颜色分开存储，但每个属性的数据块在其各自区域内紧密排列）
+{ x1, y1, z1,
+ x2, y2, z2,
+ x3, y3, z3,
+ r1, g1, b1,
+ r2, g2, b2,
+ r3, g3, b3 }
+
+2.
+{ x1, y1, z1, r1, g1, b1,
+  x2, y2, z2, r2, g2, b2,
+  x3, y3, z3, r3, g3, b3 }
+这两种情况下，position 和 color 分别对应 stride 和 offset 需要区别处理。
+
+
+然而在我们在代码设计的过程中，这个函数计算出来的结果
+void CalcOffsetAndStride(){
+	m_Stride = 0;
+	uint32_t offset = 0;
+	for (auto& element : m_Elements){
+		element.Offset = offset;
+		offset += element.Size;
+		m_Stride += element.Size;}
+}
+对应的应该是
+{ x1, y1, z1, r1, g1, b1,
+  x2, y2, z2, r2, g2, b2,
+  x3, y3, z3, r3, g3, b3 };
+时，所对应的两个 stride 和 两个 offset.
+
+但是我发现在 Application 中进行声明的时候，BufferLayout layout = {{ShaderDataType::Float3, "a_Position"}, {ShaderDataType::Float4, "a_Color"}};
+看起来像是
+{ x1, y1, z1,
+ x2, y2, z2,
+ x3, y3, z3,
+ r1, g1, b1,
+ r2, g2, b2,
+ r3, g3, b3 }这种形式呢，于是我思考，为什么Cherno在设计的时候，照常使用并得到正常结果呢。
+
+其实问题在于，我将
+BufferLayout layout = {{ShaderDataType::Float3, "a_Position"}, {ShaderDataType::Float4, "a_Color"}};
+完全理解成了一段对顶点结构定义的语句。
+实际上这只是一段为了方便计算 stride 和 offset ，也方便阅读代码设计的语句。
+
+查看定义，BufferLayout(std::initializer_list<LayoutElement> elements)，我们填入的初始化表属于LayoutElement规格。
+而查看 struct LayoutElement {
+	std::string Name;
+	ShaderDataType Type;
+	uint32_t Size;
+	uint32_t Offset;
+	LayoutElement(ShaderDataType type, const std::string& name)
+		:Type(type), Name(name), Size( ShaderDataTypeSize(type) ), Offset(0){ }
+};，这里也没有任何对于顶点数据，或者顶点结构的定义。
+
+因为我们（Cherno）在设计时并不是通过  BufferLayout layout = {{ShaderDataType::Float3, "a_Position"}, {ShaderDataType::Float4, "a_Color"}};
+来确定顶点的，我们会先行定义顶点（以这种方式）
+float vertices[3 * 6] = {
+  -0.5f, -0.5f, 0.0f, r1, g1, b1,
+   0.5f, -0.5f, 0.0f, r2, g2, b2,
+   0.0f,  0.5f, 0.0f r3, g3, b3
+};
+所以这样的设计是完全没有问题的。
+
+
+//事实上，只要我沉住气看个十来分钟，就能看到Cherno使用
+//float vertices[3 * 6] = {
+//  -0.5f, -0.5f, 0.0f, r1, g1, b1,
+//   0.5f, -0.5f, 0.0f, r2, g2, b2,
+//   0.0f,  0.5f, 0.0f r3, g3, b3
+//};
+//这样的语句了，我为什么不沉下心来看看呢？
+//否则我绝对不会提出这么蠢的问题。 :-| 
+
+
+
+
+》》》》关于为什么在 BufferLayout 类型中使用 m_Stride 记录步幅，而不在LayoutElement(BufferElement)类型中和 offset 一样，将 stride 作为结构体的成员，用来记录步幅呢，反而在 LayoutElement(BufferElement) 结构体中，使用 offset 这个成员来记录偏移量。
+
+
+因为 offset 对于每一个属性的顶点都不一样，需要区别起来，这样在 Calc 函数中进行 offset 的计算得到的不同 offset 会存放在其对应属性的结构体中
+但是对于 stride，有一个规律，就是在
+{ x1, y1, z1, r1, g1, b1,
+  x2, y2, z2, r2, g2, b2,
+  x3, y3, z3, r3, g3, b3 }
+情况下，一旦结构是这样，且数据已经确定，每一个顶点属性函数 glVertexAttribPointer() 中 stride 参数这里填入的数据都会是一样的。
+对于这个例子，位置 x,y,z 和 颜色 r,g,b 在顶点属性函数的 stride 参数这里填入的都是同样的 stride : sizeof(float) * 6。
+所以对于这种结构的顶点（仅对于第二种情况的这种排列方式来讲），offset 需要多个，但是 stride 只需要一个，故可以放在成员变量中这样定义。
+
+
+
+
+》》》》m_Elements 是 std::vector<LayoutElement> 类型的，对于函数
+BufferLayout(std::initializer_list<LayoutElement> elements)
+	:m_Elements(elements) 来说，为什么初始化表类型的参数在传入后，可以正确的被单独存放在 std::vector 的不同位置中？
+
+理论上来看的话：初始化列表语法允许在创建对象时使用花括号 {} 来传递 “一组”值，并且编译器会将每个花括号内的值作为单独的初始化列表处理。
+当你传递多个初始化列表用于初始化 BufferLayout 类型的对象时：
+BufferLayout layout（{element1},{element2},{element3},{element4}）
+每个初始化列表都会被视为一个单独的参数，在构造函数中会被分别处理。
+
+这样，每个初始化列表中的元素都会被分别存储到 std::vector<LayoutElement> 中的不同位置，而不会被合并到同一个位置。
+
+
+
+》》》》
+int func();
+int func() const; 
+const int& func();
+const int& func() const; 的区别。 
+
+1.int func();
+非常量成员函数.
+	1.可以修改对象的成员变量
+	2.返回成员变量的拷贝
+
+2.int func() const;
+成员函数
+	1.不会修改对象的成员变量
+	2.但是它返回的是成员变量的拷贝，而不是引用.(对返回值的修改不会影响到原始对象的成员变量。
+
+3.const int& func();
+可以是一个全局函数，静态函数，或者是一个类的成员函数
+	1.在对应情况下，表示可以修改静态变量、全局变量或成员变量
+	2.返回一个对静态变量或者全局变量的常量引用
+
+4.const int& func() const;
+成员函数
+	1.不会修改对象的成员变量
+	2.返回一个对成员变量的常量引用
+
+
+》》为什么有的是成员函数有的不是，怎么辨别？
+通常末尾有 const 关键字表明这个成员函数不会修改对象的成员变量，所以能够明确这种声明方式的函数通常会是一个成员函数。
+
+
+
+
+》》》》问题
+1.在 buffer.h 定义的时候，记得将 class BufferLayout 放在 class VertexBuffer 之前，
+因为在 VertexBuffer 中 使用了 BufferLayout 类型声明变量，因为使用的东西需要是之前定义过的，所以要把 BuffeLayout 这个类的定义放在前面
+
+2.我在实现element.GLType 的时候，我没有想 Cherno 一样将 GetTypeToGLType() 这个函数放在 Application.cpp 中，而是在 Buffer.h中定义了。
+这里就需要注意一个问题，由于没有选择在 Application 中将其定义为一个函数，
+而是在 Buffer.h 中这样定义
+GLenum GetTypeToGLType() const {
+	switch (Type) {
+	case ShaderDataType::Float:	return GL_FLOAT;
+	case ShaderDataType::Int:		return GL_INT;
+	case ShaderDataType::Mat3:	return GL_FLOAT;
+	}
+	NUT_CORE_ASSERT(false, "Unknown ShaderDataType !");
+	return 0;
+}
+为此我特地在 Buffer.h 中添加了 <glad/glad.h> 的声明，
+正是这一句代码，会导致 Sandbox 产生不能打开 glad/glad.h 文件的报错。
+所以我在 premake 文件的 sandbox 项目中的 includedirs 添加了 "%{IncludeDir.Glad}"，这解决了问题。
+
+
+
+》》》》
