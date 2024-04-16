@@ -28,8 +28,8 @@ namespace Nut {
 	::Nut::Log::GetCoreLogger()->warn(__VA_ARGS__);		//__VA_ARGS__是一个预定义的宏（前后的双下划线表示这是一个预定义的），可以用来动态的接收的未知个参数。
 #define NUT_CORE_ERROR(...)\
 	::Nut::Log::GetCoreLogger()->error(__VA_ARGS__);
-#define NUT_CORE_FATAL(...)\
-	::Nut::Log::GetCoreLogger()->fatal(__VA_ARGS__);
+#define NUT_CORE_CRITICAL(...)\
+	::Nut::Log::GetCoreLogger()->critical(__VA_ARGS__);
 
 //client log macros
 #define NUT_TRACE(...)\
@@ -40,5 +40,5 @@ namespace Nut {
 	::Nut::Log::GetClientLogger()->warn(__VA_ARGS__);
 #define NUT_ERROR(...)\
 	::Nut::Log::GetClientLogger()->error(__VA_ARGS__);
-#define NUT_FATAL(...)\
-	::Nut::Log::GetClientLogger()->fatal(__VA_ARGS__);
+#define NUT_CRITICAL(...)\
+	::Nut::Log::GetClientLogger()->critical(__VA_ARGS__);

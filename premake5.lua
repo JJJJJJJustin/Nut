@@ -20,18 +20,14 @@ IncludeDir["ImGui"] = "Nut/vendor/imgui"                                        
 IncludeDir["glm"] = "Nut/vendor/glm"                                            --将表的"ImGui"键索引到此路径
 
 ---------------------------------------------------------------------------------------
---包含Nut/Nut/vendor/GLFW中的premake文件并合并到这里
-include "Nut/vendor/GLFW"
---[[
-    XXXX
-]]
---包含Nut/Nut/vendor/Glad中的premake文件并合并到这里
-include "Nut/vendor/Glad"
---[[
-    XXXX
-]]
---包含Nut/Nut/vendor/imgui中的premake文件并合并到这里
-include "Nut/vendor/imgui"
+--包含Nut/Nut/vendor/GLFW、Nut/Nut/vendor/Glad、Nut/Nut/vendor/imgui中的premake文件，将其作为依赖项，并合并到这里
+group "Dependencies"
+    include "Nut/vendor/GLFW"
+    include "Nut/vendor/Glad"
+    include "Nut/vendor/imgui"
+
+group ""                                                                        --包含所有未分组的文件
+
 --[[
     XXXX
 ]]
