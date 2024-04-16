@@ -669,4 +669,6 @@ GLenum GetTypeToGLType() const {
 
 
 
-》》》》
+》》》》注意
+在将初始化列表作为参数填入 BufferLayout 的 layout 中时，要确保 vertices 中有对应属性的顶点。
+如果只更新布局而不同步更新顶点的话，会导致无渲染结果。

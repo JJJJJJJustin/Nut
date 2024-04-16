@@ -68,9 +68,6 @@ namespace Nut
 			return 0;
 		}
 
-
-
-
 	};
 
 	class BufferLayout
@@ -87,8 +84,10 @@ namespace Nut
 		inline const std::vector<LayoutElement>& GetElements() const { return m_Elements; }
 		inline const uint32_t& GetStride() const { return m_Stride; }
 
-		std::vector<LayoutElement>::iterator begin() { return m_Elements.begin(); };		//方便在 for each 中将 m_Element 作为 range
-		std::vector<LayoutElement>::iterator end() { return m_Elements.end(); };			//！！！！函数名（迭代器名称）记得是小写 :"end"
+		std::vector<LayoutElement>::iterator begin() { return m_Elements.begin(); };			//方便在 for each 中将 m_Element(layout) 作为 range
+		std::vector<LayoutElement>::iterator end() { return m_Elements.end(); };				//！！！！函数名（迭代器名称）记得是小写 :"end"
+		std::vector<LayoutElement>::const_iterator begin() const { return m_Elements.begin(); }	//如果 layout 是 const，则需要 const 类型的迭代器协助 layout 作为 range
+		std::vector<LayoutElement>::const_iterator end() const { return m_Elements.end(); }
 	private:
 		std::vector<LayoutElement> m_Elements;
 		uint32_t m_Stride;
