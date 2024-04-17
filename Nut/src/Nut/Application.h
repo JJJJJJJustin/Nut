@@ -8,6 +8,7 @@
 
 #include "Nut/Events/ApplicationEvent.h"
 
+#include "Nut/Renderer/VertexArray.h"
 #include "Nut/Renderer/Shader.h"
 #include "Nut/Renderer/Buffer.h"
 
@@ -35,12 +36,11 @@ namespace Nut {
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
 		std::unique_ptr<Window> m_Window;				//指向Window的指针
-		std::unique_ptr<Shader> m_Shader;
-		std::unique_ptr<VertexBuffer> m_VertexBuffer;
-		std::unique_ptr<IndexBuffer> m_IndexBuffer;
+		std::shared_ptr<Shader> m_Shader;
+		std::shared_ptr<VertexArray> m_VertexArray;
+		std::shared_ptr<VertexBuffer> m_VertexBuffer;
+		std::shared_ptr<IndexBuffer> m_IndexBuffer;
 		bool m_Running = true;
-
-		unsigned int m_VertexArray;
 	private:
 		static Application* s_Instance;					//! ! !唯一实例的静态成员（static类型，需要初始化定义）
 	};
