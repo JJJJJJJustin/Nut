@@ -38,8 +38,9 @@ namespace Nut {
 		std::unique_ptr<Window> m_Window;				//指向Window的指针
 		std::shared_ptr<Shader> m_Shader;
 		std::shared_ptr<VertexArray> m_VertexArray;
-		std::shared_ptr<VertexBuffer> m_VertexBuffer;
-		std::shared_ptr<IndexBuffer> m_IndexBuffer;
+
+		std::shared_ptr<VertexArray> m_SquareVA;
+		std::shared_ptr<Shader> m_SquareShader;
 		bool m_Running = true;
 	private:
 		static Application* s_Instance;					//! ! !唯一实例的静态成员（static类型，需要初始化定义）

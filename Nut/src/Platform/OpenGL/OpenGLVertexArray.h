@@ -10,7 +10,7 @@ namespace Nut
 	{
 	public:
 		OpenGLVertexArray() ;
-		virtual ~OpenGLVertexArray() {};
+		virtual ~OpenGLVertexArray();
 
 		void Bind() const override;
 		void Unbind() const override;

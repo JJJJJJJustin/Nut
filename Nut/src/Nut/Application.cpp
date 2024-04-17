@@ -47,10 +47,12 @@ namespace Nut {
 			 0.5f, -0.5f, 0.0f, 1.0f, 0.3f, 0.8f, 1.0f,
 			 0.0f,  0.5f, 0.0f, 1.0f, 0.8f, 0.2f, 1.0f
 		};
-		m_VertexBuffer.reset(VertexBuffer::Create( vertices, sizeof(vertices) ) );
+		unsigned int indices[3] = { 0, 1, 2 };
 
-		unsigned int indices[3]{ 0, 1, 2 };
-		m_IndexBuffer.reset(IndexBuffer::Create( indices, sizeof(indices) / sizeof(uint32_t) ));
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create( vertices, sizeof(vertices) ) );
+		indexBuffer.reset(IndexBuffer::Create( indices, sizeof(indices) / sizeof(uint32_t) ));
 
 		m_VertexArray.reset(VertexArray::Create());
 		BufferLayout layout =
@@ -58,10 +60,10 @@ namespace Nut {
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float4, "a_Color" }
 		};
-		m_VertexBuffer->SetLayout(layout);												// when we set the layout, we store the layout data in OpenGLBuffer.m_Layout by "SetLayout()" function, then delete layout.
+		vertexBuffer->SetLayout(layout);												// when we set the layout, we store the layout data in OpenGLBuffer.m_Layout by "SetLayout()" function, then delete layout.
 
-		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
-		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
+		m_VertexArray->AddVertexBuffer(vertexBuffer);
+		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		std::string vertexSrc = R"(
 			#version 330 core
@@ -94,6 +96,54 @@ namespace Nut {
 		)";
 
 		m_Shader.reset(new Shader(vertexSrc, fragmentSrc));
+
+		// -------------- Square rendering ----------------
+		float squareVertices[3 * 4] = 
+		{
+			-0.75f, -0.75f, 0.0f,
+			 0.75f, -0.75f, 0.0f,
+			 0.75f,  0.75f, 0.0f,
+			-0.75f,  0.75f, 0.0f
+		};
+		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
+
+		m_SquareVA.reset(VertexArray::Create());
+
+		std::shared_ptr<VertexBuffer> squareVB;
+		squareVB.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		std::shared_ptr<IndexBuffer> squareIB;
+		squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+
+		BufferLayout squareLayout =
+		{
+			{ShaderDataType::Float3, "a_Position"}
+		};
+		squareVB->SetLayout(squareLayout);
+		m_SquareVA->AddVertexBuffer(squareVB);
+		m_SquareVA->SetIndexBuffer(squareIB);
+
+		std::string squareVertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+
+			void main()
+			{
+				gl_Position = vec4(a_Position, 1.0);
+			}
+		)";
+		std::string squareFragSrc = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 a_Color;
+
+			void main()
+			{
+				a_Color = vec4(0.2, 0.3, 0.8, 1.0);
+			}
+		)";
+		m_SquareShader.reset(new Shader(squareVertexSrc, squareFragSrc));
+
 	}
 
 	Application::~Application()
@@ -135,9 +185,13 @@ namespace Nut {
 			glClearColor(0.1f, 0.1f, 0.1f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			m_SquareShader->Bind();
+			m_SquareVA->Bind();
+			glDrawElements(GL_TRIANGLES, m_SquareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+
 			m_Shader->Bind();
 			m_VertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : m_LayerStack)				//更新图层
 				layer->OnUpdate();							//执行逻辑更新(更新应用程序的逻辑状态）
