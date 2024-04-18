@@ -11,11 +11,11 @@ namespace Nut
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::None: NUT_CORE_ASSERT(false, "RendererAPI::None is currently not supported! ")
+			case RendererAPI::API::None: NUT_CORE_ASSERT(false, "RendererAPI::None is currently not supported! ")
 				return nullptr;
-			case RendererAPI::OpenGL:
+			case RendererAPI::API::OpenGL:
 				return new OpenGLVertexArray();
-			case RendererAPI::DirectX: NUT_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported! ")
+			case RendererAPI::API::DirectX: NUT_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported! ")
 				return nullptr;
 		}
 

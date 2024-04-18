@@ -687,8 +687,70 @@ GLenum GetTypeToGLType() const {
 （会在链接时报错，fatal error LNK1169: 找到一个或多个多重定义的符号
 error LNK2005: "private: static enum Nut::RendererAPI Nut::Renderer::s_API" 已经在 Nut.lib(Buffer.obj) 中定义；）
 
-届时，将此定义置于 对应的 .cpp 文件中即可解决。。或者使用 inline 关键字来定义静态成员变量。
+届时，将此定义置于 对应的 .cpp 文件中即可解决。。（或者使用 inline 关键字来定义静态成员变量。）
 
 
 
----------------------------------------------------------------------------------------------
+----------------------------------------渲染流和提交--------------------------------------------------
+这一集就是抽象了代码，使结构明了，不用再显式的调用 gl 函数去渲染物体了
+
+
+》》》》variable = new classname;
+	     variable = new classname();  的区别。
+
+一般情况下，
+1.variable = new classname; 
+	指隐式的调用默认的构造函数（无参），但是如果未定义默认的构造函数（或者函数不可见），则不会通过编译
+2.variable = new classname(); 
+	指显式的调用默认的构造函数（无参），如果没有默认的构造函数，编译器则会自动生成一个。
+
+但是：在此处（Cherno 在文件 RendererCommand.cpp 中定义的）classname( OpenGLRendererAPI )  是 RendererAPI 的子类。
+
+所以在使用 new classname 的时候，会优先调用父类的构造函数。
+虽然父类文件中没有定义构造函数，但是该类是单例类，此时编译器会为父类生成一个默认的无参构造函数。
+此时variable = new classname;
+      variable = new classname();  没有差别。
+
+
+
+
+》》》》Renderer、RendererAPI、OpenGLRendererAPI、RendererCommand  几个文件之间的关系
+
+1.定义函数（ RendererAPI、OpenGLRendererAPI ）
+RendererAPI 定义了几个虚函数，这几个虚函数将在对应的接口文件中被定义实现，这里我们选择定义在 OpenGL 接口中。
+在 OpenGLRendererAPI 中，我们定义了几个虚函数的实现，这将完成我们在渲染循环中将要进行的渲染操作。
+
+2.将函数打包在对应接口下（ RendererCommand ）
+通过上面两个文件，我们只定义了操作，但是没有设计根据情况自动调用对应接口的操作类，所以我们定义了 RendererCommand
+在 .cpp 中我们能够 RendererAPI* RenderCommand::s_RendererAPI = new OpenGLRendererAPI; 调用对应接口处，
+然后在 .h 中设置内联函数，使用 RendererCommand 类中的 s_RendererAPI 来调用对应接口中的函数。
+eg.
+s_RendererAPI->SetClearColor(color);
+
+3.按需调用函数（ Renderer ）
+最后，仅仅在 Renderer 文件中对 RendererCommand 中打包好的函数进行调用即可，此时要调用的函数已经是对应接口下的（高度抽象的）函数了
+之后，我们只需要将想调用的函数放在 Renderer 中，然后通过 Renderer 来访问就好了。
+
+
+
+》》》》发现一个问题：为啥在application.cpp中
+RendererCommand::Clear();
+RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+Renderer::BeginScene();
+
+m_SquareShader->Bind();
+Renderer::Submit(m_SquareVA);
+
+m_Shader->Bind();
+Renderer::Submit(m_VertexArray);
+
+Renderer::EndScene();
+调换
+	m_SquareShader->Bind();
+	Renderer::Submit(m_SquareVA);
+和
+	m_Shader->Bind();
+	Renderer::Submit(m_VertexArray);
+的顺序。
+
+一开始是三角形覆盖在方形之上，但为啥转换过来之后却只绘制出来个方形，没看到三角形嘞？？？
