@@ -174,6 +174,9 @@ namespace Nut {
 
 			Renderer::BeginScene(m_Camera);
 
+			m_Camera.SetPosition({ 0.5f, 0.5f, 0.0f });
+			m_Camera.SetRotation(45.0f);
+
 			Renderer::Submit(m_SquareShader, m_SquareVA);
 			Renderer::Submit(m_Shader, m_VertexArray);
 
