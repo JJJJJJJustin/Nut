@@ -2,15 +2,16 @@
 
 #include "Core.h"
 
+#include "Nut/Events/ApplicationEvent.h"
+
 #include "Window.h"
 #include "LayerStack.h"
 #include "Nut/ImGui/ImGuiLayer.h"
 
-#include "Nut/Events/ApplicationEvent.h"
-
 #include "Nut/Renderer/VertexArray.h"
 #include "Nut/Renderer/Shader.h"
 #include "Nut/Renderer/Buffer.h"
+#include "Nut/Renderer/OrthoGraphicCamera.h"
 
 namespace Nut {
 
@@ -33,15 +34,18 @@ namespace Nut {
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);
 
+		bool m_Running = true;
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
+
 		std::unique_ptr<Window> m_Window;				//指向Window的指针
 		std::shared_ptr<Shader> m_Shader;
 		std::shared_ptr<VertexArray> m_VertexArray;
 
-		std::shared_ptr<VertexArray> m_SquareVA;
 		std::shared_ptr<Shader> m_SquareShader;
-		bool m_Running = true;
+		std::shared_ptr<VertexArray> m_SquareVA;
+
+		OrthoGraphicCamera m_Camera;
 	private:
 		static Application* s_Instance;					//! ! !唯一实例的静态成员（static类型，需要初始化定义）
 	};

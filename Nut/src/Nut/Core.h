@@ -22,12 +22,12 @@
 	//断言（如果x表示错误则语句运行，{0}占位的"__VA_ARGS__"代表"..."所输入的语句）
 	#define NUT_CORE_ASSERT(x, ...) \
 		{if(!x){\
-			NUT_CORE_ERROR("Assertion Failed: {0}, __VA_ARGS__");\
+			NUT_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);\
 			__debugbreak();}\
 		}
 	#define NUT_ASSERT(x, ...)\
 		{if(!x){\
-			NUT_ERROR("Assertion Failed: {0}, __VA_ARGS__");\
+			NUT_ERROR("Assertion Failed: {0}", __VA_ARGS__);\
 			__debugbreak();}\
 		}
 #else

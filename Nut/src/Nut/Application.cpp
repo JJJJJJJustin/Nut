@@ -14,6 +14,7 @@ namespace Nut {
 	Application* Application::s_Instance = nullptr;										//! ! !初始化唯一实例的静态成员s_Instance
 
 	Application::Application()
+		:m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		NUT_CORE_ASSERT(!s_Instance, "Application already exists! (The class Application is a Singleton, it just support one instance!)");
 		s_Instance = this;																//! ! !对唯一实例的静态成员的定义
@@ -56,11 +57,13 @@ namespace Nut {
 			out vec3 v_Position;
 			out vec4 v_Color;
 
+			uniform mat4 u_ViewProjection;
+
 			void main()
 			{
 				v_Position = a_Position;
 				v_Color = a_Color;
-				gl_Position = vec4(a_Position, 1.0);
+				gl_Position =  u_ViewProjection * vec4(a_Position, 1.0);
 			}
 		)";
 		std::string fragmentSrc = R"(
@@ -109,9 +112,11 @@ namespace Nut {
 			
 			layout(location = 0) in vec3 a_Position;
 
+			uniform mat4 u_ViewProjection;
+
 			void main()
 			{
-				gl_Position = vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 		)";
 		std::string squareFragSrc = R"(
@@ -166,13 +171,11 @@ namespace Nut {
 		{
 			RendererCommand::Clear();
 			RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-			Renderer::BeginScene();
 
-			m_SquareShader->Bind();
-			Renderer::Submit(m_SquareVA);
+			Renderer::BeginScene(m_Camera);
 
-			m_Shader->Bind();
-			Renderer::Submit(m_VertexArray);
+			Renderer::Submit(m_SquareShader, m_SquareVA);
+			Renderer::Submit(m_Shader, m_VertexArray);
 
 			Renderer::EndScene();
 

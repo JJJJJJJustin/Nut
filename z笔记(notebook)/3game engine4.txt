@@ -1,0 +1,54 @@
+-----------------------------------相机&原理---------------------------------
+》》》》查看这两篇说明，一个是坐标系统，一个是摄像机
+（https://learnopengl-cn.github.io/01%20Getting%20started/08%20Coordinate%20Systems/）
+（https://learnopengl-cn.github.io/01%20Getting%20started/09%20Camera/）
+来自 learn OpenGL ，很不错的网站，通俗易懂。
+
+完全阐明了这一集的知识点。
+
+-----------------------------------正交相机---------------------------------
+》》》》原理：
+
+最开始处于局部空间，在进行坐标变换和摄像机设置的时候，需要进行以下操作。
+
+局部空间 * 模型矩阵 -> 世界空间		模型矩阵（类型：glm::translate）
+世界空间 * 观察矩阵 -> 观察空间		模型矩阵（类型：glm::rotate）
+观察空间 * 投影矩阵 -> 裁剪空间		模型矩阵（类型：glm::ortho/glm::prespective）
+裁剪空间 + 坐标变换 -> 屏幕空间	自定义的操作（类型：glm::translate/glm::scale/glm::rotate）
+
+一般会为坐标乘以 Projection * View * Model。
+（比如着色器中会：gl_Position = projection * view * model * vec4(aPos, 1.0f); ）
+
+
+
+》》》》inverse 函数在RecalcMatrix() 中的作用
+首先，在 Cherno 的代码中，Cherno 将模型矩阵和观察矩阵设置后，放在 transform 中，然后赋值给 m_ViewMatrix.
+其实，在代码中 m_ViewMatrix 实际上指代的应该是 m_ModelViewMatrix.
+
+
+问题：
+这时候讲讲为什么要使用 inverse 对 transform 进行转换，然后赋值给 m_ViewMatrix.
+
+因为观察矩阵（View Matrix）通常需要描述观察者相对于世界空间的位置和方向，而不是物体相对于观察者的位置和方向。
+也就是说该矩阵是用来作用于摄像机 camera 的，而不是作用于空间中的物体。
+
+如果不进行逆操作，会将变换应用到物体上，那么结果将描述物体相对于 camera 的位置和方向，而不是 camera 相对于世界空间的位置和方向。
+
+
+
+》》》》在着色器中，对坐标进行转换时进行乘法的顺序。
+gl_Position = projection * view * model * a_Pos;	矩阵有先后顺序，而且需要在坐标之前先进行运算。
+
+
+
+》》》》glm::value_ptr 的概念与作用
+概念：获取 GLM 类型（如矩阵、向量等）内部数据的指针
+作用：将 GLM 类型转换为指向C++内部数据的指针，以便将数据作为参数传递给 OpenGL 函数或其他需要 >指针参数<的函数
+
+eg.
+glm::mat4 matrix = glm::mat4(1.0f); 							// 创建一个4x4的单位矩阵
+glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));	 // 将矩阵传递给OpenGL
+
+
+
+》》》》

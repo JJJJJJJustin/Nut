@@ -1,7 +1,8 @@
 #include "nutpch.h"
 #include "Shader.h"
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Nut
 {
@@ -124,5 +125,10 @@ namespace Nut
 		glUseProgram(0);
 	}
 
+	void Shader::UpdateUniformMat4(const std::string& name, const glm::mat4& matrix)
+	{
+		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+	}
 
 }
