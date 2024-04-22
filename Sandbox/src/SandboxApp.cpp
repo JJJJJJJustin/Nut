@@ -4,17 +4,9 @@
 
 class ExampleLayer : public Nut::Layer
 {
-private:
-    std::shared_ptr<Nut::Shader> m_Shader;
-    std::shared_ptr<Nut::VertexArray> m_VertexArray;
-
-    std::shared_ptr<Nut::Shader> m_SquareShader;
-    std::shared_ptr<Nut::VertexArray> m_SquareVA;
-
-    Nut::OrthoGraphicCamera m_Camera;
 public:
 	ExampleLayer()
-		:Layer("Example layer"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
+		: Layer("Example layer"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f), m_CameraRotation(0.0f)
 	{
 		float vertices[3 * 7] = {
 				-0.5f, -0.5f, 0.0f, 1.0f, 0.2f, 0.8f, 1.0f,
@@ -124,15 +116,30 @@ public:
 
     }
 
-	void OnUpdate() override
-	{
-        Nut::RendererCommand::Clear();
+	void OnUpdate() override{
+
+		if (Nut::Input::IsKeyPressed(NUT_KEY_RIGHT)) 
+			m_CameraPosition.x -= m_CameraMoveSpeed;
+		else if (Nut::Input::IsKeyPressed(NUT_KEY_LEFT)) 
+			m_CameraPosition.x += m_CameraMoveSpeed;
+	
+		if (Nut::Input::IsKeyPressed(NUT_KEY_UP))
+			m_CameraPosition.y -= m_CameraMoveSpeed;
+		else if(Nut::Input::IsKeyPressed(NUT_KEY_DOWN))
+			m_CameraPosition.y += m_CameraMoveSpeed;
+
+		if (Nut::Input::IsKeyPressed(NUT_KEY_A)) 
+			m_CameraRotation -= m_CameraRotateSpeed;
+		else if (Nut::Input::IsKeyPressed(NUT_KEY_D))
+			m_CameraRotation += m_CameraRotateSpeed;
+
         Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+        Nut::RendererCommand::Clear();
+
+        m_Camera.SetPosition( m_CameraPosition );
+        m_Camera.SetRotation( m_CameraRotation );
 
         Nut::Renderer::BeginScene(m_Camera);
-
-        m_Camera.SetPosition({ 0.5f, 0.5f, 0.0f });
-        m_Camera.SetRotation(45.0f);
 
         Nut::Renderer::Submit(m_SquareShader, m_SquareVA);
         Nut::Renderer::Submit(m_Shader, m_VertexArray);
@@ -140,7 +147,7 @@ public:
         Nut::Renderer::EndScene();
 	}
 
-	void OnImGuiRender()
+	void OnImGuiRender() override
 	{
 		ImGui::Begin("Test");
 		const char* text = R"(
@@ -203,6 +210,19 @@ public:
 	{
 		
 	}
+private:
+	std::shared_ptr<Nut::Shader> m_Shader;
+	std::shared_ptr<Nut::VertexArray> m_VertexArray;
+
+	std::shared_ptr<Nut::Shader> m_SquareShader;
+	std::shared_ptr<Nut::VertexArray> m_SquareVA;
+
+	Nut::OrthoGraphicCamera m_Camera;
+
+	glm::vec3 m_CameraPosition;
+	float m_CameraMoveSpeed = 0.02f;
+	float m_CameraRotation;
+	float m_CameraRotateSpeed = 4.0f;
 };
 
 class Sandbox : public Nut::Application

@@ -8,7 +8,7 @@ namespace Nut {
 
 	LayerStack::~LayerStack()								//销毁层栈
 	{
-		for each (Layer * layer in m_Layers)
+		for each (Layer* layer in m_Layers)
 		{
 			delete layer;
 		}
@@ -23,7 +23,7 @@ namespace Nut {
 
 	void LayerStack::PopLayer(Layer* layer)										//删除栈顶元素
 	{
-		auto iter = std::find(m_Layers.begin(), m_Layers.end(), layer);			//std::find返回一个迭代器，可以理解为是一个指针
+		auto iter = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, layer);			//std::find返回一个迭代器，可以理解为是一个指针
 		if (iter != m_Layers.end())
 		{
 			layer->OnDetach();
@@ -40,7 +40,7 @@ namespace Nut {
 
 	void LayerStack::PopOverLay(Layer* overlay)
 	{
-		auto iter = std::find(m_Layers.begin(), m_Layers.end(), overlay);
+		auto iter = std::find(m_Layers.begin() + m_LayerInsertIndex, m_Layers.end(), overlay);
 		if (iter != m_Layers.end())
 		{
 			overlay->OnDetach();

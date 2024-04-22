@@ -8,11 +8,6 @@
 #include "LayerStack.h"
 #include "Nut/ImGui/ImGuiLayer.h"
 
-#include "Nut/Renderer/VertexArray.h"
-#include "Nut/Renderer/Shader.h"
-#include "Nut/Renderer/Buffer.h"
-#include "Nut/Renderer/OrthoGraphicCamera.h"
-
 namespace Nut {
 
 	class NUT_API Application							//类的导出
