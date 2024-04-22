@@ -41,6 +41,7 @@ gl_Position = projection * view * model * a_Pos;	矩阵有先后顺序，而且�
 
 
 
+
 》》》》glm::value_ptr 的概念与作用
 概念：获取 GLM 类型（如矩阵、向量等）内部数据的指针
 作用：将 GLM 类型转换为指向C++内部数据的指针，以便将数据作为参数传递给 OpenGL 函数或其他需要 >指针参数<的函数

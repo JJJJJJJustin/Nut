@@ -4,14 +4,140 @@
 
 class ExampleLayer : public Nut::Layer
 {
+private:
+    std::shared_ptr<Nut::Shader> m_Shader;
+    std::shared_ptr<Nut::VertexArray> m_VertexArray;
+
+    std::shared_ptr<Nut::Shader> m_SquareShader;
+    std::shared_ptr<Nut::VertexArray> m_SquareVA;
+
+    Nut::OrthoGraphicCamera m_Camera;
 public:
 	ExampleLayer()
-		:Layer("Example layer")
-	{}
+		:Layer("Example layer"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
+	{
+		float vertices[3 * 7] = {
+				-0.5f, -0.5f, 0.0f, 1.0f, 0.2f, 0.8f, 1.0f,
+				 0.5f, -0.5f, 0.0f, 1.0f, 0.3f, 0.8f, 1.0f,
+				 0.0f,  0.5f, 0.0f, 1.0f, 0.8f, 0.2f, 1.0f
+		};
+		unsigned int indices[3] = { 0, 1, 2 };
+
+		std::shared_ptr<Nut::VertexBuffer> vertexBuffer;
+		std::shared_ptr<Nut::IndexBuffer> indexBuffer;
+		vertexBuffer.reset(Nut::VertexBuffer::Create(vertices, sizeof(vertices)));
+		indexBuffer.reset(Nut::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+
+		m_VertexArray.reset(Nut::VertexArray::Create());
+		Nut::BufferLayout layout =
+		{
+			{ Nut::ShaderDataType::Float3, "a_Position" },
+			{ Nut::ShaderDataType::Float4, "a_Color" }
+		};
+		vertexBuffer->SetLayout(layout);												// when we set the layout, we store the layout data in OpenGLBuffer.m_Layout by "SetLayout()" function, then delete layout.
+
+		m_VertexArray->AddVertexBuffer(vertexBuffer);
+		m_VertexArray->SetIndexBuffer(indexBuffer);
+
+		std::string vertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec4 a_Color;
+
+			out vec3 v_Position;
+			out vec4 v_Color;
+
+			uniform mat4 u_ViewProjection;
+
+			void main()
+			{
+				v_Position = a_Position;
+				v_Color = a_Color;
+				gl_Position =  u_ViewProjection * vec4(a_Position, 1.0);
+			}
+		)";
+		std::string fragmentSrc = R"(
+			#version 330 core
+
+			in vec3 v_Position;
+			in vec4 v_Color;
+			layout(location = 0) out vec4 a_Color;
+
+			void main()
+			{
+				a_Color = vec4(v_Position * 0.5 + 0.5, 1.0);
+				a_Color = v_Color;
+			}
+		)";
+
+		m_Shader.reset(new Nut::Shader(vertexSrc, fragmentSrc));
+
+		// -------------- Square rendering ----------------
+		float squareVertices[3 * 4] =
+		{
+			-0.75f, -0.75f, -0.1f,
+			 0.75f, -0.75f, -0.1f,
+			 0.75f,  0.75f, -0.1f,
+			-0.75f,  0.75f, -0.1f
+		};
+		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
+
+		m_SquareVA.reset(Nut::VertexArray::Create());
+
+		std::shared_ptr<Nut::VertexBuffer> squareVB;
+		squareVB.reset(Nut::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		std::shared_ptr<Nut::IndexBuffer> squareIB;
+		squareIB.reset(Nut::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+
+		Nut::BufferLayout squareLayout =
+		{
+			{Nut::ShaderDataType::Float3, "a_Position"}
+		};
+		squareVB->SetLayout(squareLayout);
+		m_SquareVA->AddVertexBuffer(squareVB);
+		m_SquareVA->SetIndexBuffer(squareIB);
+
+		std::string squareVertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+
+			uniform mat4 u_ViewProjection;
+
+			void main()
+			{
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+			}
+		)";
+		std::string squareFragSrc = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 a_Color;
+
+			void main()
+			{
+				a_Color = vec4(0.2, 0.3, 0.8, 1.0);
+			}
+		)";
+		m_SquareShader.reset(new Nut::Shader(squareVertexSrc, squareFragSrc));
+
+    }
 
 	void OnUpdate() override
 	{
-		//NUT_INFO("ExampleLayer::Updata");
+        Nut::RendererCommand::Clear();
+        Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+
+        Nut::Renderer::BeginScene(m_Camera);
+
+        m_Camera.SetPosition({ 0.5f, 0.5f, 0.0f });
+        m_Camera.SetRotation(45.0f);
+
+        Nut::Renderer::Submit(m_SquareShader, m_SquareVA);
+        Nut::Renderer::Submit(m_Shader, m_VertexArray);
+
+        Nut::Renderer::EndScene();
 	}
 
 	void OnImGuiRender()
@@ -75,14 +201,7 @@ public:
 
 	void OnEvent(Nut::Event& event) override
 	{
-		//NUT_TRACE("{0}", event);
-		if (event.GetEventType() == Nut::EventType::KeyPressed)
-		{
-			Nut::KeyPressedEvent& e = (Nut::KeyPressedEvent&)event;			//将参数中未知的事件event转换成相应类型，并传递给e
-			if (e.GetKeyCode() == NUT_KEY_TAB)
-				NUT_TRACE("{0} is pressed", "Tab");
-			NUT_TRACE("{0} is pressed",(char)e.GetKeyCode());
-		}
+		
 	}
 };
 
@@ -92,12 +211,11 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
-		//取消 PushOverlay(new Nut::ImGuiLayer()); ，将其作为 Hazel 运行时 固定自动添加的图层
+		//取消 PushOverlay(new Nut::ImGuiLayer()); ，将其作为 Hazel 运行时 固定自动添加的图层（在 application.cpp 中）
 	}
 
 	~Sandbox()
 	{
-
 	}
 
 };

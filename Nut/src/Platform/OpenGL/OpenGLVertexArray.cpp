@@ -54,5 +54,4 @@ namespace Nut
 		m_IndexBuffer = indexbuffer;
 	}
 
-
 }
