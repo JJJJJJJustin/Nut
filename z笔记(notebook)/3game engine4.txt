@@ -62,8 +62,25 @@ glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));	 // 将矩阵
 》》
 理解：
 通过垂直同步对 GPU 和显示器的垂直刷新率进行同步，限制GPU输出的帧率，使其与显示器的刷新率保持一致。
+（在 OpenGL 中，开启垂直同步后就是调用 glfwSwapInterval( 0 ) 产生这样的效果）
 这样，GPU只会在显示器完成一次完整的垂直刷新周期后才输出下一帧图像，从而避免了图像撕裂现象的发生。
 
 缺点：
 因为GPU必须等待显示器完成垂直刷新周期后才能输出新的帧，所以不能充分利用显卡性能，可能导致输入延迟和帧率下降。
 在 CS::GO 中，我会选择将其关闭 XD
+
+
+--------------------------------------TimeStep-----------------------------------------------
+》》》》 关于  Conversion Operators。 
+》》》》 operator float() { return Variable } 是啥？
+概念：
+转换操作符（Conversion Operators）是一种特殊的成员函数，它们允许用户定义自定义类型之间的隐式或显式类型转换
+语法：
+operator target_type();
+
+参考视频：
+来自 Cherno 的（https://www.youtube.com/watch?v=OK0G4cmeX-I&t=368s）
+
+
+
+》》》》

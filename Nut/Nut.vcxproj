@@ -143,6 +143,7 @@
     <ClInclude Include="src\Nut.h" />
     <ClInclude Include="src\Nut\Application.h" />
     <ClInclude Include="src\Nut\Core.h" />
+    <ClInclude Include="src\Nut\Core\Timestep.h" />
     <ClInclude Include="src\Nut\EntryPoint.h" />
     <ClInclude Include="src\Nut\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Nut\Events\Event.h" />

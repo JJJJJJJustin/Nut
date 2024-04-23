@@ -116,22 +116,24 @@ public:
 
     }
 
-	void OnUpdate() override{
+	void OnUpdate(Nut::Timestep& ts) override{
+
+		//NUT_TRACE("{0}s( {1}ms ) pre frame", ts.GetSeconds(), ts.GetMilliseconds())		165HZ: 0.0061478615s( 6.1478615ms ) pre frame
 
 		if (Nut::Input::IsKeyPressed(NUT_KEY_RIGHT)) 
-			m_CameraPosition.x -= m_CameraMoveSpeed;
+			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
 		else if (Nut::Input::IsKeyPressed(NUT_KEY_LEFT)) 
-			m_CameraPosition.x += m_CameraMoveSpeed;
+			m_CameraPosition.x += m_CameraMoveSpeed * ts;
 	
 		if (Nut::Input::IsKeyPressed(NUT_KEY_UP))
-			m_CameraPosition.y -= m_CameraMoveSpeed;
+			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
 		else if(Nut::Input::IsKeyPressed(NUT_KEY_DOWN))
-			m_CameraPosition.y += m_CameraMoveSpeed;
+			m_CameraPosition.y += m_CameraMoveSpeed * ts;
 
 		if (Nut::Input::IsKeyPressed(NUT_KEY_A)) 
-			m_CameraRotation -= m_CameraRotateSpeed;
+			m_CameraRotation -= m_CameraRotateSpeed * ts;
 		else if (Nut::Input::IsKeyPressed(NUT_KEY_D))
-			m_CameraRotation += m_CameraRotateSpeed;
+			m_CameraRotation += m_CameraRotateSpeed * ts;
 
         Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
         Nut::RendererCommand::Clear();
@@ -220,9 +222,9 @@ private:
 	Nut::OrthoGraphicCamera m_Camera;
 
 	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 0.02f;
+	float m_CameraMoveSpeed = 4.0f;
 	float m_CameraRotation;
-	float m_CameraRotateSpeed = 4.0f;
+	float m_CameraRotateSpeed = 180.0f;
 };
 
 class Sandbox : public Nut::Application

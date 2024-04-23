@@ -1,4 +1,7 @@
 #include "nutpch.h"
+
+#include <GLFW/glfw3.h>
+
 #include "Application.h"
 
 #include "Events/Event.h"
@@ -20,6 +23,7 @@ namespace Nut {
 
 		m_Window = std::unique_ptr<Window>(Window::Create());							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		m_Window->SetVSync(true);
 
 		m_ImGuiLayer = new ImGuiLayer();												//初始化 m_ImGuiLayer 为原始指针，并推入层栈
 		PushOverlay(m_ImGuiLayer);
@@ -60,8 +64,12 @@ namespace Nut {
 	{
 		while (m_Running)
 		{
+			float time = (float)glfwGetTime();
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+
 			for (Layer* layer : m_LayerStack)				//更新图层
-				layer->OnUpdate();							//执行逻辑更新(更新应用程序的逻辑状态）
+				layer->OnUpdate(timestep);					//执行逻辑更新(更新应用程序的逻辑状态）
 			
 			//auto [x, y] = Input::GetMousePos();
 			//NUT_CORE_TRACE("{0},{1}", x, y);

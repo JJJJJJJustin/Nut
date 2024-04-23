@@ -5,6 +5,8 @@
 #include "Nut/Layer.h"
 #include "Nut/Log.h"
 
+#include "Nut/Core/Timestep.h"
+
 #include "Nut/Input.h"
 #include "Nut/KeyCodes.h"
 #include "Nut/MouseButtonCodes.h"
