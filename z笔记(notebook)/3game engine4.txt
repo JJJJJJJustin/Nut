@@ -81,6 +81,7 @@ operator target_type();
 参考视频：
 来自 Cherno 的（https://www.youtube.com/watch?v=OK0G4cmeX-I&t=368s）
 
-
-
-》》》》
+--------------------------------------Transform（变换）--------------------------------------------------
+》》》》关于 SetPositoin 和 变换 的区别
+SetPosition 和 SetRotation 是对摄像机的变换。
+这一集中我们需要对物体进行变换。
