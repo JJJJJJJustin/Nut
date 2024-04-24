@@ -1,6 +1,9 @@
 #include "Nut.h"
 
+#include "Platform/OpenGL/OpenGLShader.h"
+
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "imgui/imgui.h"
 
@@ -66,7 +69,7 @@ public:
 			}
 		)";
 
-		m_Shader.reset(new Nut::Shader(vertexSrc, fragmentSrc));
+		m_Shader.reset(Nut::Shader::Create(vertexSrc, fragmentSrc));
 
 		// -------------- Square rendering ----------------
 		float squareVertices[3 * 4] =
@@ -109,113 +112,93 @@ public:
 		std::string squareFragSrc = R"(
 			#version 330 core
 
-			layout(location = 0) out vec4 a_Color;
+			layout(location = 0) out vec4 Color;
+
+			uniform vec3 u_Color;
 
 			void main()
 			{
-				a_Color = vec4(0.2, 0.3, 0.8, 1.0);
+				Color = vec4(u_Color, 1.0);
 			}
 		)";
-		m_SquareShader.reset(new Nut::Shader(squareVertexSrc, squareFragSrc));
+		m_SquareShader.reset(Nut::Shader::Create(squareVertexSrc, squareFragSrc));
 
-    }
+	}
 
-	void OnUpdate(Nut::Timestep& ts) override{
+	void OnUpdate(Nut::Timestep& ts) override {
 
 		//NUT_TRACE("{0}s( {1}ms ) pre frame", ts.GetSeconds(), ts.GetMilliseconds())		165HZ: 0.0061478615s( 6.1478615ms ) pre frame
 
-		if (Nut::Input::IsKeyPressed(NUT_KEY_RIGHT)) 
-			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
-		else if (Nut::Input::IsKeyPressed(NUT_KEY_LEFT)) 
+		if (Nut::Input::IsKeyPressed(NUT_KEY_LEFT))
 			m_CameraPosition.x += m_CameraMoveSpeed * ts;
-	
+		else if (Nut::Input::IsKeyPressed(NUT_KEY_RIGHT))
+			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
+
 		if (Nut::Input::IsKeyPressed(NUT_KEY_UP))
 			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
-		else if(Nut::Input::IsKeyPressed(NUT_KEY_DOWN))
+		else if (Nut::Input::IsKeyPressed(NUT_KEY_DOWN))
 			m_CameraPosition.y += m_CameraMoveSpeed * ts;
 
-		if (Nut::Input::IsKeyPressed(NUT_KEY_A)) 
+		if (Nut::Input::IsKeyPressed(NUT_KEY_A))
 			m_CameraRotation -= m_CameraRotateSpeed * ts;
 		else if (Nut::Input::IsKeyPressed(NUT_KEY_D))
 			m_CameraRotation += m_CameraRotateSpeed * ts;
 
-        Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-        Nut::RendererCommand::Clear();
+		Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		Nut::RendererCommand::Clear();
 
-        m_Camera.SetPosition( m_CameraPosition );
-        m_Camera.SetRotation( m_CameraRotation );
+		m_Camera.SetPosition(m_CameraPosition);
+		m_Camera.SetRotation(m_CameraRotation);
 
-        Nut::Renderer::BeginScene(m_Camera);
+		Nut::Renderer::BeginScene(m_Camera);
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-		for(int y = 0; y < 20; y++){
-			for (int x = 0; x < 20; x++) {
-				glm::vec3 pos (x * 0.11f, y * 0.11f, 0.0f);
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
+		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->Bind();
+		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->UpdateUniformFloat3("u_Color", m_SquareColor);
+			for (int y = 0; y < 20; y++) {
+				for (int x = 0; x < 20; x++) {
+					glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
 
-				Nut::Renderer::Submit(m_SquareShader, m_SquareVA, transform);
+					Nut::Renderer::Submit(m_SquareShader, m_SquareVA, transform);
+				}
 			}
-		}
 
-        Nut::Renderer::Submit(m_Shader, m_VertexArray, glm::mat4(1.0f));
+		Nut::Renderer::Submit(m_Shader, m_VertexArray, glm::mat4(1.0f));
 
-        Nut::Renderer::EndScene();
+		Nut::Renderer::EndScene();
 	}
 
 	void OnImGuiRender() override
 	{
 		ImGui::Begin("Test");
+		ImGui::ColorEdit3("Square Color Edit", glm::value_ptr(m_SquareColor));
 		const char* text = R"(
-                             ...----....
-                         ..-:"''         ''"-..
-                      .-'                      '-.
-                    .'              .     .       '.
-                  .'   .          .    .      .    .''.
-                .'  .    .       .   .   .     .   . ..:.
-              .' .   . .  .       .   .   ..  .   . ....::.
-             ..   .   .      .  .    .     .  ..  . ....:IA.
-            .:  .   .    .    .  .  .    .. .  .. .. ....:IA.
-           .: .   .   ..   .    .     . . .. . ... ....:.:VHA.
-           '..  .  .. .   .       .  . .. . .. . .....:.::IHHB.
-          .:. .  . .  . .   .  .  . . . ...:.:... .......:HIHMM.
-         .:.... .   . ."::"'.. .   .  . .:.:.:II;,. .. ..:IHIMMA
-         ':.:..  ..::IHHHHHI::. . .  ...:.::::.,,,. . ....VIMMHM
-        .:::I. .AHHHHHHHHHHAI::. .:...,:IIHHHHHHMMMHHL:. . VMMMM
-       .:.:V.:IVHHHHHHHMHMHHH::..:" .:HIHHHHHHHHHHHHHMHHA. .VMMM.
-       :..V.:IVHHHHHMMHHHHHHHB... . .:VPHHMHHHMMHHHHHHHHHAI.:VMMI
-       ::V..:VIHHHHHHMMMHHHHHH. .   .I":IIMHHMMHHHHHHHHHHHAPI:WMM
-       ::". .:.HHHHHHHHMMHHHHHI.  . .:..I:MHMMHHHHHHHHHMHV:':H:WM
-       :: . :.::IIHHHHHHMMHHHHV  .ABA.:.:IMHMHMMMHMHHHHV:'. .IHWW
-       '.  ..:..:.:IHHHHHMMHV" .AVMHMA.:.'VHMMMMHHHHHV:' .  :IHWV
-        :.  .:...:".:.:TPP"   .AVMMHMMA.:. "VMMHHHP.:... .. :IVAI
-       .:.   '... .:"'   .   ..HMMMHMMMA::. ."VHHI:::....  .:IHW'
-       ...  .  . ..:IIPPIH: ..HMMMI.MMMV:I:.  .:ILLH:.. ...:I:IM
-     : .   .'"' .:.V". .. .  :HMMM:IMMMI::I. ..:HHIIPPHI::'.P:HM.
-     :.  .  .  .. ..:.. .    :AMMM IMMMM..:...:IV":T::I::.".:IHIMA
-     'V:.. .. . .. .  .  .   'VMMV..VMMV :....:V:.:..:....::IHHHMH
-       "IHH:.II:.. .:. .  . . . " :HB"" . . ..PI:.::.:::..:IHHMMV"
-        :IP""HHII:.  .  .    . . .'V:. . . ..:IH:.:.::IHIHHMMMMM"
-        :V:. VIMA:I..  .     .  . .. . .  .:.I:I:..:IHHHHMMHHMMM
-        :"VI:.VWMA::. .:      .   .. .:. ..:.I::.:IVHHHMMMHMMMMI
-        :."VIIHHMMA:.  .   .   .:  .:.. . .:.II:I:AMMMMMMHMMMMMI
-        :..VIHIHMMMI...::.,:.,:!"I:!"I!"I!"V:AI:VAMMMMMMHMMMMMM'
-        ':.:HIHIMHHA:"!!"I.:AXXXVVXXXXXXXA:."HPHIMMMMHHMHMMMMMV
-          V:H:I:MA:W'I :AXXXIXII:IIIISSSSSSXXA.I.VMMMHMHMMMMMM
-            'I::IVA ASSSSXSSSSBBSBMBSSSSSSBBMMMBS.VVMMHIMM'"'
-             I:: VPAIMSSSSSSSSSBSSSMMBSSSBBMMMMXXI:MMHIMMI
-            .I::. "H:XIIXBBMMMMMMMMMMMMMMMMMBXIXXMMPHIIMM'
-            :::I.  ':XSSXXIIIIXSSBMBSSXXXIIIXXSMMAMI:.IMM
-            :::I:.  .VSSSSSISISISSSBII:ISSSSBMMB:MI:..:MM
-            ::.I:.  ':"SSSSSSSISISSXIIXSSSSBMMB:AHI:..MMM.
-            ::.I:. . ..:"BBSSSSSSSSSSSSBBBMMMB:AHHI::.HMMI
-            :..::.  . ..::":BBBBBSSBBBMMMB:MMMMHHII::IHHMI
-            ':.I:... ....:IHHHHHMMMMMMMMMMMMMMMHHIIIIHMMV"
-              "V:. ..:...:.IHHHMMMMMMMMMMMMMMMMHHHMHHMHP'
-               ':. .:::.:.::III::IHHHHMMMMMHMHMMHHHHM"
-                 "::....::.:::..:..::IIIIIHHHHMMMHHMV"
-                   "::.::.. .. .  ...:::IIHHMMMMHMV"
-                     "V::... . .I::IHHMMV"'
-                       '"VHVHHHAHHHHMMV:"'
+                         ...----....
+                  .-'                  ''
+                   .          .    .    .''.
+             .' . .  .       .   .   .. ....::.
+            .  .    .    .  .  .    .... ....:IA.
+           '.  . .   .       .  . .. .....:.::IHHB.
+         .:... . ."::"'.. .   .  . .:.. .. ..:IHIMMA
+        .:::I .AHHHHHHAI::. .:...,:IIHMHHL:. . VMMMM
+       :..V.:VHHHHHHHHHHB... . .:VPHHMHHHHHHHAI.:VMMI
+       ::". ..HHHHMMHHHHHI.  . .:..I:MHHHHHMHV:':H:WM
+       '.  ....:.HHHMMHV" .AVMHMA.:.'VHHHV:' .  :IHWV
+       .:.   ...    .   ..HMMMHMMMA::.:::....  .:IHW'
+     : .   .'' .: .. .  :HMMM:IMMMI::IIIPPHI::'.P:HM.
+     'V:.. ... ...  .   'VMMV..VMMV :.:..:....::IHHHH
+        :IP""HII:  .    . . .'V:. . . :.::IHIHHMMMMM"
+        :"VI:VWMA.:      .   .. .:. ..IVHHHMMMHMMMMI
+        :..VIIHMM.::.,:.,:!"I:!"I!"I!"MMMMMMHMMMMMM'
+          V:HI:MA :AXXXIXII:IIIISSSSSSMMMHMHMMMMMM
+             :: VSSSSSSSSSBSSSMMBSSSBB:MMHIMMI
+            ::I. SSXXIIIIXSSBMBSSXXXIIMI:.IMM
+            :.I:."SSSSSSSISISSXIIXSSSSI:..MMM.
+              "V::...:.IHHHMMMMMMMMMMMMMHHMHP'
+                 ...::.:::..:..::IIIIIHHMV"
+                     "V::... . .I::IHHV"'
+
 		)";
 		ImGui::Text(text);
 		ImGui::End();
@@ -223,7 +206,7 @@ public:
 
 	void OnEvent(Nut::Event& event) override
 	{
-		
+
 	}
 private:
 	std::shared_ptr<Nut::Shader> m_Shader;
@@ -231,6 +214,8 @@ private:
 
 	std::shared_ptr<Nut::Shader> m_SquareShader;
 	std::shared_ptr<Nut::VertexArray> m_SquareVA;
+
+	glm::vec3 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f };
 
 	Nut::OrthoGraphicCamera m_Camera;
 

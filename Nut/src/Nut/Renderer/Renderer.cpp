@@ -1,6 +1,8 @@
 #include "nutpch.h"
 #include "Renderer.h"
 
+#include "Platform/OpenGL/OpenGLShader.h"
+
 namespace Nut
 {
 	Renderer::SceneData* Renderer::s_SceneData = new Renderer::SceneData;
@@ -17,8 +19,8 @@ namespace Nut
 	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->Bind();
-		shader->UpdateUniformMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
-		shader->UpdateUniformMat4("u_Transform", transform);
+		std::dynamic_pointer_cast<OpenGLShader>(shader)->UpdateUniformMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);						//传入的参数是OpenGLShader类型的，故需要手动转换。
+		std::dynamic_pointer_cast<OpenGLShader>(shader)->UpdateUniformMat4("u_Transform", transform);
 		
 		vertexArray->Bind();
 		RendererCommand::DrawIndexed(vertexArray);
