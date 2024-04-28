@@ -23,7 +23,8 @@ namespace Nut {
 
 		m_Window = std::unique_ptr<Window>(Window::Create());							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
-		m_Window->SetVSync(true);
+		
+		Renderer::Init();
 
 		m_ImGuiLayer = new ImGuiLayer();												//初始化 m_ImGuiLayer 为原始指针，并推入层栈
 		PushOverlay(m_ImGuiLayer);

@@ -10,6 +10,11 @@ namespace Nut
 	public:
 		// static variable frmm Create(), which returns virtual funcs already overrided in Platform
 		// So bind the functions form corresponding interface in OpenGL/DirectX/Metal/Valkan
+		inline static void Init()
+		{
+			s_RendererAPI->Init();
+		}
+
 		inline static void Clear() 
 		{
 			s_RendererAPI->Clear();

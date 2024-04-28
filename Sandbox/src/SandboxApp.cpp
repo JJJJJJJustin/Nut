@@ -156,9 +156,10 @@ public:
 			}
 		)";
 		m_TextureShader.reset(Nut::Shader::Create(textureVertexSrc, textureFragSrc));
-		m_Texture = Nut::Texture2D::Create("assets/textures/emoji.png");
 		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_TextureShader)->Bind();
 		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_TextureShader)->UpdateUniformInt("u_Texture", 0);
+		m_EmojiTexture = Nut::Texture2D::Create("assets/textures/emoji.png");
+		m_Texture = Nut::Texture2D::Create("assets/textures/rain.jpg");
 	}
 
 	void OnUpdate(Nut::Timestep& ts) override {
@@ -201,6 +202,8 @@ public:
 			}
 		m_Texture->Bind(); 
 		Nut::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)) );
+		m_EmojiTexture->Bind();
+		Nut::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		// Triangle Draw call
 		//Nut::Renderer::Submit(m_Shader, m_VertexArray, glm::mat4(1.0f));
 
@@ -253,7 +256,7 @@ private:
 	Nut::Ref<Nut::Shader> m_SquareShader, m_TextureShader;
 	Nut::Ref<Nut::VertexArray> m_SquareVA;
 
-	Nut::Ref<Nut::Texture2D> m_Texture;
+	Nut::Ref<Nut::Texture2D> m_Texture,m_EmojiTexture;
 
 	glm::vec3 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f };
 

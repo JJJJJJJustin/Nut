@@ -18,15 +18,24 @@ namespace Nut
 		NUT_CORE_ASSERT(data, "Failed to load image!");
 
 		m_Width = width;
-		m_Height = height;
+		m_Height = height;																// gl func need unsigned int data So we assign the value of width to m_Width
+
+		GLenum internalFormat = 0, dataFormat = 0;										// 数据内部储存格式 和 数据的上传格式
+		if (channels == 3) {
+			internalFormat = GL_RGB8;
+			dataFormat = GL_RGB;
+		}else if (channels == 4) {
+			internalFormat = GL_RGBA8;
+			dataFormat = GL_RGBA;
+		}
+		NUT_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!")
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-		// 储存数据
-		glTextureStorage2D(m_RendererID, 1, GL_RGBA8, m_Width, m_Height);			//gl func need unsigned int data So we assign the value of width to m_Width
+		glTextureStorage2D(m_RendererID, 1, internalFormat, m_Width, m_Height);				// 储存数据
 
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		// 上传数据
-		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);		// 上传数据
 		stbi_image_free(data);
 	}
 
