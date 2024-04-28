@@ -18,6 +18,7 @@ IncludeDir["GLFW"] = "Nut/vendor/GLFW/include"                                  
 IncludeDir["Glad"] = "Nut/vendor/Glad/include"                                  --将表的"Glad"键索引到此路径
 IncludeDir["ImGui"] = "Nut/vendor/imgui"                                        --将表的"ImGui"键索引到此路径
 IncludeDir["glm"] = "Nut/vendor/glm"                                            --将表的"ImGui"键索引到此路径
+IncludeDir["stb_image"] = "Nut/vendor/stb_image"
 
 ---------------------------------------------------------------------------------------
 --包含Nut/Nut/vendor/GLFW、Nut/Nut/vendor/Glad、Nut/Nut/vendor/imgui中的premake文件，将其作为依赖项，并合并到这里
@@ -52,6 +53,8 @@ project "Nut"                       --项目
     {
        "%{prj.name}/src/**.h",
        "%{prj.name}/src/**.cpp",
+       "%{prj.name}/vendor/stb_image/**.h",
+       "%{prj.name}/vendor/stb_image/**.cpp",
        "%{prj.name}/vendor/glm/glm/**.hpp",
        "%{prj.name}/vendor/glm/glm/**.inl"
     }
@@ -68,7 +71,8 @@ project "Nut"                       --项目
         "%{IncludeDir.GLFW}",                                                   --将IncludeDir表中GLFW键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.Glad}",                                                   --将IncludeDir表中Glad键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.ImGui}",                                                  --将IncludeDir表中ImGui键索引的值（地址）作为一个库文件路径
-        "%{IncludeDir.glm}"                                                     --将IncludeDir表中glm键索引的值（地址）作为一个库文件路径
+        "%{IncludeDir.glm}",                                                    --将IncludeDir表中glm键索引的值（地址）作为一个库文件路径
+        "%{IncludeDir.stb_image}"
     }
 
     links                           --为Nut项目(.dll)链接文件

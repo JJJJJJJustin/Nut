@@ -20,8 +20,8 @@ public:
 		};
 		unsigned int indices[3] = { 0, 1, 2 };
 
-		std::shared_ptr<Nut::VertexBuffer> vertexBuffer;
-		std::shared_ptr<Nut::IndexBuffer> indexBuffer;
+		Nut::Ref<Nut::VertexBuffer> vertexBuffer;
+		Nut::Ref<Nut::IndexBuffer> indexBuffer;
 		vertexBuffer.reset(Nut::VertexBuffer::Create(vertices, sizeof(vertices)));
 		indexBuffer.reset(Nut::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 
@@ -72,25 +72,26 @@ public:
 		m_Shader.reset(Nut::Shader::Create(vertexSrc, fragmentSrc));
 
 		// -------------- Square rendering ----------------
-		float squareVertices[3 * 4] =
+		float squareVertices[5 * 4] =
 		{
-			-0.5f, -0.5f, -0.1f,
-			 0.5f, -0.5f, -0.1f,
-			 0.5f,  0.5f, -0.1f,
-			-0.5f,  0.5f, -0.1f
+			-0.5f, -0.5f, -0.1f, 0.0f, 0.0f,
+			 0.5f, -0.5f, -0.1f, 1.0f, 0.0f,
+			 0.5f,  0.5f, -0.1f, 1.0f, 1.0f,
+			-0.5f,  0.5f, -0.1f, 0.0f, 1.0f
 		};
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 
 		m_SquareVA.reset(Nut::VertexArray::Create());
 
-		std::shared_ptr<Nut::VertexBuffer> squareVB;
+		Nut::Ref<Nut::VertexBuffer> squareVB;
 		squareVB.reset(Nut::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
-		std::shared_ptr<Nut::IndexBuffer> squareIB;
+		Nut::Ref<Nut::IndexBuffer> squareIB;
 		squareIB.reset(Nut::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 
 		Nut::BufferLayout squareLayout =
 		{
-			{Nut::ShaderDataType::Float3, "a_Position"}
+			{Nut::ShaderDataType::Float3, "a_Position"},
+			{Nut::ShaderDataType::Float2, "a_TexCoord"}
 		};
 		squareVB->SetLayout(squareLayout);
 		m_SquareVA->AddVertexBuffer(squareVB);
@@ -123,6 +124,41 @@ public:
 		)";
 		m_SquareShader.reset(Nut::Shader::Create(squareVertexSrc, squareFragSrc));
 
+		std::string textureVertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+			}
+		)";
+		std::string textureFragSrc = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 Color;
+			
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture;
+
+			void main()
+			{
+				Color = texture(u_Texture, v_TexCoord);
+			}
+		)";
+		m_TextureShader.reset(Nut::Shader::Create(textureVertexSrc, textureFragSrc));
+		m_Texture = Nut::Texture2D::Create("assets/textures/emoji.png");
+		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_TextureShader)->Bind();
+		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_TextureShader)->UpdateUniformInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Nut::Timestep& ts) override {
@@ -163,8 +199,10 @@ public:
 					Nut::Renderer::Submit(m_SquareShader, m_SquareVA, transform);
 				}
 			}
-
-		Nut::Renderer::Submit(m_Shader, m_VertexArray, glm::mat4(1.0f));
+		m_Texture->Bind(); 
+		Nut::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)) );
+		// Triangle Draw call
+		//Nut::Renderer::Submit(m_Shader, m_VertexArray, glm::mat4(1.0f));
 
 		Nut::Renderer::EndScene();
 	}
@@ -209,11 +247,13 @@ public:
 
 	}
 private:
-	std::shared_ptr<Nut::Shader> m_Shader;
-	std::shared_ptr<Nut::VertexArray> m_VertexArray;
+	Nut::Ref<Nut::Shader> m_Shader;
+	Nut::Ref<Nut::VertexArray> m_VertexArray;
 
-	std::shared_ptr<Nut::Shader> m_SquareShader;
-	std::shared_ptr<Nut::VertexArray> m_SquareVA;
+	Nut::Ref<Nut::Shader> m_SquareShader, m_TextureShader;
+	Nut::Ref<Nut::VertexArray> m_SquareVA;
+
+	Nut::Ref<Nut::Texture2D> m_Texture;
 
 	glm::vec3 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f };
 

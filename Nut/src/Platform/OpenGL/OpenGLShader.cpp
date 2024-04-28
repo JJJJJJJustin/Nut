@@ -125,7 +125,7 @@ namespace Nut
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::UpdateUniformInt4(const std::string& name, const int& value)
+	void OpenGLShader::UpdateUniformInt(const std::string& name, const int& value)
 	{
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform1i(location, value);

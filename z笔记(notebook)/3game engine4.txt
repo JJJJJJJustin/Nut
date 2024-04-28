@@ -160,4 +160,199 @@ SetPosition 和 SetRotation 是对摄像机的变换。
 概念：
 std::dynamic_pointer_cast 是 C++ 标准库中的一个模板函数，用于在运行时进行动态类型转换。
 
----------------------------------------------------------------------------------------------
+----------------------------------指针(Ref & Scope)-----------------------------------------------------
+》》》》关于智能指针，Cherno有一期视频介绍了。
+check that out if you haven't already.
+（https://www.bilibili.com/video/BV1hv411W7kX/?spm_id_from=333.999.0.0&vd_source=64ca0934a8f5ef66a21e8d0bddd35f63）
+
+
+
+》》》》什么是强引用？什么是弱引用？二者有什么作用？
+声明：
+在 C++ 中，通常没有与其他编程语言中的强引用和弱引用直接对应的概念。但是，可以使用普通指针和智能指针来模拟类似的引用行为。
+
+概念（Java 中）：
+
+》强引用：
+      强引用是一种对对象的正常引用，它会使对象的引用计数加一。
+      只要存在强引用指向一个对象，该对象就不会被垃圾回收系统回收，即使内存紧张也不会被释放，
+除非所有指向该对象的强引用都被解除（即没有任何对象持有对该对象的强引用），对象才会被销毁和释放内存。
+》弱引用
+      弱引用是一种非强制性的引用，它不会增加对象的引用计数。
+      弱引用允许对象被垃圾回收系统回收，即使还有弱引用指向该对象，只要没有强引用指向它，对象就可能被回收。
+
+
+对应用例（C++）：
+
+》强引用：
+在 C++ 中，使用普通指针或者智能指针来引用对象时，通常就会是一种强引用。
+1.普通指针不具备自动管理内存的能力，需要手动释放资源
+2.智能指针（如 std::shared_ptr 内含计数系统）同时也可以自动管理内存生命周期，当没有任何智能指针指向对象时，会自动释放资源。
+》弱引用：
+在 C++ 中，可以使用 std::weak_ptr 来模拟弱引用的行为。
+std::weak_ptr 是 std::shared_ptr 的伴随类，它允许观察 std::shared_ptr 指向的对象，但不会增加对象的引用计数。
+因此，当所有 std::shared_ptr 指向对象的引用都释放时，即使存在 std::weak_ptr，对象也会被释放。
+
+参考Java中的概念理解。
+
+
+作用：
+1.强引用可以确保对象在需要时不会被提前释放。
+2.弱引用可以防止对象复用，同时避免内存泄漏。
+
+
+
+
+》》》》关于unique_ptr 的理解。
+
+unique_ptr 可以看做是强引用。
+
+相较于普通指针：
+std::unique_ptr 是一种独占所有权的智能指针，与普通的指针不同，它不允许多个指针同时指向同一块内存区域。
+相较于共享指针 shared_ptr：
+std::unique_ptr 不会增加引用计数，而是在其生命周期结束时自动释放所管理的对象。更加轻量。
+
+
+
+》》》》什么是“原子”？
+概念：
+“原子”（atomic）是一个术语，用来描述不可分割、不被中断的操作或动作。
+当我们说某个操作是原子的，意思是这个操作在执行过程中不会被其他操作打断，无论是因为多线程竞争还是其他原因。
+
+常见的原子操作：
+	原子读写：确保读取或写入数据时不会受到其他线程的干扰。
+	原子增量/减量：确保对数值进行加减操作时是不可分割的。
+	原子比较和交换（CAS）：一种常用的原子操作，用于在多线程环境中实现锁定机制，确保在执行特定条件下的数据交换是原子的。
+
+作用：
+原子操作在并发和多线程环境中起关键作用，因为它确保了数据的一致性和完整性。在这些环境中，多个线程可能会同时尝试修改同一个数据。这时，如果没有原子操作，可能会发生竞态条件（race condition），导致数据错误或不可预测的行为。
+
+使用：
+C++：可以使用 <atomic> 头文件提供的 std::atomic 类型来确保原子性。
+
+
+
+》》》》什么是“原子增量”？  什么是“原子减量”？
+
+原子增量（Atomic Increment）：
+原子增量是指对共享变量进行加一操作，并且这个操作是原子性的，即不会被中断或者被其他线程干扰。
+（在多线程环境中，当多个线程同时尝试对同一个共享变量进行增量操作时，如果不使用原子操作，可能会出现竞态条件（race condition）导致结果不确定或者出错。）
+原子增量操作保证了在任何时刻只有一个线程能够对变量进行递增操作，从而确保了结果的正确性。
+
+原子减量（Atomic Decrement）：
+原子减量与原子增量相反，是对共享变量进行减一操作，并且保证操作的原子性。
+类似于原子增量，原子减量操作也是为了避免竞态条件而设计的，确保在多线程环境下对共享变量进行减少操作时的正确性。
+
+
+-------------------------------------Texture（纹理）------------------------------------------------------
+》》》》部分知识参考（https://learnopengl-cn.github.io/01%20Getting%20started/06%20Textures/）
+也可以去看Cherno OpenGL系列的视频。
+
+
+
+》》》》glTextureStorage2D和 glTextureSubImage2D分别是什么用法，这两个函数有什么作用？这和glTexImage2D有什么不同？
+
+》glTexImage2D：
+      glTexImage2D 用于指定一个二维纹理图像的数据。
+      这个函数会为纹理对象分配内存并设置其格式、宽度、高度以及初始数据。
+当调用 glTexImage2D 时，如果纹理对象已经存在，则会重新分配内存并覆盖原有数据。
+
+》glTextureStorage2D：
+      glTextureStorage2D 用于分配存储纹理对象的内存空间，但不会填充具体的纹理数据。
+      这个函数通常在创建纹理对象时使用，用于指定纹理的维度、级别数量和内部格式，但不会填充实际的像素数据。
+与 glTexImage2D 不同，glTextureStorage2D 不会重新分配内存或更改纹理对象的大小，只会分配足够的内存空间。
+
+》glTextureSubImage2D：
+      glTextureSubImage2D 用于更新已分配内存的纹理对象的部分或全部像素数据。
+      这个函数可以用于更新纹理对象的某个区域，而不影响其他区域。
+它通常用于动态更新纹理数据，比如视频纹理、实时渲染等场景。
+
+
+》》也就是说glTexImage2D就是glTextureStorage2D和 glTextureSubImage2D组合使用的效果吗？
+差不多是的。因为：
+1.glTexImage2D 提供了一个简单的接口，用于分配内存并设置初始纹理数据。它相当于一次性完成了内存分配和初始化数据的工作。
+
+2.glTextureStorage2D 专门用于分配内存空间，但不填充具体数据。它通常用于创建纹理对象并指定其格式、大小和级别数量。
+  glTextureSubImage2D 则用于在已分配内存的纹理对象上更新数据。它允许你在不重新分配内存的情况下，动态更新纹理的像素数据。
+
+所以可以通过组合 glTextureStorage2D 和 glTextureSubImage2D 来实现类似 glTexImage2D 的功能
+
+
+
+
+》》》》glActiveTexture(GL_TEXTURE0); + glBindTexture(GL_TEXTURE_2D, texture1);
+和 glBindTextureUint的区别。
+
+》glActiveTexture(GL_TEXTURE0); 
+》glBindTexture(GL_TEXTURE_2D, texture1);
+这是传统的绑定纹理的方式，适用于 OpenGL 2.0 及更高版本，
+首先，使用 glActiveTexture() 设置活动的纹理单元，然后通过 glBindTexture() 将特定的纹理对象绑定到该纹理单元。
+适合用于绑定和切换不同的纹理单元，以便在着色器中使用。
+
+》glBindTextureUnit(unit, texture);
+这个函数在 OpenGL 4.5 及更高版本中可用。
+这个方法直接将纹理对象绑定到特定的纹理单元，而无需先激活纹理单元。
+
+区别：
+glBindTextureUnit() 更直接、更高效，因为它不需要显式调用 glActiveTexture()。有助于减少代码复杂性并提高性能。
+因为可以直接操作纹理单元，而无需通过传统的激活-绑定流程。在 4.5 以上版本，可以用来替代 Active + Bind;
+
+
+
+
+》》》》stb 库的支持
+QUICK NOTES:
+      Primarily of interest to game developers and other people who can
+          avoid problematic images and only need the trivial interface
+
+      JPEG baseline & progressive (12 bpc/arithmetic not supported, same as stock IJG lib)
+      PNG 1/2/4/8/16-bit-per-channel
+
+      TGA (not sure what subset, if a subset)
+      BMP non-1bpp, non-RLE
+      PSD (composited view only, no extra channels, 8/16 bit-per-channel)
+
+      GIF (*comp always reports as 4-channel)
+      HDR (radiance rgbE format)
+      PIC (Softimage PIC)
+      PNM (PPM and PGM binary only)
+
+      Animated GIF still needs a proper API, but here's one way to do it:
+          http://gist.github.com/urraka/685d9a6340b26b830d49
+
+      - decode from memory or through FILE (define STBI_NO_STDIO to remove code)
+      - decode from arbitrary I/O callbacks
+      - SIMD acceleration on x86/x64 (SSE2) and ARM (NEON)
+
+   Full documentation under "DOCUMENTATION" below.
+
+
+熟肉：快速注释：
+       主要是游戏开发者和其他有能力的人感兴趣
+           避免有问题的图像，只需要简单的界面
+
+       JPEG 基线和渐进（不支持 12 bpc/算术，与库存 IJG 库相同）
+       PNG 每通道 1/2/4/8/16 位
+
+       TGA（不确定是哪个子集，如果是子集）
+       BMP 非 1bpp、非 RLE
+       PSD（仅合成视图，无额外通道，每通道 8/16 位）
+
+       GIF（*comp 始终报告为 4 通道）
+       HDR（亮度rgbE格式）
+       PIC（Softimage PIC）
+       PNM（仅限 PPM 和 PGM 二进制）
+
+       动画 GIF 仍然需要适当的 API，但这是一种方法：
+           http://gist.github.com/urraka/685d9a6340b26b830d49
+
+       - 从内存或通过 FILE 解码（定义 STBI_NO_STDIO 以删除代码）
+       - 从任意 I/O 回调中解码
+       - x86/x64 (SSE2) 和 ARM (NEON) 上的 SIMD 加速
+
+    完整文档位于下面的“文档”下。
+
+
+
+---------------------------------------blending（混合）---------------------------------------------------------------
+》》》》

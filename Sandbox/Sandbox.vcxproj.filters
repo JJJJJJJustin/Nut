@@ -19,4 +19,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\textures\emoji.webp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\textures\emoji.png">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

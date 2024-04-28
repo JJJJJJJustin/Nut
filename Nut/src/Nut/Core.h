@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #ifdef NUT_PLATFORM_WINDOWS
 	#ifdef NUT_DYNAMIC_LINK
 		#ifdef NUT_BUILD_DLL
@@ -39,3 +41,13 @@
 #define Bit(x) (1 << x)
 
 #define NUT_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+
+namespace Nut 
+{
+	template<typename T>
+	using Ref  = std::shared_ptr<T>;
+
+	template<typename T>
+	using Scope  = std::unique_ptr<T>;
+
+}

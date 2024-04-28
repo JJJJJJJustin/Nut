@@ -138,6 +138,12 @@
       <Project>{3C0E880B-A817-887C-3193-9E7C9D9B937C}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\textures\emoji.webp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\textures\emoji.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
