@@ -11,6 +11,11 @@ workspace "Nut"                     --工作区
         "Dist"
     }
 
+    flags                           --设置编译器选项
+	{
+		"MultiProcessorCompile"     --多处理器并行编译
+	}
+
 --[[起别名]]
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"                 --（方便输出和中间目录编写）
 IncludeDir = {}                                                                 --创建一个名为IncludeDir的表

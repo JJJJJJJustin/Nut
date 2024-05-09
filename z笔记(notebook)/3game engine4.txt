@@ -355,4 +355,406 @@ QUICK NOTES:
 
 
 ---------------------------------------blending（混合）---------------------------------------------------------------
-》》》》
+》》》》函数使用自行查阅文档或资料，Cherno 系列视频或 Learn OpenGL文档。
+
+
+
+》》》》关于为什么使用多层抽象来实现 Renderer:: 的方法？
+为了高度抽象，以供多接口使用。
+》》RenderCommand 的作用？
+1.可以直接静态的调用一些命令，而不是实现某接口的方法。
+2.方便多线程的使用。
+
+
+
+-------------------------------Shader Asset Abstract（着色器资产抽象）--------------------------------------------------------
+》》》》在笔记文件夹中新增了 bat语法参考（浏览器打开）
+https://winddoing.github.io/post/29269ff3.html?highlight=bat
+
+
+》》》》@echo off 和  IF %ERRORLEVEL% NEQ 0 ( PAUSE ) 在批处理文件中的意思？
+
+@echo off
+关闭批处理文件的命令回显功能。
+命令回显是指在批处理文件执行时显示每个命令在命令提示符窗口中的执行结果。
+作用：这使输出简洁，执行高效。
+
+IF %ERRORLEVEL% NEQ 0 (
+  PAUSE
+)
+1. %ERRORLEVEL% 代表上一个命令的退出代码（或错误代码）
+	Windows上，程序和命令执行完成后会返回一个退出代码。返回代码0通常表示成功，非零表示错误或异常。
+2. IF %ERRORLEVEL% NEQ 0
+	如果 %ERRORLEVEL% 的值不等于0（即先前的命令发生了错误）
+3. PAUSE 
+	暂停批处理文件的执行，直到用户按下任意键。
+
+作用：如果执行某个命令后发生错误，批处理文件就会暂停并等待用户响应。否则直接运行完毕。
+
+
+
+
+》》》》在 gitignore 中标明 bin 和 bin/ 有什么区别？
+
+bin：表示会忽略所有包含 bin 的文件或目录
+bin/：表示会忽略名为 bin 的文件目录（文件夹）
+
+
+
+》》》》https://github.com/TheCherno/Hazel/pull/107
+》》》》在这个 pull request 中，两人讨论一个问题，即 OpenGLBuffer 文件中，OpenGLIndexBuffer
+
+OpenGLIndexBuffer 函数定义里面（注意是：IndexBuffer 中）
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+是否应该被写为：
+	glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+	glBufferData(GL_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+
+@LovelySanta 说，在 4.5 中，vertex buffer 和 index buffer 只在 Bind( )
+	void OpenGLIndexBuffer::Bind() const { 
+ 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID); } 
+这里有区别，需要分别写做：GL_ARRAY_BUFFER 和 GL_ELEMENT_ARRAY_BUFFER,
+在 OpenGLIndexBuffer 和 OpenGLVertexBuffer 中，则都在 glBufferBind 和 Data 中填入 GL_ARRAY_BUFFER.
+
+文献附上：
+4.5（翻阅第60页）https://registry.khronos.org/OpenGL/specs/gl/glspec45.core.pdf
+4.6（翻阅第60页）https://registry.khronos.org/OpenGL/specs/gl/glspec46.core.pdf
+
+结论：（绑定缓冲区时指明即可，创建缓冲区时不用区别开来）
+在OpenGL 4.5核心配置中，只需将缓冲区绑定到GL_ARRAY_BUFFER，而不需要在创建索引缓冲区时绑定到GL_ELEMENT_ARRAY_BUFFER。
+唯一需要将 indexbuffer 的 slot 设置为 GL_ELEMENT_ARRAY_BUFFER 的情况是在绑定时，以指定缓冲区包含索引。
+
+
+
+》》》》premake 中的 flags :
+flags:
+	用于设置编译器选项或标志的一个属性.
+"MultiProcessorCompile" 
+	是一个 MSVC 编译器的选项，用于启用多处理器编译。
+
+作用：
+	当这个标志被设置时，编译器会尝试使用计算机上的多个处理器来并行编译源文件，以加快编译速度。
+
+
+
+》》》》读取文件的函数设计理解：
+
+》》关于 ifstream 类对象的理解：
+
+对象的概念：
+std::ifstream 对象 ( 比如 in ) 是一个文件流，它代表了一个与文件相关联的输入流。
+对象持有：
+该对象持有一系列操作文件的方法和属性，你可以通过这些方法和属性来读取文件内容、控制文件读取位置、判断文件是否打开等等。
+一般来讲，in 本身不包含文件中的数据，他只是持有一些方法，对文件操作，在某些情况下（比如将文件读取出来）作用于你自己声明的 string 类型变量上。
+
+
+》》函数设计：
+1.std::ifstream in(filepath, std::ios::in, std::ios::binary);  -->  打开文件以备后续读取
+从 filepath 中访问文件
+
+1.1  以输入（读取）模式打开文件（std::ios::in），
+1.2  并以二进制模式打开文件（std::ios::binary），后续将文件作为原始二进制数据读取。
+
+
+2.if ( in )
+如果成功读取，in 会被隐式转换为 true，if ( in ) 表示文件若打开 ...
+
+
+3.in.seekg(0, std::ios::end);
+读取文件之前设置文件读取位置，通过 seekg 让这行代码将文件读取位置设置为：读取位置为末尾，且不设置方向。
+
+3.1  这里的参数 0 表示相对于某个参考点的 offset 偏移量，（用来确定相对于参考点的读取位置）
+      (正数表示向文件末尾方向移动多少个字节，负数表示向文件开头方向移动多少个字节，零表示不移动，origin设置的参考点位置已经满足我们的用例)
+3.2  std::ios::end 则就是偏移量的参考点，表示相对于文件末尾的位置。（用来确定读取的位置，offset 设置在参考点之前或之后多少个字节的位置）
+    （可以是 std::ios::beg（文件开头）、std::ios::cur（当前读取位置）、std::ios::end（文件末尾）中的一个，
+       由于只有三个预定义的参数而没有其他参数可填，所以我们在必要时需要使用 offset 来确定一个比较准确的位置）。
+eg.  
+// seekg(10, std::ios::beg)  //将读取位置移动到文件起始位置后第10个字节处。
+// seekg(-5, std::ios::end)  //读取位置移动到文件末尾之前的5个字节处。
+
+所以seekg 操作实际上是在移动文件流的读取位置指针，我们显式的设置这个指针的位置。
+
+
+4.result.resize(in.tellg());
+这行代码将字符串 result 的大小进行调整，以便容纳整个文件。
+4.1  tellg 函数用于获取当前的读取位置，返回一个整数值。此时获取了文件末尾位置，0表示不用前后移动，就返回当前位置，
+       所以我们返回了这个末尾位置来为 result 确定大小。
+
+
+5.in.seekg(0, std::ios::beg);
+这行代码将文件读取位置重新设置到文件的开头，以便从文件开头开始读取数据。
+5.1  目的：设置读取位置为开始，以便接下来的 read 函数作用时从正确的位置开始读取文件。
+
+
+6.in.read(&result[0], result.size());
+开始读取数据。
+&result[0] 是 result 的起始指针，表示将文件读到哪个缓冲区中去。
+result.size() 是要读多大的文件（读多少字节数的文件），result.size() 恰好是一整个文件的大小。
+
+
+7.in.close();
+关闭文件流。
+
+
+
+》》我们通过 seekg 确定了文件目前的指针位置，也就是读取时开始的位置，那读取方向由谁确定？
+问题分析：
+seekg 函数用于确定读取位置，而具体的读取方向则由后续的读取操作来确定。
+设置方式：
+读取方向是由后续的读取操作（比如 getline、read 等），通过这些函数我们设置读取方向。
+
+
+
+
+》》》》关于 unordered_map 的一些使用方式。（无序映射）
+使用前需要包含头文件 <unordered_map>
+
+ 1.初始化
+	std::unordered_map<KeyType, ValueType> Map
+或者使用初始化列表
+	std::unordered_map<KeyType, ValueType> Map = {
+	    {key1, value1},
+	    {key2, value2}
+	};
+
+2.插入元素
+	Map[key] = value;
+或者使用 insert 函数
+	Map.insert({key, value});
+
+3.访问元素
+	Map[key]
+也可以使用一些成员函数，进行判断：
+	Count（对应某键的值的数量）
+	Map.count(key)	
+
+	Find（查找元素）
+	auto it = Map.find(key)
+find: 返回一个迭代器，指向查找到的元素，如果未找到，则返回指向容器末尾的迭代器，即 unordered_map::end()。
+
+4.删除元素
+	Map.erase(key);
+
+5.可以用于遍历
+	for (const auto& pair : Map) { }
+或者使用迭代器遍历
+	for (auto it = Map.begin(); it != Map.end(); ++it) { } 
+
+
+
+》》》》在 Windows 系统中，为什么使用 " \r\n " 来代表新行（另起一行）
+\r，\n：代表回车符和换行符。
+在文本操控中，\r 一般用于控制光标在文本输出中返回到当前行的起始位置，而不换行。
+故在 Windows 操作系统中，使用 "\r\n" 表示文本中的一行结束，并开始新的一行。
+
+
+
+》》》》关于 find_first_of 和 find_first_not_of 函数
+1. find_first_of 
+原型：
+	size_t find_first_of(const string& str, size_t pos = 0) const noexcept;
+参数：
+	str 参数是要搜索的字符集合，pos 参数是搜索的起始位置，默认为 0。
+返回值：
+	如果找到匹配的字符，则返回该字符在字符串中的位置索引；如果没有找到匹配的字符，则返回 string::npos。
+释义：
+	在字符串中查找第一个与指定字符相匹配的字符，并返回其位置。
+
+2.find_first_not_of 
+原型：
+	size_t find_first_not_of(const string& str, size_t pos = 0) const noexcept;
+参数：
+	str 参数是要搜索的字符集合，pos 参数是搜索的起始位置，默认为 0。
+返回值：
+	如果找到第一个不匹配的字符，则返回其在字符串中的位置索引；如果没有找到不匹配的字符，则返回 string::npos。
+释义：
+	在字符串中查找第一个与指定字符不匹配的字符，并返回其位置。
+
+
+eg.
+"a bc \n abc aabcds \r\n"
+find_first_of ("\r\n"); 返回  \r\n 在文本中的索引。
+			       ↓
+"a bc \n abc aabcds \r\n"
+
+"adb ccc\n bacccab\r\n"
+find_first_not_of ("\r\n"); 返回此句中第一个不是 \r\n  的字符在文本中的索引（位置）
+ ↓
+"adb ccc\n bacccab\r\n"
+
+
+
+
+》》》》关于 PreProcess 函数的理解：
+
+1.提前处理：
+	const char* typeToken = "#type";			//确定类型助记符的格式
+	size_t typeTokenLength = strlen(typeToken);	//确定助记符的长度
+	size_t pos = source.find(typeToken, 0);		//从头开始查找助记符的位置并返回
+	while (pos != std::string::npos)	{}			//如果找到了助记符（开始时逐行都进行判断，如果找到则进入循环。但由于循环中会对 pos 进行刷新，可以在										退出当前循环之后，通过 pos = source.find(typeToken, nextLinePos); 跳过多余的语句快速进行判断）
+
+2.循环中的设计：
+	size_t eol = source.find_first_of("\r\n", pos);			//使用 find_first_of 得到助记符这一行的末尾位置
+	HZ_CORE_ASSERT(..., "Syntax error");					//断言
+	size_t begin = pos + typeTokenLength + 1;			//计算助记符 #type 之后的字符应该出现的位置，并储存
+	std::string type = source.substr(begin, eol - begin);		//复制 #type 之后的类型标识 “vertex/fragment.pixel”
+	HZ_CORE_ASSERT(..., "Invalid shader type specified");	//断言
+
+	size_t nextLinePos = source.find_first_not_of("\r\n", eol);	//使用 find_first_not_of 得到助记符下一行的字符串开头的位置并储存
+	pos = source.find(typeToken, nextLinePos);			//将 pos 更新至从新行开始后遇到的下一个助记符 #type 的位置
+	shaderSources[...] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));	
+	//如果找不到新行，即该类型着色器没有放置代码，且位于文件末尾。则直接从助记符的开始复制直到文件末尾。（下一个提问会分析这一设计）
+	//如果找到新行即该着色器是有实际代码的，则直接从实际代码的开始复制到下一个助记符之前。
+
+
+3.为什么会在复制一个着色器代码时使用 source.size 这样一个完整的大小？万一后面还有着色器呢？
+
+前提：
+实际上，我们使用 size_t nextLinePos = source.find_first_not_of("\r\n", eol);来判断一个助记符 #type vertex 这一行之后有没有字符，然后将其复制。
+无论是有字符还是空行，我们都返回位置。（有新行，且新行上有实际代码，返回位置。有新行，但新行没有实际代码，也返回位置。)
+至于编译结果，我们交给编译器去判断，空与不空导致的结果会是某种情况下所需要的。
+
+分析：
+但是注意看 substr 的第二个参数 pos - (nextLinePos == std::string::npos ... ， 这里的 std::string::npos 指的是完全没有任何东西，包括 '\n' '\r'等。
+也就是说，如果满足此条件，则表明 #type fragment 后面已经是文件末尾，后面没有任何东西了。
+	eg.
+	#type vertex
+	vertex shader code
+
+	#type fragment
+注意，像是：
+	eg.
+	#type vertex
+	vertex shader code
+
+	#type fragment \n
+	
+提示：
+这样不满足 nextLinePos == std::string::npos 条件，因为其之后虽然没有实际的代码，但在 find 函数的眼中，有 '\n', '\r' 的存在，会
+将 pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos) 判别为 pos - nextLinePos 。
+（尽管这样没有什么问题，有时候着色器在调试过程中确乎不会存放代码。
+
+总结：
+但注意这个 nextLinePos == std::string::npos 条件的满足条件，所以我们才会大胆的使用 source.size 这整个读出的字符串大小来计算位置。
+因为此时 #type vertex 已经位于文件末尾了）
+
+
+4.一些特殊情况呢，会怎么处理？
+
+4.1（第一种）
+如果处理的字符串是第一种情况
+“#type vertex 
+adfdjkl
+asgdas”
+而不是第二种情况
+“#type vertex 
+adfdjkl
+asgdas
+
+#type fragment”
+
+结果：
+则在前二种情况的第一次循环中，pos 会在 substr 处理之前通过 find() 进行更新，在第二种情况下 pos 是一个正常位置，会正确计算。
+但在第一种情况的第一次循环中，pos 会因为找不到第二个 #type 而在更新后返回 std::string::npos, 这在计算时会出现  std::string::npos - nextLinePos。
+
+
+4.2（第二种）
+如果处理的字符串仅仅是
+"#type vertex"
+
+结果：
+则在第一次循环中，处理 #type vertex 时，nextLinePos 会在 substr 运行之前被赋值为 std::string::npos ,pos 也会是 npos，
+然后在 source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos)); 
+会返回 pos - ( source.size() - 1) -> pos - source.size() + 1 -> std::string::npos - source.size() + 1.
+
+思考：
+根据查证，std::string::npos 是一个常量，代表了 std::string 类型中无效的位置。当 npos 与任何数值相减时，结果仍然是 npos，因为它代表的是一个无效的位置。
+这表明上述情况会导致 substr ()  返回无效字符串吗？这也许是一个 bug? 这果真是一个bug吗？
+
+
+4.3 问题分析
+首先我们另举一个例子来看：
+“#type vertex
+dasfgda
+agdsa
+
+#type fragment
+sadfsga
+asdgas”
+
+问题分析：
+我们得知在第一次while循环中没有什么异常，但在第二次 while 循环中：
+size_t nextLinePos = source.find_first_not_of("\r\n", eol); 正常运行且返回有效数值，
+但是会因为 #type fragment 之后没有出现类似的 #type XXX 而导致 pos = source.find(typeToken, nextLinePos); 返回 std::string::npos
+
+问题解决：
+4.3.1.此时循环是否会提前中断？
+此时，尽管循环的条件是 (pos != std::string::npos ) ,但我们没有使用条件判断手动退出，所以并不会提前退出。
+而是会在更新 pos 之后，继续进行之后的语句，最后在下一次循环轮询时结束循环。
+
+4.3.2.substr 的返回值是否无效？
+并不是无效的，虽然
+shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+使用 pos 来确定代码的结束位置，且 pos 在分析后应该是 std::string::npos,
+但即使 pos 是 std::string::npos，std::string::substr 也会将结束位置自动设置为字符串的末尾。
+因此即使没有下一个 #type 标记，代码仍然能够正确地截取到最后一个着色器的代码。
+
+4.3.3.为什么substr ( ) 可以返回一个有效的值？
+原型：
+std::string substr(size_t pos = 0, size_t count = npos) const;
+定义标明：
+	1.如果省略 count 参数（默认 count = npos），则函数默认截取从 pos 开始直到字符串的末尾。
+	2.如果填满参数，则当 pos 参数大于等于字符串的长度时，substr 会返回一个空字符串。
+	（人话：从整个字符串的末尾甚至更靠后的地方开始复制，这后面肯定没有字符了）
+	3.而如果 pos 参数小于字符串的长度但 count 参数过大导致超出字符串末尾时，substr 会自动将 count 调整为使得截取不超出字符串末尾的最大值。
+	（人话：开始位置正确，但是要复制的长度被设置的超出了字符串本身的大小，则截取字符串全部）
+结论：
+因此，当 count 参数被我们计算得到的值为 std::string::npos 时，substr ( ) 实际上会默认截取从 pos 开始直到字符串的末尾。
+这就是为什么即使在没有下一个 #type 标记的情况下，代码仍然能够正确地截取到最后一个着色器的代码。
+
+
+
+
+》》》》关于对一个指针类型变量使用 reset() 和 直接传递一个返回对应指针类型函数 这两种方法的不同。
+eg.
+	m_TextureShader.reset(Nut::Shader::Create(textureVertexSrc, textureFragSrc));
+	m_TextureShader = Nut::Shader::Create(textureVertexSrc, textureFragSrc);二者的区别。
+
+区别：
+reset() 会在重新赋值之前释放原有的资源，从而避免内存泄漏。是一个安全的成员函数。
+而直接使用 Create() 返回的指针（将指针赋值给一个改变量）并不会自动的进行资源释放，需要自己定义资源的正确释放。
+
+
+
+》》》》发现 Cherno 的一个小错误
+代码：
+在PreProcess  函数中，Cherno 这样定义
+while (pos != std::string::npos)
+	{
+		size_t begin = pos + tokenLength + 1;
+		size_t end_of_line = source.find_first_of("\r\n", pos);
+		NUT_CORE_ASSERT( end_of_line != std::string::npos, "Syntax error");
+问题：
+但是正常使用的时候，我发现 end_of_line 应该是一个有效的正确的值，却一直触发断言。
+(end_of_line != std::string::npos) 返回的是一个 bool 量，其值确实为 true, 触发断言的原因是格式的错误。
+
+改正：
+正确形式应该是
+NUT_CORE_ASSERT( (end_of_line != std::string::npos), "Syntax error");
+而不是
+NUT_CORE_ASSERT( end_of_line != std::string::npos, "Syntax error");
+
+原因：
+如果不加这个括号，宏会被展开为
+{
+	if ( ! end_of_line != std::string::npos )
+	{ /* ... */ }
+}
+因为 ! 的优先级高于 !=，所以会变成if (  (! end_of_line) != std::string::npos ),这样一来即使 end_of_line 是 true（有效值），
+!(end_of_line) 也会是 false，然后 false != std::string::npos 会是 true，这会导致断言的触发，而实际上代码并没有问题。
+
+修改后则不会出现这种 end_of_line 被修改了的情况。
+ 
+
+------------------------------------------------------------------------------------

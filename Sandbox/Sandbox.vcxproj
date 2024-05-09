@@ -139,9 +139,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\TextureShader.glsl" />
     <None Include="assets\textures\emoji.webp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\textures\Checkerboard.png" />
     <Image Include="assets\textures\emoji.png" />
     <Image Include="assets\textures\rain.jpg" />
   </ItemGroup>

@@ -21,12 +21,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\textures\emoji.webp" />
+    <None Include="assets\shaders\TextureShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\textures\emoji.png">
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="assets\textures\rain.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="assets\textures\Checkerboard.png">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
