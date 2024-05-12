@@ -28,7 +28,7 @@ namespace Nut {
 		//-----------------------All interfaces----------------------------------
 		static Window* Create(const WindowProps& props = WindowProps());		//返回指向Windows类型的指针
 
-		virtual ~Window() {}
+		virtual ~Window() = default;
 
 		virtual void OnUpdate() = 0;
 

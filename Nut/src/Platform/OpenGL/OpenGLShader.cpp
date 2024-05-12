@@ -97,7 +97,9 @@ namespace Nut
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
 		m_RendererID = glCreateProgram();
-		std::vector<GLuint> glShaders(shaderSources.size());
+		NUT_CORE_ASSERT((shaderSources.size() <= 2), "We only support 2 shaders for now ! ");
+		int glShaderIndex = 0;
+		std::array<GLuint, 2> glShaders;
 
 		for (auto& key_value : shaderSources) {
 			GLenum type = key_value.first;
@@ -128,7 +130,7 @@ namespace Nut
 			}
 
 			glAttachShader(m_RendererID, shader);
-			glShaders.push_back(shader);
+			glShaders[glShaderIndex++] = shader;
 		}
 
 		glLinkProgram(m_RendererID);

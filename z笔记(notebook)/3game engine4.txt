@@ -74,12 +74,20 @@ glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));	 // 将矩阵
 》》》》 关于  Conversion Operators。 
 》》》》 operator float() { return Variable } 是啥？
 概念：
-转换操作符（Conversion Operators）是一种特殊的成员函数，它们允许用户定义自定义类型之间的隐式或显式类型转换
+转换运算符/转换操作符（Conversion Operators）是一种特殊的成员函数，
+它们允许用户定义自定义类型之间的隐式或显式类型转换(允许你将 Timestep 对象隐式地转换为 float 之类的数据类型).
 语法：
 operator target_type();
 
 参考视频：
 来自 Cherno 的（https://www.youtube.com/watch?v=OK0G4cmeX-I&t=368s）
+
+eg.
+operator float() const { return m_Time; }	// This is for a varible which typed by "Timestep" can be use with arithmetic operator like + - * /
+	float GetSeconds() const { return m_Time; }
+	float GetMilliseconds() const { return m_Time * 1000.0f; }
+private:
+	float m_Time;
 
 --------------------------------------Transform（变换）--------------------------------------------------
 》》》》关于 SetPositoin 和 变换 的区别
@@ -757,4 +765,45 @@ NUT_CORE_ASSERT( end_of_line != std::string::npos, "Syntax error");
 修改后则不会出现这种 end_of_line 被修改了的情况。
  
 
-------------------------------------------------------------------------------------
+------------------------------------------Shader Library（着色器库）------------------------------------------
+》》》》关于 Cherno 提到的问题
+std::vector<GLenum> glShaders(shaderSources.size());				//逻辑上是 resize
+会导致初始化动态数组的时候提前新增两个空白的位置，而之后的 glShaders.push_back(shader); 才会推入正确的数据，而且位置位于前两个空白之后，
+
+解决方式：
+std::vector<GLuint> glShaders；
+glShaders.reserve(shaderSources.size());							//逻辑上是 reserve
+这样可以为数组在内存中先分配确定的内存（先预留两个位置），当然也可以在两个位置之后继续动态拓展。
+但并不用空白数据初始化这两个位置的内存，而是交给后面push_back进来的数据填充。
+
+
+
+
+》》》》在临摹代码之前，我先将一些亟待解决的代码细节优化做了。以下是一些笔记。
+
+》》(const void*)element.Offset 和 (const void*)(intptr_t)element.Offset的区别
+(const void*)(intptr_t)element.Offset：
+这个表达式先将 element.Offset 转换为 intptr_t 类型，然后将其强制转换为 const void* 类型。
+其中intptr_t 是一种整数类型，足够大以容纳指针的位模式。（这样确保了数据传递和使用的正确性）
+
+》》src/Nut/Input.h 中的更改是什么？为什么？
+为什么：
+首先，这个类是一个用于判断输入的抽象的基类，包含了一些序虚函数，作为接口被使用。
+并且，这个类也被声明为单例类，意为这不能被实例化。（就算被实例化，这个对象也不包含任何数据，只包含能使用的接口）
+
+是什么：
+所以我们定义并禁用了两个函数：复制构造函数和赋值运算符
+eg.
+	Input(const Input&) = delete;
+	Input& operator=(const Input&) = delete;
+1.
+= delete 关键字表明这两个函数是被删除的，也就是说被禁止使用。
+2.
+Input(const Input&) = delete; 
+复制构造函数在对象被复制时调用，用于将一个对象复制到另一个对象中。
+通过将其定义为 = delete，编译器会禁止复制构造函数的使用。即禁止任何尝试复制该类对象的行为，从而确保该类对象不会被意外地复制。
+3.
+Input& operator=(const Input&) = delete;
+赋值运算符用于将一个对象赋值给另一个对象。
+通过将其定义为 = delete，编译器会禁止赋值运算符的使用。即禁止对该类对象进行赋值操作，从而确保对象不会被错误地赋值。
+

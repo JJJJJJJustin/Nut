@@ -6,7 +6,12 @@ namespace Nut
 {
 	class NUT_API Input 
 	{
+	protected:
+		Input() = default;
 	public:
+		Input(const Input&) = delete;									//对该类对象禁用复制（复制函数）
+		Input& operator=(const Input&) = delete;						//对该类对象禁用赋值操作
+
 		inline static bool IsKeyPressed(int keycode) { return s_Instance->IsKeyPressedImpl(keycode); }
 
 		inline static bool IsMouseButtonPressed(int button) { return s_Instance->IsMouseButtonPressedImpl(button); }

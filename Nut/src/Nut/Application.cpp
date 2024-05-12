@@ -29,11 +29,9 @@ namespace Nut {
 		m_ImGuiLayer = new ImGuiLayer();												//初始化 m_ImGuiLayer 为原始指针，并推入层栈
 		PushOverlay(m_ImGuiLayer);
 	}
+	
+	//Application::~Application(){ }
 
-	Application::~Application()
-	{
-
-	}
 	void Application::PushLayer(Layer* layer)
 	{
 		m_LayerStack.PushLayer(layer);

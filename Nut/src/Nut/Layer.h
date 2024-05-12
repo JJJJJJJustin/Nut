@@ -10,7 +10,7 @@ namespace Nut
 	{
 	public:
 		Layer(const std::string& name = "Layer");
-		virtual ~Layer();
+		virtual ~Layer() = default;
 
 		virtual void OnAttach() {}			//此虚函数初步为空
 		virtual void OnDetach() {}

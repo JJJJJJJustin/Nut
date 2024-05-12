@@ -24,7 +24,7 @@ namespace Nut {
 	void LayerStack::PopLayer(Layer* layer)										//删除栈顶元素
 	{
 		auto iter = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, layer);			//std::find返回一个迭代器，可以理解为是一个指针
-		if (iter != m_Layers.end())
+		if (iter != m_Layers.begin() + m_LayerInsertIndex)
 		{
 			layer->OnDetach();
 			m_Layers.erase(iter);

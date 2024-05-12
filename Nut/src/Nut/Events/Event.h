@@ -76,7 +76,7 @@ namespace Nut {
 			if (m_Event.GetEventType() == T::GetStaticType())				//！！！静态函数在使用时需要使用类名或类型名来调用
 			{									//？？？if语句中的判断是为了干什么,T会是啥，会怎样被使用：typename T 在使用时作为允许标识，当接受一个未知类型的事件时，
 												//我们会判断该事件与被标识允许执行自定义操作的事件之间类型是否相同（操作即执行填入的函数func），若相同则执行我们定义的事件
-				m_Event.Handled = func(*(T*)&m_Event);						//*(T*) 表示：用 * 解引用（T*）所声明的T类型指针，实现强制类型转换（在这里我们使用了func并将event作为参数传入，以此执行函数操作，并返回该函数的返回值赋值给Handled）
+				m_Event.Handled = func( static_cast<T&>(m_Event) );						//*(T*) 表示：用 * 解引用（T*）所声明的T类型指针，实现强制类型转换（在这里我们使用了func并将event作为参数传入，以此执行函数操作，并返回该函数的返回值赋值给Handled）
 				return true;												// 这个 return 用于结束该函数（ Dispatch 函数），和 Handled 没什么关系， Handled 是 func 返回的值
 			}
 			return false;

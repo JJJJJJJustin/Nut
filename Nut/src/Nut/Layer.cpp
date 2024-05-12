@@ -9,8 +9,4 @@ namespace Nut
 
 	}
 
-	Layer::~Layer()
-	{
-
-	}
 }

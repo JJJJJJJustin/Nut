@@ -15,7 +15,7 @@ namespace Nut {
 	{
 	public:
 		Application();
-		virtual ~Application();							//支持多态
+		virtual ~Application() = default;				//支持多态
 
 		void Run();
 
