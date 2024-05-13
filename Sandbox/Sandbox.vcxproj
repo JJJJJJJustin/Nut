@@ -139,6 +139,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\SquarePosShader.glsl" />
     <None Include="assets\shaders\TextureShader.glsl" />
     <None Include="assets\textures\emoji.webp" />
   </ItemGroup>

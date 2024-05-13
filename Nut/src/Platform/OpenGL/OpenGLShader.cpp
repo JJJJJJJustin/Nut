@@ -1,10 +1,11 @@
-#include "nutpch.h"
+	#include "nutpch.h"
 #include "OpenGLShader.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <fstream>
+#include <filesystem>
 
 namespace Nut
 {
@@ -22,12 +23,24 @@ namespace Nut
 
 	OpenGLShader::OpenGLShader(const std::string& filepath) 
 	{
+		// Get Shader code
 		std::string source = ReadFile(filepath);
 		std::unordered_map<GLenum, std::string> shaderSources = PreProcess(source);
 		Compile(shaderSources);
+		// Get Shader's name though filepath name
+		size_t lastSlash = filepath.find_last_of('/\\');					// maybe : 1.assets/textures/shader.glsl		2./shader	3.shader.glsl	4.shader
+		lastSlash = (lastSlash == std::string::npos ? 0 : lastSlash + 1);
+		size_t lastDot = filepath.rfind('.');
+		lastDot = (lastDot == std::string::npos ? filepath.size() : lastDot);
+		size_t count = lastDot - lastSlash;
+		m_Name = filepath.substr(0, count);
+																			// But we can use "filesystem" to simplify the syntax (And for "../shader.glsl", it'll be safer)
+		//std::filesystem::path path = filepath;
+		//m_Name = path.stem().string();
 	};
 
-	OpenGLShader::OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc)
+	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
+		:m_Name(name)
 	{
 		std::unordered_map<GLenum, std::string> shaderSources;
 		shaderSources[GL_VERTEX_SHADER] = vertexSrc;

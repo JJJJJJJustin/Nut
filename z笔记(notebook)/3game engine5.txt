@@ -1,0 +1,38 @@
+》》》》终于开始着色器库的设计，来看看着色器库是用来干嘛的。
+着色器库的设置是静态的，用于自动加载着色器内容、诊断着色器。
+高度抽象的设置可以为我们自动化识别接口，使在程序中的调用更加简洁，同时也隐藏了一些细节（自动化处理，不用手动显示设置）
+
+
+》》》》以下是一些设计中的理解：
+
+》》在 ShaderLibary 中，使用之前定义的指针 Ref 和 Scope，不需要包含头文件即可使用，为什么。
+原理：
+命名空间的作用域在整个程序中都有效，只要命名空间被正确声明和定义，其成员在程序的任何地方都可见。
+
+不使用命名空间的话，直接在代码中使用 Nut::Ref 也是可行的，
+
+
+》》关于Cherno对于从文件名截取着色器名称的手法，在 C++ 版本的逐步发展中，还有其他更便捷的方法。
+原版：
+	// Get Shader's name though filepath name
+	// maybe : 1.assets/textures/shader.glsl		2./shader	3.shader.glsl	4.shader
+	size_t lastSlash = filepath.find_last_of('/\\');
+	lastSlash = (lastSlash == std::string::npos ? 0 : lastSlash + 1);
+	size_t lastDot = filepath.rfind('.');
+	lastDot = (lastDot == std::string::npos ? filepath.size() : lastDot);
+
+	size_t count = lastDot - lastSlash;
+	m_Name = filepath.substr(0, count);
+
+新版：（C++ 17）
+#include <filesystem>
+
+std::filesystem::path path = filepath;
+m_Name = path.stem().string(); // Returns the file's name stripped of the extension.
+
+截取自评论：
+@This new feature is very useful for use in Asset Managers as well which I'm currently implementing in my project, it supports native file path directory seeking.
+@And it is bulletproof. His code isn't. If the path is "../testures/texture", the count will be negative, because the last dot is before the last slash. And this is a valid path.
+
+
+----------------------------------------------------------------------------------------

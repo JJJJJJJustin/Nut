@@ -69,7 +69,7 @@ public:
 			}
 		)";
 
-		m_Shader.reset(Nut::Shader::Create(vertexSrc, fragmentSrc));
+		m_Shader = Nut::Shader::Create("TriangleShader", vertexSrc, fragmentSrc);
 
 		// -------------- Square rendering ----------------
 		float squareVertices[5 * 4] =
@@ -97,36 +97,8 @@ public:
 		m_SquareVA->AddVertexBuffer(squareVB);
 		m_SquareVA->SetIndexBuffer(squareIB);
 
-		std::string squareVertexSrc = R"(
-			#version 330 core
-			
-			layout(location = 0) in vec3 a_Position;
-
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;
-
-			void main()
-			{
-				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
-			}
-		)";
-		std::string squareFragSrc = R"(
-			#version 330 core
-
-			layout(location = 0) out vec4 Color;
-
-			uniform vec3 u_Color;
-
-			void main()
-			{
-				Color = vec4(u_Color, 1.0);
-			}
-		)";
-		m_SquareShader.reset(Nut::Shader::Create(squareVertexSrc, squareFragSrc));
-
-
-		/*m_TextureShader.reset(Nut::Shader::Create(textureVertexSrc, textureFragSrc));*/
-		m_TextureShader.reset(Nut::Shader::Create("assets/shaders/TextureShader.glsl"));
+		m_SquareShader = Nut::Shader::Create("assets/shaders/SquarePosShader.glsl");
+		m_TextureShader = Nut::Shader::Create("assets/shaders/TextureShader.glsl");
 
 		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_TextureShader)->Bind();
 		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_TextureShader)->UpdateUniformInt("u_Texture", 0);

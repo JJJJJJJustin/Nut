@@ -11,11 +11,13 @@ namespace Nut
 	{
 	public:
 		OpenGLShader(const std::string& filepath);
-		OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc);
+		OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
 		virtual ~OpenGLShader();
 
 		void Bind() const override;
 		void Unbind() const override;
+
+		const std::string& GetName() const override { return m_Name; }
 
 		void UpdateUniformInt(const std::string& name, const int& value);
 
@@ -32,6 +34,7 @@ namespace Nut
 		void Compile(const std::unordered_map<GLenum, std::string>& shaderSource);
 	private:
 		uint32_t m_RendererID;								// uint32_t 是 32 位无符号整型，而 unsigned int 根据平台编译器有所不同
+		std::string m_Name;
 	};
 
 }

@@ -22,6 +22,7 @@
   <ItemGroup>
     <None Include="assets\textures\emoji.webp" />
     <None Include="assets\shaders\TextureShader.glsl" />
+    <None Include="assets\shaders\SquarePosShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\textures\emoji.png">
