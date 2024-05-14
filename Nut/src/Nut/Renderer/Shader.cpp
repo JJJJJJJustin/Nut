@@ -41,15 +41,21 @@ namespace Nut
 	}
 
 
+	// ---------------------------------------------------------------------------------------------------
+	//ShaderLibrary::ShaderLibrary()
+	//{
+	//	m_Shaders = std::unordered_map<std::string, Ref<Shader>>();
+	//}
+
 	void ShaderLibrary::Add(const Ref<Shader>& shader)
 	{
-		const std::string& name = shader->GetName();									// GetName的m_Name 在 OpenGLShader() 中设置 1.在一个构造函数中，通过文件名来截取 2.在另一个构造函数的重载中通过参数获取
+		auto& name = shader->GetName();										// GetName的m_Name 在 OpenGLShader() 中设置 1.在一个构造函数中，通过文件名来截取 2.在另一个构造函数的重载中通过参数获取
 		Add(name, shader);
 	}
 
-	void ShaderLibrary::Add(const std::string name, const Ref<Shader>& shader)
+	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
 	{
-		NUT_CORE_ASSERT(!Exists(name), "Shader:'{0}' is already exists!", name);		// 如果重复 Add 同一个着色器则报错
+		NUT_CORE_ASSERT(!Exists(name), "Shader is already exists!");		// 如果重复 Add 同一个着色器则报错
 		m_Shaders[name] = shader;
 	}
 
@@ -73,9 +79,13 @@ namespace Nut
 		return m_Shaders[name];
 	}
 
-	bool ShaderLibrary::Exists(const std::string& name)									// name 存在于 m_Shaders 中返回 true，否则 false
+	bool ShaderLibrary::Exists(const std::string& name)	const							// name 存在于 m_Shaders 中返回 true，否则 false
 	{
-		return (m_Shaders.find(name) != m_Shaders.end());
+		if (m_Shaders.empty()) {
+			return false;
+		}
+		
+		return m_Shaders.find(name) != m_Shaders.end();
 	}
 
 }
