@@ -8,7 +8,10 @@ namespace Nut
 	class OrthoGraphicCamera
 	{
 	public:
+		//OrthoGraphicCamera() = default;
 		OrthoGraphicCamera(float left, float right, float bottom, float top);
+
+		void SetProjectionMatrix(float left, float right, float bottom, float top);
 
 		void SetPosition(const glm::vec3& position)	{ m_Position = position; UpdateViewMatrix(); }
 		void SetRotation(const float& rotation)	    { m_Rotation = rotation; UpdateViewMatrix(); }

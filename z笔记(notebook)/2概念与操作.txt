@@ -18,7 +18,9 @@ Ctrl + Esc:			打开菜单（相当与单击 win ）
 Ctrl + E:			和 Alt + D 类似（Ctrl + E 适合在进行搜索的时候快速定位到搜索框，而 Alt + D 更适合在直接编辑网址的时候快速定位到地址栏。）
 Win + A:			打开快速设置页面
 Ctrl + Shift + Space:	（在VS中）打开函数参数的提示框
-
+VS2019中打开 minimap:
+				工具->选项->文本编辑器->C++->使用垂直滚动条的缩略图模式
+				(https://learn.microsoft.com/zh-cn/visualstudio/ide/how-to-track-your-code-by-customizing-the-scrollbar?view=vs-2022)
 
 
 

@@ -35,4 +35,17 @@ m_Name = path.stem().string(); // Returns the file's name stripped of the extens
 @And it is bulletproof. His code isn't. If the path is "../testures/texture", the count will be negative, because the last dot is before the last slash. And this is a valid path.
 
 
-----------------------------------------------------------------------------------------
+--------------------------------------How to build 2D engine-------------------------------------------
+没什么要记的，后面也都会涉及。这一集就是一个大概思路。
+-------------------------------------Camera Controllers------------------------------------------------
+》》》》大致思路
+将实际控制通过 Camera Controller 来调用，而不是像以前一样通过 Camera 类来直接的修改和更新 Camera 的值。
+现在的 Camera 可以认为是一个深层次的、存放了一些计算方法的库，controller 会调用这些方法，而用户只需要使用 Controller 来进行操纵。
+
+
+》》》》std::max( )?
+std::max 是 C++ 标准库中的一个函数模板，用于比较两个值，并返回其中较大的值。它定义在 <algorithm> 头文件中。
+
+
+》》》》claudiaIDE 2019
+一个可以更改 VS2019 背景的插件，这就是我昨天没有更选代码的原因。因为我去折腾壁纸了。

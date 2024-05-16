@@ -11,6 +11,8 @@
 #include "Nut/KeyCodes.h"
 #include "Nut/MouseButtonCodes.h"
 
+#include "Nut/OrthoGraphicCameraController.h"
+
 #include "Nut/ImGui/ImGuiLayer.h"
 //--------------- Renderer -------------------------
 #include "Nut/Renderer/Renderer.h"
@@ -20,7 +22,5 @@
 #include "Nut/Renderer/Shader.h"
 #include "Nut/Renderer/Texture.h"
 #include "Nut/Renderer/VertexArray.h"
-
-#include "Nut/Renderer/OrthoGraphicCamera.h"
 //--------------- EntryPoint ---------------------------
 #include "Nut/EntryPoint.h"

@@ -11,7 +11,7 @@ class ExampleLayer : public Nut::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("Example layer"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f), m_CameraRotation(0.0f)
+		: Layer("Example layer"), m_CameraController(1280.0f / 720.0f, true)
 	{
 		float vertices[3 * 7] = {
 				-0.5f, -0.5f, 0.0f, 1.0f, 0.2f, 0.8f, 1.0f,
@@ -108,31 +108,13 @@ public:
 	}
 
 	void OnUpdate(Nut::Timestep& ts) override {
-
-		//NUT_TRACE("{0}s( {1}ms ) pre frame", ts.GetSeconds(), ts.GetMilliseconds())		165HZ: 0.0061478615s( 6.1478615ms ) pre frame
-
-		if (Nut::Input::IsKeyPressed(NUT_KEY_LEFT))
-			m_CameraPosition.x += m_CameraMoveSpeed * ts;
-		else if (Nut::Input::IsKeyPressed(NUT_KEY_RIGHT))
-			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
-
-		if (Nut::Input::IsKeyPressed(NUT_KEY_UP))
-			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
-		else if (Nut::Input::IsKeyPressed(NUT_KEY_DOWN))
-			m_CameraPosition.y += m_CameraMoveSpeed * ts;
-
-		if (Nut::Input::IsKeyPressed(NUT_KEY_A))
-			m_CameraRotation -= m_CameraRotateSpeed * ts;
-		else if (Nut::Input::IsKeyPressed(NUT_KEY_D))
-			m_CameraRotation += m_CameraRotateSpeed * ts;
-
+		// Update
+		m_CameraController.OnUpdate(ts);
+		// Render
 		Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		Nut::RendererCommand::Clear();
 
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(m_CameraRotation);
-
-		Nut::Renderer::BeginScene(m_Camera);
+		Nut::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->Bind();
@@ -192,9 +174,9 @@ public:
 		ImGui::End();
 	}
 
-	void OnEvent(Nut::Event& event) override
+	void OnEvent(Nut::Event& e) override
 	{
-
+		m_CameraController.OnEvent(e);
 	}
 private:
 	Nut::Ref<Nut::Shader> m_Shader;
@@ -208,12 +190,8 @@ private:
 
 	glm::vec3 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f };
 
-	Nut::OrthoGraphicCamera m_Camera;
+	Nut::OrthoGraphicCameraController m_CameraController;
 
-	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 4.0f;
-	float m_CameraRotation;
-	float m_CameraRotateSpeed = 180.0f;
 };
 
 class Sandbox : public Nut::Application
