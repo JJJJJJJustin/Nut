@@ -46,6 +46,7 @@ namespace Nut {
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
 
 		//NUT_CORE_TRACE("{0}", e);
 
@@ -67,9 +68,10 @@ namespace Nut {
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			for (Layer* layer : m_LayerStack)				//更新图层
-				layer->OnUpdate(timestep);					//执行逻辑更新(更新应用程序的逻辑状态）
-			
+			if (!m_Minimized) {
+				for (Layer* layer : m_LayerStack)				//更新图层
+					layer->OnUpdate(timestep);					//执行逻辑更新(更新应用程序的逻辑状态）
+			}
 			//auto [x, y] = Input::GetMousePos();
 			//NUT_CORE_TRACE("{0},{1}", x, y);
 
@@ -86,5 +88,17 @@ namespace Nut {
 	{
 		m_Running = false;
 		return true;
+	}
+	bool Application::OnWindowResize(WindowResizeEvent& event)
+	{
+		m_Minimized = false;
+		Renderer::OnWindowResize(event.GetWidth(), event.GetHeight());
+		return false;
+
+		if(event.GetWidth() == 0 && event.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
 	}
 }

@@ -29,8 +29,10 @@ namespace Nut {
 																	//（为什么函数是引用传递？：因为application是一个单例，如果不使用&则会多出一个复制，这有悖于单例模式的只有一个对象的要求
 	private:
 		bool OnWindowClose(WindowCloseEvent& event);
+		bool OnWindowResize(WindowResizeEvent& event);
 	private:
 		bool m_Running = true;
+		bool m_Minimized = false;
 		std::unique_ptr<Window> m_Window;				//指向Window的指针
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;

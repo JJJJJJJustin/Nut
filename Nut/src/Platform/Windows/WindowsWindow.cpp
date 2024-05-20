@@ -69,13 +69,13 @@ namespace Nut
 				WindowResizeEvent event(width, height);
 				data.EventCallback(event);
 			}
-		);																//lambda表达式作为第二个参数
+		);																	//lambda表达式作为第二个参数
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				WindowCloseEvent event;
-				data.EventCallback(event);									//data.EventCallback中存入了OnEvent函数，event作为其参数使用
+				data.EventCallback(event);									//data.EventCallback中存入了OnEvent函数（在application中），event作为其参数使用
 			}
 		);
 
