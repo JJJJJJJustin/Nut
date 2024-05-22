@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nutpch.h"
-#include "Nut\Core.h"
+#include "Nut\Core\Core.h"
 
 namespace Nut {
 	/*I hear that from the Cherno :

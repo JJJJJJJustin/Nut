@@ -1,17 +1,17 @@
 #pragma once
 
 // For use by Nut applications
-#include "Nut/Application.h"
-#include "Nut/Layer.h"
-#include "Nut/Log.h"
+#include "Nut/Core/Application.h"
+#include "Nut/Core/Layer.h"
+#include "Nut/Core/Log.h"
 
 #include "Nut/Core/Timestep.h"
 
-#include "Nut/Input.h"
-#include "Nut/KeyCodes.h"
-#include "Nut/MouseButtonCodes.h"
+#include "Nut/Core/Input.h"
+#include "Nut/Core/KeyCodes.h"
+#include "Nut/Core/MouseButtonCodes.h"
 
-#include "Nut/OrthoGraphicCameraController.h"
+#include "Nut/Renderer/OrthoGraphicCameraController.h"
 
 #include "Nut/ImGui/ImGuiLayer.h"
 //--------------- Renderer -------------------------
@@ -22,5 +22,3 @@
 #include "Nut/Renderer/Shader.h"
 #include "Nut/Renderer/Texture.h"
 #include "Nut/Renderer/VertexArray.h"
-//--------------- EntryPoint ---------------------------
-#include "Nut/EntryPoint.h"

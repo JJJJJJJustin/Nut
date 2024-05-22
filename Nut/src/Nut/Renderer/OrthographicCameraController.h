@@ -14,7 +14,7 @@ namespace Nut {
 	public:
 		OrthoGraphicCameraController(float aspectRatio, bool rotation = false);
 
-		void OnUpdate(Timestep& ts);
+		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 
 		OrthoGraphicCamera& GetCamera() { return m_Camera; }

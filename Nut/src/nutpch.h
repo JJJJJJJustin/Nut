@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "Nut/Log.h"
+#include "Nut/Core/Log.h"
 
 #ifdef NUT_PLATFORM_WINDOWS
 	#include <Windows.h>

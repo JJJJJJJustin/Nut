@@ -10,6 +10,7 @@ namespace Nut {
 	{
 		for each (Layer* layer in m_Layers)
 		{
+			layer->OnDetach();
 			delete layer;
 		}
 	}

@@ -2,10 +2,10 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Application.h"
+#include "Nut/Core/Application.h"
 
-#include "Events/Event.h"
-#include "Nut/Log.h"
+#include "Nut/Events/Event.h"
+#include "Nut/Core/Log.h"
 #include "Input.h"
 
 #include "Nut/Renderer/Renderer.h"

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Nut/Core.h"
+#include "Nut/Core/Core.h"
 
 namespace Nut
 {

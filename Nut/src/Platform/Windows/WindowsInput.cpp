@@ -1,7 +1,7 @@
 #include "nutpch.h"
 #include "WindowsInput.h"
 
-#include "Nut\Application.h"
+#include "Nut\Core\Application.h"
 
 #include <GLFW\glfw3.h>
 

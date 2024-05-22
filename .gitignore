@@ -1,8 +1,16 @@
+## *和**是通配符，* 表示任意一级子目录，** 表示当前目录及其所有子目录中的文件。
+## \xxx 和 \xxx\。 \xxx 表示匹配 xxx 目录及其直接子目录中的 xxx, \xxx\ 表示表示匹配 xxx 目录及其所有子目录中的 xxx。
+
 # Ignore files and directories in the .vs folder
 .vs/
-# Ignore directories
-bin/
-bin-int/
+# Ignore Visual Studio files and folder (包括项目的用户特定设置文件）
+**.sln
+**.vcxproj
+**.vcxproj.filters          
+**.vcxproj.user
 
-#Ignore files
-*.user
+# Ignore directories
+bin-int/
+**/bin/
+# ! 表示不忽略vendor/bin/premake目录
+!vendor/bin/premake/

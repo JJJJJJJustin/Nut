@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Core.h"
+#include "Nut/Core/Core.h"
 #include "Nut/Core/Timestep.h"
-#include "Events/Event.h"
+#include "Nut/Events/Event.h"
 
 namespace Nut
 {
@@ -14,7 +14,7 @@ namespace Nut
 
 		virtual void OnAttach() {}			//此虚函数初步为空
 		virtual void OnDetach() {}
-		virtual void OnUpdate(Timestep& ts) {}
+		virtual void OnUpdate(Timestep ts) {}
 		virtual void OnEvent(Event& event) {}
 		virtual void OnImGuiRender(){}
 

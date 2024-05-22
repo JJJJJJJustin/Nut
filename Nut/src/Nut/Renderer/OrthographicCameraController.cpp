@@ -1,17 +1,16 @@
 #include "nutpch.h"
 #include "OrthographicCameraController.h"
 
-#include "Nut/Input.h"
-#include "Nut/KeyCodes.h"
+#include "Nut/Core/Input.h"
+#include "Nut/Core/KeyCodes.h"
 
 namespace Nut {
-
 
 	OrthoGraphicCameraController::OrthoGraphicCameraController(float aspectRatio, bool rotation)
 		:m_AspectRatio(aspectRatio), m_Rotation(rotation), m_Camera(-m_AspectRatio * m_ZoomLevel, m_AspectRatio* m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel)
 	{ }
 
-	void OrthoGraphicCameraController::OnUpdate(Timestep& ts)
+	void OrthoGraphicCameraController::OnUpdate(Timestep ts)
 	{
 		if (m_Rotation) {
 			if (Input::IsKeyPressed(NUT_KEY_Q))

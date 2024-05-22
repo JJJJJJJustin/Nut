@@ -80,7 +80,9 @@
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -104,6 +106,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -128,6 +131,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -141,32 +145,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Nut.h" />
-    <ClInclude Include="src\Nut\Application.h" />
-    <ClInclude Include="src\Nut\Core.h" />
+    <ClInclude Include="src\Nut\Core\Application.h" />
+    <ClInclude Include="src\Nut\Core\Core.h" />
+    <ClInclude Include="src\Nut\Core\EntryPoint.h" />
+    <ClInclude Include="src\Nut\Core\Input.h" />
+    <ClInclude Include="src\Nut\Core\KeyCodes.h" />
+    <ClInclude Include="src\Nut\Core\Layer.h" />
+    <ClInclude Include="src\Nut\Core\LayerStack.h" />
+    <ClInclude Include="src\Nut\Core\Log.h" />
+    <ClInclude Include="src\Nut\Core\MouseButtonCodes.h" />
     <ClInclude Include="src\Nut\Core\Timestep.h" />
-    <ClInclude Include="src\Nut\EntryPoint.h" />
+    <ClInclude Include="src\Nut\Core\Window.h" />
     <ClInclude Include="src\Nut\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Nut\Events\Event.h" />
     <ClInclude Include="src\Nut\Events\KeyEvent.h" />
     <ClInclude Include="src\Nut\Events\MouseEvent.h" />
     <ClInclude Include="src\Nut\ImGui\ImGuiLayer.h" />
-    <ClInclude Include="src\Nut\Input.h" />
-    <ClInclude Include="src\Nut\KeyCodes.h" />
-    <ClInclude Include="src\Nut\Layer.h" />
-    <ClInclude Include="src\Nut\LayerStack.h" />
-    <ClInclude Include="src\Nut\Log.h" />
-    <ClInclude Include="src\Nut\MouseButtonCodes.h" />
-    <ClInclude Include="src\Nut\OrthographicCameraController.h" />
     <ClInclude Include="src\Nut\Renderer\Buffer.h" />
     <ClInclude Include="src\Nut\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Nut\Renderer\OrthoGraphicCamera.h" />
+    <ClInclude Include="src\Nut\Renderer\OrthographicCameraController.h" />
     <ClInclude Include="src\Nut\Renderer\Renderer.h" />
     <ClInclude Include="src\Nut\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Nut\Renderer\RendererCommand.h" />
     <ClInclude Include="src\Nut\Renderer\Shader.h" />
     <ClInclude Include="src\Nut\Renderer\Texture.h" />
     <ClInclude Include="src\Nut\Renderer\VertexArray.h" />
-    <ClInclude Include="src\Nut\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
@@ -595,15 +599,15 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Nut\Application.cpp" />
+    <ClCompile Include="src\Nut\Core\Application.cpp" />
+    <ClCompile Include="src\Nut\Core\Layer.cpp" />
+    <ClCompile Include="src\Nut\Core\LayerStack.cpp" />
+    <ClCompile Include="src\Nut\Core\Log.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiLayer.cpp" />
-    <ClCompile Include="src\Nut\Layer.cpp" />
-    <ClCompile Include="src\Nut\LayerStack.cpp" />
-    <ClCompile Include="src\Nut\Log.cpp" />
-    <ClCompile Include="src\Nut\OrthographicCameraController.cpp" />
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Nut\Renderer\OrthoGraphicCamera.cpp" />
+    <ClCompile Include="src\Nut\Renderer\OrthographicCameraController.cpp" />
     <ClCompile Include="src\Nut\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Nut\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\Nut\Renderer\RendererCommand.cpp" />

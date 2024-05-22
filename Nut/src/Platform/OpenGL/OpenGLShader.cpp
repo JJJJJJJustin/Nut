@@ -13,15 +13,16 @@ namespace Nut
 	{
 		if (type == "vertex") {
 			return GL_VERTEX_SHADER;
-		} else if (type == "fragment" || type == "pixel") {
+		}
+		else if (type == "fragment" || type == "pixel") {
 			return GL_FRAGMENT_SHADER;
 		}
 
 		NUT_CORE_ASSERT(false, "Unknown shader type!")
-		return 0;
+			return 0;
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& filepath) 
+	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
 		// Get Shader code
 		std::string source = ReadFile(filepath);
@@ -34,9 +35,9 @@ namespace Nut
 		lastDot = lastDot == std::string::npos ? filepath.size() : lastDot;
 		auto count = lastDot - lastSlash;
 		m_Name = filepath.substr(lastSlash, count);
-																		// But we can use "filesystem" to simplify the syntax (And for "../shader.glsl", it'll be safer)
-		//std::filesystem::path path = filepath;
-		//m_Name = path.stem().string();
+		// But we can use "filesystem" to simplify the syntax (And for "../shader.glsl", it'll be safer)
+//std::filesystem::path path = filepath;
+//m_Name = path.stem().string();
 	};
 
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
@@ -63,11 +64,11 @@ namespace Nut
 		glUseProgram(0);
 	}
 
-	std::string OpenGLShader::ReadFile(const std::string& filepath) 
+	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
 		std::string result;
 		std::ifstream readIn(filepath, std::ios::in | std::ios::binary);
-		if(readIn)
+		if (readIn)
 		{
 			readIn.seekg(0, std::ios::end);
 			result.resize(readIn.tellg());
@@ -75,7 +76,8 @@ namespace Nut
 			readIn.seekg(0, std::ios::beg);
 			readIn.read(&result[0], result.size());
 			readIn.close();
-		} else {
+		}
+		else {
 			NUT_CORE_ERROR("Could not open file form : '{0}'", filepath);
 		}
 
@@ -94,13 +96,13 @@ namespace Nut
 		{
 			size_t begin = pos + tokenLength + 1;
 			size_t end_of_line = source.find_first_of("\r\n", pos);
-			NUT_CORE_ASSERT( (end_of_line != std::string::npos), "Syntax error");
+			NUT_CORE_ASSERT((end_of_line != std::string::npos), "Syntax error");
 			std::string type = source.substr(begin, end_of_line - begin);
 			NUT_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified");
 
 			size_t nextLinePos = source.find_first_not_of("\r\n", end_of_line);
 			pos = source.find(token, nextLinePos);
-			shaderSources[ShaderTypeFromString(type)] = 
+			shaderSources[ShaderTypeFromString(type)] =
 				source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
 		}
 
@@ -160,7 +162,7 @@ namespace Nut
 
 			glDeleteProgram(m_RendererID);
 
-			for(auto shader : glShaders)
+			for (auto shader : glShaders)
 				glDeleteShader(shader);
 
 			NUT_CORE_ERROR("{0}", infoLog.data());
@@ -168,8 +170,10 @@ namespace Nut
 			return;
 		}
 
-		for (auto shader : glShaders)
+		for (auto shader : glShaders) {
 			glDetachShader(m_RendererID, shader);
+			glDeleteShader(shader);
+		}
 	}
 
 	void OpenGLShader::UpdateUniformInt(const std::string& name, const int& value)
@@ -178,28 +182,28 @@ namespace Nut
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::UpdateUniformFloat(const std::string& name, const float& value){
+	void OpenGLShader::UpdateUniformFloat(const std::string& name, const float& value) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform1f(location, value);
 	}
-	void OpenGLShader::UpdateUniformFloat2(const std::string& name, const glm::vec2& value){
+	void OpenGLShader::UpdateUniformFloat2(const std::string& name, const glm::vec2& value) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform2f(location, value.x, value.y);
 	}
-	void OpenGLShader::UpdateUniformFloat3(const std::string& name, const glm::vec3& value){
+	void OpenGLShader::UpdateUniformFloat3(const std::string& name, const glm::vec3& value) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform3f(location, value.x, value.y, value.z);
 	}
-	void OpenGLShader::UpdateUniformFloat4(const std::string& name, const glm::vec4& value){
+	void OpenGLShader::UpdateUniformFloat4(const std::string& name, const glm::vec4& value) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
-	void OpenGLShader::UpdateUniformMat3(const std::string& name, const glm::mat3& matrix){
+	void OpenGLShader::UpdateUniformMat3(const std::string& name, const glm::mat3& matrix) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
-	void OpenGLShader::UpdateUniformMat4(const std::string& name, const glm::mat4& matrix){
+	void OpenGLShader::UpdateUniformMat4(const std::string& name, const glm::mat4& matrix) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}

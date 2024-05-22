@@ -1,11 +1,12 @@
 #include "Nut.h"
+#include <Nut/Core/EntryPoint.h>
+#include "Sandbox2D.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
+#include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include "imgui/imgui.h"
 
 class ExampleLayer : public Nut::Layer
 {
@@ -25,7 +26,7 @@ public:
 		vertexBuffer.reset(Nut::VertexBuffer::Create(vertices, sizeof(vertices)));
 		indexBuffer.reset(Nut::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 
-		m_VertexArray.reset(Nut::VertexArray::Create());
+		m_VertexArray = Nut::VertexArray::Create();
 		Nut::BufferLayout layout =
 		{
 			{ Nut::ShaderDataType::Float3, "a_Position" },
@@ -81,7 +82,7 @@ public:
 		};
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 
-		m_SquareVA.reset(Nut::VertexArray::Create());
+		m_SquareVA = Nut::VertexArray::Create();
 
 		Nut::Ref<Nut::VertexBuffer> squareVB;
 		squareVB.reset(Nut::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
@@ -97,7 +98,7 @@ public:
 		m_SquareVA->AddVertexBuffer(squareVB);
 		m_SquareVA->SetIndexBuffer(squareIB);
 
-		m_SquareShader = Nut::Shader::Create("assets/shaders/SquarePosShader.glsl");
+		m_SquareShader = Nut::Shader::Create("assets/shaders/FlatColorShader.glsl");
 		//auto m_TextureShader = Nut::Shader::Create("assets/shaders/TextureShader.glsl");
 		auto textureShader = m_ShaderLibrary.Load("assets/shaders/TextureShader.glsl");
 
@@ -107,7 +108,7 @@ public:
 		m_Texture = Nut::Texture2D::Create("assets/textures/rain.jpg");
 	}
 
-	void OnUpdate(Nut::Timestep& ts) override {
+	void OnUpdate(Nut::Timestep ts) override {
 		// Update
 		m_CameraController.OnUpdate(ts);
 		// Render
@@ -118,7 +119,7 @@ public:
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->Bind();
-		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->UpdateUniformFloat3("u_Color", m_SquareColor);
+		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->UpdateUniformFloat4("u_Color", m_SquareColor);
 		for (int y = 0; y < 20; y++) {
 			for (int x = 0; x < 20; x++) {
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
@@ -142,7 +143,7 @@ public:
 	void OnImGuiRender() override
 	{
 		ImGui::Begin("Test");
-		ImGui::ColorEdit3("Square Color Edit", glm::value_ptr(m_SquareColor));
+		ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(m_SquareColor));
 		const char* text = R"(
                          ...----....
                   .-'                  ''
@@ -188,7 +189,7 @@ private:
 
 	Nut::Ref<Nut::Texture2D> m_Texture,m_EmojiTexture;
 
-	glm::vec3 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f };
+	glm::vec4 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };
 
 	Nut::OrthoGraphicCameraController m_CameraController;
 
@@ -199,8 +200,9 @@ class Sandbox : public Nut::Application
 public:
 	Sandbox()
 	{
-		PushLayer(new ExampleLayer());
 		//取消 PushOverlay(new Nut::ImGuiLayer()); ，将其作为 Hazel 运行时 固定自动添加的图层（在 application.cpp 中）
+		//PushLayer(new ExampleLayer());
+		PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox()

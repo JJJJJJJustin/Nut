@@ -18,21 +18,17 @@
     <ClCompile Include="src\SandboxApp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Sandbox2D.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\textures\emoji.webp" />
+    <None Include="assets\shaders\FlatColorShader.glsl" />
     <None Include="assets\shaders\TextureShader.glsl" />
-    <None Include="assets\shaders\SquarePosShader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\textures\emoji.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="assets\textures\rain.jpg">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="assets\textures\Checkerboard.png">
-      <Filter>资源文件</Filter>
-    </Image>
+    <ClInclude Include="src\Sandbox2D.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
