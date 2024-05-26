@@ -26,6 +26,6 @@ namespace Nut
 		virtual float GetMouseXImpl() = 0;
 		virtual float GetMouseYImpl() = 0;
 	private:
-		static Input* s_Instance;										//在WindowsInput.cpp中初始化（静态成员变量必须被定义或初始化）
+		static Scope<Input> s_Instance;										//在WindowsInput.cpp中初始化（静态成员变量必须被定义或初始化）
 	};
 }

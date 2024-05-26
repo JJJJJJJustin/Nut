@@ -18,18 +18,28 @@ namespace Nut {
 			else if (Nut::Input::IsKeyPressed(NUT_KEY_E))
 				m_CameraRotation += m_CameraRotationSpeed * ts;
 
+			if (m_CameraRotation > 180.0f)														// 将角度控制在 180°~ -180°中(共360°)，在不影响计算结果的情况下减少计算成本（避免在不断更新中导致角度过大）
+				m_CameraRotation -= 360.0f;
+			else if (m_CameraRotation <= -180.0f)
+				m_CameraRotation += 360.0f;
+
 			m_Camera.SetRotation(m_CameraRotation);
 		}
 
-		if (Input::IsKeyPressed(NUT_KEY_A))
-			m_CameraPosition.x += m_CameraTranslationSpeed * ts;
-		else if (Nut::Input::IsKeyPressed(NUT_KEY_D))
-			m_CameraPosition.x -= m_CameraTranslationSpeed * ts;
-
-		if (Input::IsKeyPressed(NUT_KEY_W))
-			m_CameraPosition.y -= m_CameraTranslationSpeed * ts;
-		else if (Nut::Input::IsKeyPressed(NUT_KEY_S))
-			m_CameraPosition.y += m_CameraTranslationSpeed * ts;
+		if (Input::IsKeyPressed(NUT_KEY_A)) {
+			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+		} else if (Nut::Input::IsKeyPressed(NUT_KEY_D)) {
+			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+		}
+		if (Input::IsKeyPressed(NUT_KEY_W)) {
+			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y -=  cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+		} else if (Nut::Input::IsKeyPressed(NUT_KEY_S)) {
+			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y +=  cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+		}
 
 		m_Camera.SetPosition(m_CameraPosition);
 

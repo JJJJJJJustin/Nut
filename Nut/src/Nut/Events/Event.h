@@ -31,7 +31,7 @@ namespace Nut {
 
 	//宏定义（文本替换）自动化以下的重写操作---------------------------------------------------
 #define EVENT_CLASS_TYPE(type) \
-			static EventType GetStaticType(){ return EventType::##type; }\
+			static EventType GetStaticType(){ return EventType::type; }\
 			virtual EventType GetEventType() const override { return GetStaticType(); }\
 			virtual const char* GetName() const override { return #type; }
 

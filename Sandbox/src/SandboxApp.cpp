@@ -201,8 +201,8 @@ public:
 	Sandbox()
 	{
 		//取消 PushOverlay(new Nut::ImGuiLayer()); ，将其作为 Hazel 运行时 固定自动添加的图层（在 application.cpp 中）
-		//PushLayer(new ExampleLayer());
-		PushLayer(new Sandbox2D());
+		PushLayer(new ExampleLayer());
+		//PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox()

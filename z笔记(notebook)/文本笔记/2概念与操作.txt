@@ -21,6 +21,7 @@ Ctrl + Shift + Space:	（在VS中）打开函数参数的提示框
 VS2019中打开 minimap:
 				工具->选项->文本编辑器->C++->使用垂直滚动条的缩略图模式
 				(https://learn.microsoft.com/zh-cn/visualstudio/ide/how-to-track-your-code-by-customizing-the-scrollbar?view=vs-2022)
+Win+Shift+N:		打开快速笔记 OneNote，或者在 Win+R 中输入 onenote 指令。
 
 
 
@@ -432,4 +433,51 @@ emplace( ) 接受两个参数，一个是插入的位置，第二个是传入的
 而 .hpp 文件则有时被用于 C++ 头文件，特别是在涉及到 C++ 的特性或标准库时。
 
 
-》》》》
+
+》》》》什么是 constexpr ？
+概念：
+constexpr是C++11引入的一个关键字，用于声明可以在编译时求值的常量表达式。它可以用于变量、函数、构造函数等的声明中。
+
+变量：
+通过在变量声明前加上constexpr关键字，可以将其定义为常量表达式。
+必须满足以下条件：
+	初始化表达式在编译时就能计算出结果；
+	变量类型必须是字面类型（literal type），即不能包含用户自定义类型的成员函数，且所有非静态成员必须也是字面类型。
+eg.
+	constexpr int k = 10;
+	constexpr double pi = 3.1415926;
+
+函数：
+通过在函数声明前加上constexpr关键字，可以将其定义为常量表达式。
+函数必须满足以下条件：
+	函数体中只能包含一行返回语句；
+	返回值必须是字面类型；
+	所有参数必须是字面类型。
+
+eg.
+	constexpr int factorial(int n) {
+	    return (n == 0) ? 1 : n * factorial(n - 1);
+	}
+	constexpr int result = factorial(5); // 编译时就能计算出结果
+
+构造函数：
+通过在构造函数声明前加上constexpr关键字，可以将其定义为常量表达式构造函数。
+类必须满足以下条件：
+	类中的所有成员变量和成员函数都是字面类型；
+	构造函数只能有一个参数列表；
+	构造函数中只能使用一行赋值语句对成员变量进行初始化。
+
+eg.
+	class Vector {
+	public:
+	    constexpr Vector(double x, double y) : x_(x), y_(y) {}
+	    constexpr double x() const { return x_; }
+	    constexpr double y() const { return y_; }
+	private:
+ 	   double x_;
+ 	   double y_;
+	};
+	constexpr Vector v(1.0, 2.0); // 编译时就能创建对象
+
+作用：
+在使用constexpr时，最重要的是确保定义的常量表达式可以在编译时求值。

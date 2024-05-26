@@ -93,7 +93,6 @@ project "Nut"                       --项目
 
         defines
         {                           --宏的声明
-            "NUT_PLATFORM_WINDOWS",
             "NUT_BUILD_DLL",
             "GLFW_INCLUDE_NONE"
         }
@@ -157,8 +156,8 @@ project "Sandbox"
         systemversion "latest"
 
         defines
-        {                          
-            "NUT_PLATFORM_WINDOWS"
+        {
+            
         }
 
         filter "configurations:Debug"

@@ -15,7 +15,7 @@ namespace Nut
 			None = 0, OpenGL = 1, DirectX = 2
 		};
 	public:
-		static RendererAPI* Create();
+		static Scope<RendererAPI> Create();
 
 		virtual void Clear() = 0;
 		virtual void SetClearColor(const glm::vec4& color) = 0;
