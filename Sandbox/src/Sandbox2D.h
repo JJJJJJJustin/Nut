@@ -2,7 +2,7 @@
 
 #include "Nut.h"
 
-#include "Platform/OpenGL/OpenGLShader.h"
+#include "Nut/Renderer/Texture.h"
 
 #include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -21,8 +21,10 @@ public:
 	void OnImGuiRender() override;
 	void OnEvent(Nut::Event& event) override;
 private:
-	Nut::Ref<Nut::Shader> m_SquareShader;
-	Nut::Ref<Nut::VertexArray> m_SquareVA;
+	//Nut::Ref<Nut::VertexArray> m_SquareVA;
+	//Nut::Ref<Nut::Shader> m_SquareShader;
+	Nut::Ref<Nut::Texture2D> m_Texture;
+
 	Nut::OrthoGraphicCameraController m_CameraController;
 
 	glm::vec4 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };

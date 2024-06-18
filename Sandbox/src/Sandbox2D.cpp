@@ -7,8 +7,7 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
-	
-
+	m_Texture = Nut::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void Sandbox2D::OnDetach()
@@ -26,6 +25,7 @@ void Sandbox2D::OnUpdate(Nut::Timestep ts)
 	Nut::Renderer2D::BeginScene(m_CameraController.GetCamera());
 	Nut::Renderer2D::DrawQuad({ 0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.8f, 0.2f, 0.3f, 1.0f});
 	Nut::Renderer2D::DrawQuad({ 1.0f, -1.0f }, { 0.5f, 1.0f }, { 0.2f, 0.8f, 0.3f, 1.0f });
+	Nut::Renderer2D::DrawQuad({ 0.0f,  0.0f, -0.1f }, { 2.0f, 2.0f }, m_Texture);
 	Nut::Renderer2D::EndScene();
 }
 
