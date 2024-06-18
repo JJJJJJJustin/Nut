@@ -8,7 +8,7 @@ namespace Nut
 	class RendererCommand
 	{
 	public:
-		// static variable frmm Create(), which returns virtual funcs already overrided in Platform
+		// static variable from Create(), which returns virtual funcs already overrided in Platform
 		// So bind the functions form corresponding interface in OpenGL/DirectX/Metal/Valkan
 		inline static void Init()
 		{

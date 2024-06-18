@@ -16,6 +16,7 @@
 #include "Nut/ImGui/ImGuiLayer.h"
 //--------------- Renderer -------------------------
 #include "Nut/Renderer/Renderer.h"
+#include "Nut/Renderer/Renderer2D.h"
 #include "Nut/Renderer/RendererCommand.h"
 
 #include "Nut/Renderer/Buffer.h"

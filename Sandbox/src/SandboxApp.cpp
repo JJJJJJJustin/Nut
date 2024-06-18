@@ -103,7 +103,7 @@ public:
 		auto textureShader = m_ShaderLibrary.Load("assets/shaders/TextureShader.glsl");
 
 		std::dynamic_pointer_cast<Nut::OpenGLShader>(textureShader)->Bind();
-		std::dynamic_pointer_cast<Nut::OpenGLShader>(textureShader)->UpdateUniformInt("u_Texture", 0);
+		std::dynamic_pointer_cast<Nut::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
 		m_EmojiTexture = Nut::Texture2D::Create("assets/textures/emoji.png");
 		m_Texture = Nut::Texture2D::Create("assets/textures/rain.jpg");
 	}
@@ -119,7 +119,7 @@ public:
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->Bind();
-		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->UpdateUniformFloat4("u_Color", m_SquareColor);
+		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->UploadUniformFloat4("u_Color", m_SquareColor);
 		for (int y = 0; y < 20; y++) {
 			for (int x = 0; x < 20; x++) {
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
@@ -200,9 +200,9 @@ class Sandbox : public Nut::Application
 public:
 	Sandbox()
 	{
-		//取消 PushOverlay(new Nut::ImGuiLayer()); ，将其作为 Hazel 运行时 固定自动添加的图层（在 application.cpp 中）
-		PushLayer(new ExampleLayer());
-		//PushLayer(new Sandbox2D());
+		//取消 PushOverlay(new Nut::ImGuiLayer()); ，将其作为 Hazel 运行时 固定自动添加的图层:DemoWindow（在 application.cpp 中）
+		//PushLayer(new ExampleLayer());
+		PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox()

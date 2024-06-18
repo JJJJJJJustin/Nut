@@ -19,15 +19,19 @@ namespace Nut
 
 		const std::string& GetName() const override { return m_Name; }
 
-		void UpdateUniformInt(const std::string& name, const int& value);
+		void SetInt   (const std::string& name, const int& value) override;
+		void SetFloat3(const std::string& name, const glm::vec3& value) override;
+		void SetFloat4(const std::string& name, const glm::vec4& value) override;
+		void SetMat3  (const std::string& name, const glm::mat3& value) override;
+		void SetMat4  (const std::string& name, const glm::mat4& value) override;
 
-		void UpdateUniformFloat(const std::string& name, const float& value);
-		void UpdateUniformFloat2(const std::string& name, const glm::vec2& value);
-		void UpdateUniformFloat3(const std::string& name, const glm::vec3& value);
-		void UpdateUniformFloat4(const std::string& name, const glm::vec4& value);
-
-		void UpdateUniformMat3(const std::string& name, const glm::mat3& matrix);
-		void UpdateUniformMat4(const std::string& name, const glm::mat4& matrix);
+		void UploadUniformInt   (const std::string& name, const int& value);
+		void UploadUniformFloat (const std::string& name, const float& value);
+		void UploadUniformFloat2(const std::string& name, const glm::vec2& value);
+		void UploadUniformFloat3(const std::string& name, const glm::vec3& value);
+		void UploadUniformFloat4(const std::string& name, const glm::vec4& value);
+		void UploadUniformMat3  (const std::string& name, const glm::mat3& matrix);
+		void UploadUniformMat4  (const std::string& name, const glm::mat4& matrix);
 	private:
 		std::string ReadFile(const std::string& filepath);										//将文件读入一个字符串中并返回以供使用
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);
