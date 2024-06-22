@@ -14,8 +14,8 @@ namespace Nut {
 	struct Renderer2DStorage
 	{
 		Ref<VertexArray> QuadVA;
-		Ref<Shader> FlatColorShader;
 		Ref<Shader> TextureShader;
+		Ref<Texture2D> WhiteTexture;
 	};
 	static Renderer2DStorage* s_Data;														// 为什么是指针：方便管理内存的分配与释放
 
@@ -49,11 +49,13 @@ namespace Nut {
 		s_Data->QuadVA->AddVertexBuffer(squareVB);
 		s_Data->QuadVA->SetIndexBuffer(squareIB);
 
-		s_Data->FlatColorShader = Shader::Create("assets/shaders/FlatColorShader.glsl");
-		s_Data->TextureShader = Shader::Create("assets/shaders/TextureShader.glsl");
-		s_Data->TextureShader->Bind();															//绑定着色器之后，将其将要采样的图片设置在插槽0号当中
-		s_Data->TextureShader->SetInt("u_Texture", 0);											//设置为0号之后，系统会根据纹理默认的顺序采样
+		s_Data->TextureShader = Shader::Create("assets/shaders/TextureShader.glsl");			//根据glsl创建着色器对象
+		s_Data->TextureShader->Bind();															//绑定着色器对象
+		s_Data->TextureShader->SetInt("u_Texture", 0);											//将要采样的图片设置在0号纹理单元中，设置为0号之后，之后绑定的纹理会被渲染在0号图层中。（纹理单元允许同一个位置同时渲染多个图层的纹理）
 
+		s_Data->WhiteTexture = Texture2D::Create(1,1);
+		uint32_t whiteTextureData = 0xffffffff;
+		s_Data->WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 	}
 
 	void Renderer2D::Shutdown()
@@ -63,9 +65,6 @@ namespace Nut {
 
 	void Renderer2D::BeginScene(const OrthoGraphicCamera& camera)
 	{
-		s_Data->FlatColorShader->Bind();
-		s_Data->FlatColorShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 	}
@@ -81,10 +80,12 @@ namespace Nut {
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
+		// 唯一的着色器在 BeginScene 中已经被绑定，故先设置 Color, 再绑定 Texture
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		s_Data->FlatColorShader->Bind();
-		s_Data->FlatColorShader->SetFloat4("u_Color", color);
-		s_Data->FlatColorShader->SetMat4("u_Transform", transform);
+		s_Data->TextureShader->SetFloat4("u_Color", color);
+		s_Data->TextureShader->SetMat4("u_Transform", transform);
+
+		s_Data->WhiteTexture->Bind();
 
 		s_Data->QuadVA->Bind();
 		RendererCommand::DrawIndexed(s_Data->QuadVA);
@@ -98,10 +99,10 @@ namespace Nut {
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		s_Data->TextureShader->Bind();
+		s_Data->TextureShader->SetFloat4("u_Color", glm::vec4{ 1.0f });
 		s_Data->TextureShader->SetMat4("u_Transform", transform);
 
-		texture->Bind();														//将纹理绑定在0号插槽，以采样
+		texture->Bind();														//将纹理采样至0号纹理单元
 
 		s_Data->QuadVA->Bind();
 		RendererCommand::DrawIndexed(s_Data->QuadVA);

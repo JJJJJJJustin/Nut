@@ -32,6 +32,7 @@ namespace Nut
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
 	{
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glBindTexture(GL_TEXTURE_2D, 0);													//渲染完之后，解绑当前纹理，避免影响到后续物体纹理的渲染
 	}
 
 }
