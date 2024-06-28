@@ -49,11 +49,13 @@ namespace Nut {
 		s_Data->QuadVA->AddVertexBuffer(squareVB);
 		s_Data->QuadVA->SetIndexBuffer(squareIB);
 
+		// Shader
 		s_Data->TextureShader = Shader::Create("assets/shaders/TextureShader.glsl");			//根据glsl创建着色器对象
 		s_Data->TextureShader->Bind();															//绑定着色器对象
 		s_Data->TextureShader->SetInt("u_Texture", 0);											//将要采样的图片设置在0号纹理单元中，设置为0号之后，之后绑定的纹理会被渲染在0号图层中。（纹理单元允许同一个位置同时渲染多个图层的纹理）
 
-		s_Data->WhiteTexture = Texture2D::Create(1,1);
+		// Texture
+		s_Data->WhiteTexture = Texture2D::Create(1,1);											//通过Create函数设置宽高比，根据包含颜色数据设置内存，直接从底层创建白色纹理
 		uint32_t whiteTextureData = 0xffffffff;
 		s_Data->WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 	}
@@ -80,7 +82,6 @@ namespace Nut {
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		// 唯一的着色器在 BeginScene 中已经被绑定，故先设置 Color, 再绑定 Texture
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 		s_Data->TextureShader->SetFloat4("u_Color", color);
 		s_Data->TextureShader->SetMat4("u_Transform", transform);

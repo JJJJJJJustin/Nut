@@ -70,7 +70,7 @@ namespace Nut
 	void ImGuiLayer::OnImGuiRender()						//此函数将会被设置在 Begin 和 End 之间，并且可以由任何层编写
 	{
 		static bool show = true;
-		ImGui::ShowDemoWindow(&show);
+		//ImGui::ShowDemoWindow(&show);
 	}
 
 	void ImGuiLayer::End()
