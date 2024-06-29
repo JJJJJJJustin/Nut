@@ -16,6 +16,7 @@
 #include <unordered_set>
 
 #include "Nut/Core/Log.h"
+#include "Nut/Debug/Instrumentor.h"
 
 #ifdef NUT_PLATFORM_WINDOWS
 	#include <Windows.h>

@@ -22,6 +22,7 @@ namespace Nut {
 		s_Instance = this;																//! ! !对唯一实例的静态成员的定义
 
 		m_Window = std::unique_ptr<Window>(Window::Create());							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
+		m_Window->SetVSync(false);
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 		
 		Renderer::Init();

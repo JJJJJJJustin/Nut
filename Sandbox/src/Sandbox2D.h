@@ -20,8 +20,6 @@ public:
 	void OnImGuiRender() override;
 	void OnEvent(Nut::Event& event) override;
 private:
-	//Nut::Ref<Nut::VertexArray> m_SquareVA;
-	//Nut::Ref<Nut::Shader> m_SquareShader;
 	Nut::Ref<Nut::Texture2D> m_Texture;
 
 	Nut::OrthoGraphicCameraController m_CameraController;

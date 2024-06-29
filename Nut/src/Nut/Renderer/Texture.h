@@ -25,8 +25,8 @@ namespace Nut
 	class Texture2D : public Texture
 	{
 	public:
-		static Ref<Texture2D> Create(uint32_t width, uint32_t height);
-		static Ref<Texture2D> Create(const std::string& path);
+		static Ref<Texture2D> Create(uint32_t width, uint32_t height);								//手动设置纹理大小（宽高），并通过 SetData 设置纯色纹理。
+		static Ref<Texture2D> Create(const std::string& path);										//根据图像文件读取
 	};
 
 }
