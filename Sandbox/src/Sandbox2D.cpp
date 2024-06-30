@@ -11,21 +11,23 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
+	NUT_PROFILE_FUNCTION();
+
 	m_Texture = Nut::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void Sandbox2D::OnDetach()
 {
+	NUT_PROFILE_FUNCTION();
+
 }
 
 void Sandbox2D::OnUpdate(Nut::Timestep ts)
 {
-	NUT_PROFILE_FUNCTION();										// 一个作用域只能声明一个 Timer 变量
+	NUT_PROFILE_FUNCTION();												// 一个作用域只能声明一个 Timer 变量
 	// Update
-	{
-		NUT_PROFILE_SCOPE("CameraController::OnUpdate");
-		m_CameraController.OnUpdate(ts); 
-	}
+	m_CameraController.OnUpdate(ts); 
+
 	// Render
 	{
 		NUT_PROFILE_SCOPE("RenderCommand Prep");

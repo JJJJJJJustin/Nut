@@ -14,6 +14,8 @@ namespace Nut
 
 	void OpenGLContext::Init()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		glfwMakeContextCurrent(m_WindowHandle);
 			//通过glad加载OpenGL提供的各种图形渲染函数
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -35,6 +37,8 @@ namespace Nut
 
 	void OpenGLContext::SwapBuffers()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		glfwSwapBuffers(m_WindowHandle);
 	}
 }

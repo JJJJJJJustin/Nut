@@ -12,6 +12,8 @@ namespace Nut {
 
 	void OrthoGraphicCameraController::OnUpdate(Timestep ts)
 	{
+		NUT_PROFILE_FUNCTION();
+		
 		if (m_Rotation) {
 			if (Input::IsKeyPressed(NUT_KEY_Q))
 				m_CameraRotation -= m_CameraRotationSpeed * ts;
@@ -49,6 +51,8 @@ namespace Nut {
 
 	void OrthoGraphicCameraController::OnEvent(Event& e)
 	{
+		NUT_PROFILE_FUNCTION();
+		
 		EventDispatcher dispathcer(e);
 		dispathcer.Dispatch<MouseScrolledEvent>(NUT_BIND_EVENT_FN(OrthoGraphicCameraController::OnMouseScrolled));
 		dispathcer.Dispatch<WindowResizeEvent>(NUT_BIND_EVENT_FN(OrthoGraphicCameraController::OnWindowResized));
@@ -56,6 +60,8 @@ namespace Nut {
 
 	bool OrthoGraphicCameraController::OnMouseScrolled(MouseScrolledEvent e)
 	{
+		NUT_PROFILE_FUNCTION();
+		
 		m_ZoomLevel -= e.GetYOffset() * 0.5f;													//Offset 在向前滚动时通常为负数，向后滚动时通常为正数
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
 		m_Camera.SetProjectionMatrix(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel , m_ZoomLevel);
@@ -64,6 +70,8 @@ namespace Nut {
 
 	bool OrthoGraphicCameraController::OnWindowResized(WindowResizeEvent e)
 	{
+		NUT_PROFILE_FUNCTION();
+		
 		m_AspectRatio = (float)e.GetWidth() / (float)e.GetHeight();								//设置回调的宽高比
 		m_Camera.SetProjectionMatrix(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 		return false;

@@ -19,7 +19,7 @@ namespace Nut {
 	{
 		m_Layers.emplace(m_Layers.begin() + m_LayerInsertIndex, layer);			//从前向后插入(emplace)
 		m_LayerInsertIndex++;
-		layer->OnAttach();
+		//layer->OnAttach();
 	}
 
 	void LayerStack::PopLayer(Layer* layer)										//删除栈顶元素
@@ -36,7 +36,7 @@ namespace Nut {
 	void LayerStack::PushOverLay(Layer* overlay)
 	{
 		m_Layers.emplace_back(overlay);											//从前向后插（直接插在末尾）
-		overlay->OnAttach();
+		//overlay->OnAttach();
 	}
 
 	void LayerStack::PopOverLay(Layer* overlay)

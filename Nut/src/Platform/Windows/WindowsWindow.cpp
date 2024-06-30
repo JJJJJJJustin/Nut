@@ -24,16 +24,22 @@ namespace Nut
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
+		NUT_PROFILE_FUNCTION();
+
 		Init(props);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		Shutdown();
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
+		NUT_PROFILE_FUNCTION();
+
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
@@ -42,6 +48,7 @@ namespace Nut
 
 		if (!s_GLFWInitialized)									//这样的语句使GLFW只会在整个周期中初始化一次（后续s_GLFWInitialized会改成true）
 		{
+			NUT_PROFILE_SCOPE("glfwInitWindow");
 			//TODO: glfwTerminate on system shutdown
 			int success = glfwInit();
 			NUT_CORE_ASSERT(success, "Could not intialize GLFW!");
@@ -49,8 +56,11 @@ namespace Nut
 			glfwSetErrorCallback(GLFWErrorCallback);
 			s_GLFWInitialized = true;
 		}
-		//初始化Windows对象并创建窗口上下文
-		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		{
+			NUT_PROFILE_SCOPE("glfwCreateWindow");
+			//初始化Windows对象并创建窗口上下文
+			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr); 
+		}
 
 		m_Context = CreateScope<OpenGLContext>(m_Window);
 		m_Context->Init();
@@ -133,17 +143,23 @@ namespace Nut
 
 	void WindowsWindow::Shutdown()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		glfwDestroyWindow(m_Window);
 	}
 
 	void WindowsWindow::OnUpdate()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		glfwPollEvents();
 		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)							//是否启用垂直同步
 	{
+		NUT_PROFILE_FUNCTION();
+
 		if (enabled)
 			glfwSwapInterval(1);
 		else

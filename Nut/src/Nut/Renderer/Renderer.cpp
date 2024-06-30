@@ -10,6 +10,8 @@ namespace Nut
 
 	void Renderer::Init()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		RendererCommand::Init();
 		Renderer2D::Init();
 	}

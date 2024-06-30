@@ -20,6 +20,8 @@ namespace Nut
 
 	void ImGuiLayer::OnAttach()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -53,6 +55,8 @@ namespace Nut
 
 	void ImGuiLayer::OnDetach()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		// Cleanup
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
@@ -61,6 +65,8 @@ namespace Nut
 
 	void ImGuiLayer::Begin()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();						//每一帧开始时准备 OpenGL 渲染环境以供 Dear ImGui 绘制 UI 元素
 		ImGui_ImplGlfw_NewFrame();
@@ -69,12 +75,16 @@ namespace Nut
 
 	void ImGuiLayer::OnImGuiRender()						//此函数将会被设置在 Begin 和 End 之间，并且可以由任何层编写
 	{
+		NUT_PROFILE_FUNCTION();
+
 		static bool show = true;
 		//ImGui::ShowDemoWindow(&show);
 	}
 
 	void ImGuiLayer::End()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());

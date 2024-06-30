@@ -22,6 +22,8 @@ namespace Nut {
 
 	void Renderer2D::Init()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		s_Data = new Renderer2DStorage();
 
 		float squareVertices[5 * 4] =
@@ -62,17 +64,23 @@ namespace Nut {
 
 	void Renderer2D::Shutdown()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		delete s_Data;
 	}
 
 	void Renderer2D::BeginScene(const OrthoGraphicCamera& camera)
 	{
+		NUT_PROFILE_FUNCTION();
+
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 	}
 
 	void Renderer2D::EndScene()
 	{
+		NUT_PROFILE_FUNCTION();
+
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -82,6 +90,8 @@ namespace Nut {
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
+		NUT_PROFILE_FUNCTION();
+
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 		s_Data->TextureShader->SetFloat4("u_Color", color);
 		s_Data->TextureShader->SetMat4("u_Transform", transform);
@@ -99,6 +109,8 @@ namespace Nut {
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture)
 	{
+		NUT_PROFILE_FUNCTION();
+
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 		s_Data->TextureShader->SetFloat4("u_Color", glm::vec4{ 1.0f });
 		s_Data->TextureShader->SetMat4("u_Transform", transform);

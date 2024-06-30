@@ -18,11 +18,13 @@ namespace Nut {
 
 	Application::Application()
 	{
+		NUT_PROFILE_FUNCTION();
+
 		NUT_CORE_ASSERT(!s_Instance, "Application already exists! (The class Application is a Singleton, it just support one instance!)");
 		s_Instance = this;																//! ! !对唯一实例的静态成员的定义
 
 		m_Window = std::unique_ptr<Window>(Window::Create());							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
-		m_Window->SetVSync(false);
+		m_Window->SetVSync(true);
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 		
 		Renderer::Init();
@@ -35,16 +37,24 @@ namespace Nut {
 
 	void Application::PushLayer(Layer* layer)
 	{
+		NUT_PROFILE_FUNCTION();
+
 		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();																					// OnAttach is declared in Layer and defined ImGuiLayer
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
+		NUT_PROFILE_FUNCTION();
+
 		m_LayerStack.PushOverLay(overlay);
+		overlay->OnAttach();
 	}
 
 	void Application::OnEvent(Event& e)																		// --- 在 Application 的构造函数中被调用（用作事件分发）
 	{
+		NUT_PROFILE_FUNCTION();
+
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
@@ -63,25 +73,35 @@ namespace Nut {
 
 	void Application::Run()																					// --- 在 入口点 中被使用（作为渲染循环）
 	{
+		NUT_PROFILE_FUNCTION();
+
 		while (m_Running)
 		{
+			NUT_PROFILE_SCOPE("RunLoop");
+
 			float time = (float)glfwGetTime();
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			if (!m_Minimized) {
-				for (Layer* layer : m_LayerStack)				//更新图层
-					layer->OnUpdate(timestep);					//执行逻辑更新(更新应用程序的逻辑状态）
+			if (!m_Minimized) 
+			{
+				{
+					NUT_PROFILE_SCOPE("LayerStack OnUpdate");
+
+					for (Layer* layer : m_LayerStack)				//更新图层
+						layer->OnUpdate(timestep);					//执行图层逻辑更新(更新应用程序的逻辑状态）
+				}
+
+				m_ImGuiLayer->Begin(); 
+				{
+					NUT_PROFILE_SCOPE("LayerStack OnImGuiRender");
+
+					for (Layer* layer : m_LayerStack)
+						layer->OnImGuiRender();						//进行图层实际渲染操作（逻辑更新后才能进行的渲染操作）
+				}
+				m_ImGuiLayer->End();
 			}
-			//auto [x, y] = Input::GetMousePos();
-			//NUT_CORE_TRACE("{0},{1}", x, y);
-
-			m_ImGuiLayer->Begin();
-			for (Layer* layer : m_LayerStack)
-				layer->OnImGuiRender();						// 进行实际渲染操作（逻辑更新后才能进行的渲染操作）
-			m_ImGuiLayer->End();
-
-			m_Window->OnUpdate();							//更新窗口
+			m_Window->OnUpdate();								//更新窗口
 		}
 	}
 
@@ -92,6 +112,8 @@ namespace Nut {
 	}
 	bool Application::OnWindowResize(WindowResizeEvent& event)
 	{
+		NUT_PROFILE_FUNCTION();
+
 		m_Minimized = false;
 		Renderer::OnWindowResize(event.GetWidth(), event.GetHeight());
 		return false;
