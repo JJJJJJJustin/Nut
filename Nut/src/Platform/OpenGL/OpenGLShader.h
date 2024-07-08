@@ -20,6 +20,7 @@ namespace Nut
 		const std::string& GetName() const override { return m_Name; }
 
 		void SetInt   (const std::string& name, const int& value) override;
+		void SetFloat (const std::string& name, const float& value) override;
 		void SetFloat3(const std::string& name, const glm::vec3& value) override;
 		void SetFloat4(const std::string& name, const glm::vec4& value) override;
 		void SetMat3  (const std::string& name, const glm::mat3& value) override;
