@@ -1,7 +1,7 @@
 --[[  关于premake中的token（符记）： https://premake.github.io/docs/Tokens/  ]]
 
 workspace "Nut"                     --工作区
-    architecture "x64"              --架构
+    architecture "x86_64"              --架构
     startproject "Sandbox"          --[[启动项目]]
 
     configurations
