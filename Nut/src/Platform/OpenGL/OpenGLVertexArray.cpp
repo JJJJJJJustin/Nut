@@ -47,7 +47,7 @@ namespace Nut
 		{
 			glEnableVertexAttribArray(m_VertexBufferIndex);
 			glVertexAttribPointer(m_VertexBufferIndex, element.Count, element.GLType,
-				element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)(intptr_t)element.Offset);		//(intptr_t) 是一种足够大的整数类型，先将Offset转换成了整数型。
+				element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)element.Offset);		//(intptr_t) 是一种足够大的整数类型，先将Offset转换成了整数型。
 			m_VertexBufferIndex++;
 		}
 

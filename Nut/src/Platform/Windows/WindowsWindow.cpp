@@ -10,7 +10,7 @@
 
 namespace Nut
 {
-	static bool s_GLFWInitialized = false;
+	static uint8_t s_GLFWWindowCount = 0;
 
 	static void GLFWErrorCallback(int error_code, const char* description)
 	{
@@ -46,20 +46,24 @@ namespace Nut
 
 		NUT_CORE_INFO("Creating window: {0} ({1} , {2})", props.Title, props.Width, props.Height);
 
-		if (!s_GLFWInitialized)									//这样的语句使GLFW只会在整个周期中初始化一次（后续s_GLFWInitialized会改成true）
+		if (s_GLFWWindowCount == 0)
 		{
 			NUT_PROFILE_SCOPE("glfwInitWindow");
-			//TODO: glfwTerminate on system shutdown
+
+			NUT_CORE_INFO("Initializing GLFW window..");
 			int success = glfwInit();
 			NUT_CORE_ASSERT(success, "Could not intialize GLFW!");
+
 			//If Initalized successfully but get the wrong on run time
 			glfwSetErrorCallback(GLFWErrorCallback);
-			s_GLFWInitialized = true;
 		}
 		{
 			NUT_PROFILE_SCOPE("glfwCreateWindow");
+
 			//初始化Windows对象并创建窗口上下文
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr); 
+
+			s_GLFWWindowCount++;
 		}
 
 		m_Context = CreateScope<OpenGLContext>(m_Window);
@@ -68,7 +72,7 @@ namespace Nut
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
-		//------------------Set GLFW callbacks FN(function) in function "init()"----------------------
+		#pragma region ------------------Set GLFW callbacks FN(function) in function "init()"----------------------
 		glfwSetWindowSizeCallback(m_Window,
 			[](GLFWwindow* window, int width, int height)
 			{
@@ -139,6 +143,7 @@ namespace Nut
 				data.EventCallback(event);
 			}
 		);
+		#pragma endregion
 	}
 
 	void WindowsWindow::Shutdown()
@@ -146,6 +151,12 @@ namespace Nut
 		NUT_PROFILE_FUNCTION();
 
 		glfwDestroyWindow(m_Window);
+		s_GLFWWindowCount--;
+
+		if (s_GLFWWindowCount == 0) {
+			NUT_CORE_INFO("Terminating GLFW..");
+			glfwTerminate();
+		}
 	}
 
 	void WindowsWindow::OnUpdate()

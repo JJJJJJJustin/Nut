@@ -35,12 +35,12 @@ namespace Nut
 		std::string Name;
 		ShaderDataType Type;
 		uint32_t Size;
-		uint32_t Offset;
+		size_t   Offset;
 		uint32_t Count;
 		bool Normalized;
 		uint32_t GLType;
 
-		LayoutElement() {}
+		LayoutElement() = default;
 
 		LayoutElement(ShaderDataType type, const std::string& name, bool normalized = false)
 			:Type(type), Name(name), Size(ShaderDataTypeSize(type)), Offset(0), Count(GetComponentCount()), Normalized(normalized), GLType(GetTypeToGLType(type))
@@ -110,7 +110,7 @@ namespace Nut
 		void CalcOffsetAndStride()
 		{
 			m_Stride = 0;
-			uint32_t offset = 0;
+			size_t offset = 0;
 			for (auto& element : m_Elements)
 			{
 				element.Offset = offset;			//第一个布局的 offset 为 0，后续累加

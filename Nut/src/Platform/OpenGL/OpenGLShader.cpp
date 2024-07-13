@@ -81,14 +81,20 @@ namespace Nut
 
 		std::string result;
 		std::ifstream readIn(filepath, std::ios::in | std::ios::binary);
-		if (readIn)
+		if (readIn)															//是否成功打开
 		{
 			readIn.seekg(0, std::ios::end);
-			result.resize(readIn.tellg());
+			size_t size = readIn.tellg();
 
-			readIn.seekg(0, std::ios::beg);
-			readIn.read(&result[0], result.size());
-			readIn.close();
+			if (size != -1) {												//是否成功获取
+				result.resize(size);
+				readIn.seekg(0, std::ios::beg);
+				readIn.read(&result[0], size);
+				readIn.close();
+			}
+			else {
+				NUT_CORE_ERROR("Failed to read file from : '{0}'", filepath);
+			}
 		}
 		else {
 			NUT_CORE_ERROR("Could not open file form : '{0}'", filepath);
