@@ -2,9 +2,6 @@
 #include "LayerStack.h"
 
 namespace Nut {
-	LayerStack::LayerStack()
-	{
-	}
 
 	LayerStack::~LayerStack()								//Ïú»Ù²ãÕ»
 	{

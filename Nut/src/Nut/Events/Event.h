@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nutpch.h"
+
 #include "Nut\Core\Core.h"
 
 namespace Nut {
@@ -38,8 +39,8 @@ namespace Nut {
 #define EVENT_CLASS_CATEGORY(category)\
 			virtual int GetCategoryFlags() const override { return category; }
 
-//CLASS--------------------------------------------------------------------------------
-	class NUT_API Event
+	//CLASS--------------------------------------------------------------------------------
+	class Event
 	{
 		friend class EventDispatcher;										//ÉùÃ÷ÓÑÔªEventDispatcher
 	public:

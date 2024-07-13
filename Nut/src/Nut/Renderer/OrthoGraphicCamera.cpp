@@ -1,5 +1,5 @@
 #include "nutpch.h"
-#include "OrthoGraphicCamera.h"
+#include "Nut/Renderer/OrthoGraphicCamera.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 

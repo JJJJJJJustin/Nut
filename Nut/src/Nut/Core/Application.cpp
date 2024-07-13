@@ -6,13 +6,11 @@
 
 #include "Nut/Events/Event.h"
 #include "Nut/Core/Log.h"
-#include "Input.h"
+#include "Nut/Core/Input.h"
 
 #include "Nut/Renderer/Renderer.h"
 
 namespace Nut {
-
-#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)		//绑定一个成员函数，并占位参数，稍后使用  !!!是_1而不是 1,宏定义最后不要写;!!!
 
 	Application* Application::s_Instance = nullptr;										//! ! !初始化唯一实例的静态成员s_Instance
 
@@ -23,9 +21,9 @@ namespace Nut {
 		NUT_CORE_ASSERT(!s_Instance, "Application already exists! (The class Application is a Singleton, it just support one instance!)");
 		s_Instance = this;																//! ! !对唯一实例的静态成员的定义
 
-		m_Window = std::unique_ptr<Window>(Window::Create());							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
+		m_Window = Window::Create();							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
 		m_Window->SetVSync(true);
-		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		m_Window->SetEventCallback(NUT_BIND_EVENT_FN(Application::OnEvent));
 		
 		Renderer::Init();
 
@@ -33,7 +31,10 @@ namespace Nut {
 		PushOverlay(m_ImGuiLayer);
 	}
 	
-	//Application::~Application(){ }
+	Application::~Application()
+	{
+		Renderer::Shutdown();
+	}
 
 	void Application::PushLayer(Layer* layer)
 	{
@@ -56,8 +57,8 @@ namespace Nut {
 		NUT_PROFILE_FUNCTION();
 
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
-		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
+		dispatcher.Dispatch<WindowCloseEvent>(NUT_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(NUT_BIND_EVENT_FN(Application::OnWindowResize));
 
 		//NUT_CORE_TRACE("{0}", e);
 
@@ -124,4 +125,6 @@ namespace Nut {
 			return false;
 		}
 	}
+
+
 }

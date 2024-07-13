@@ -608,6 +608,7 @@
     <ClCompile Include="src\Nut\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp" />
     <ClCompile Include="src\Nut\Renderer\OrthoGraphicCamera.cpp" />
     <ClCompile Include="src\Nut\Renderer\OrthographicCameraController.cpp" />
     <ClCompile Include="src\Nut\Renderer\Renderer.cpp" />
@@ -644,4 +645,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project> 
+</Project>

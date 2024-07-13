@@ -1,5 +1,5 @@
 #include "nutpch.h"
-#include "WindowsInput.h"
+#include "Platform/Windows/WindowsInput.h"
 
 #include "Nut\Core\Application.h"
 

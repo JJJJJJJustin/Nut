@@ -1,4 +1,5 @@
 #pragma once
+#include "Nut/Core/Core.h"
 
 #ifdef NUT_PLATFORM_WINDOWS
 
@@ -22,4 +23,6 @@ int main(int argc, char** argv)				//将其设置为windows平台上的win main函数，可能
 	delete app;
 	NUT_PROFILE_END_SESSION();
 }
+
+
 #endif

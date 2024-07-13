@@ -1,9 +1,9 @@
 #pragma once
 
-#include"Event.h"
+#include"Nut/Events/Event.h"
 
 namespace Nut {
-	class NUT_API WindowResizeEvent : public Event				//公有继承的派生类
+	class WindowResizeEvent : public Event				//公有继承的派生类
 	{
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height)
@@ -24,36 +24,36 @@ namespace Nut {
 		unsigned int m_Width, m_Height;
 	};
 
-	class NUT_API WindowCloseEvent : public Event
+	class WindowCloseEvent : public Event
 	{
 	public:
-		WindowCloseEvent() {}
+		WindowCloseEvent() = default;
 
 		EVENT_CLASS_TYPE(WindowClose)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class NUT_API AppTickEvent : public Event
+	class AppTickEvent : public Event
 	{
 	public:
-		AppTickEvent() {}
+		AppTickEvent() = default;
 
 		EVENT_CLASS_TYPE(AppTick)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class NUT_API AppUpdateEvent : public Event
+	class AppUpdateEvent : public Event
 	{
-		AppUpdateEvent() {}
+		AppUpdateEvent() = default;
 
 		EVENT_CLASS_TYPE(AppUpdate)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class NUT_API AppRenderEvent : public Event
+	class AppRenderEvent : public Event
 	{
 	public:
-		AppRenderEvent() {}
+		AppRenderEvent() = default;
 
 		EVENT_CLASS_TYPE(AppRender)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)

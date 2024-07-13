@@ -1,12 +1,11 @@
 #include "nutpch.h"
-#include "Renderer2D.h"
+#include "Nut/Renderer/Renderer2D.h"
 
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "Shader.h"
-#include "VertexArray.h"
-#include "Texture.h"
-#include "RendererCommand.h"
+#include "Nut/Renderer/Shader.h"
+#include "Nut/Renderer/VertexArray.h"
+#include "Nut/Renderer/RendererCommand.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Nut {
@@ -36,9 +35,9 @@ namespace Nut {
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 
 		Ref<VertexBuffer> squareVB;
-		squareVB.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		squareVB = VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 		Ref<IndexBuffer> squareIB;
-		squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		squareIB = IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 
 		BufferLayout squareLayout =
 		{

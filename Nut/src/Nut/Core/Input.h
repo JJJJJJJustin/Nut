@@ -4,7 +4,7 @@
 
 namespace Nut
 {
-	class NUT_API Input 
+	class Input 
 	{
 	protected:
 		Input() = default;

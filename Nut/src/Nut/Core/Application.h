@@ -1,21 +1,23 @@
 #pragma once
 
-#include "Core.h"
+#include "Nut/Core/Core.h"
 
+#include "Nut/Events/Event.h"
 #include "Nut/Events/ApplicationEvent.h"
 
-#include "Window.h"
-#include "LayerStack.h"
+#include "Nut/Core/Window.h"
+#include "Nut/Core/LayerStack.h"
 #include "Nut/ImGui/ImGuiLayer.h"
 
 #include "Nut/Core/Timestep.h"
+
 namespace Nut {
 
-	class NUT_API Application							//类的导出
+	class Application							//类的导出
 	{
 	public:
 		Application();
-		virtual ~Application() = default;				//支持多态
+		virtual ~Application();
 
 		void Run();
 

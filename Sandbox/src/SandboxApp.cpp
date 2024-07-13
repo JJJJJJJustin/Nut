@@ -4,7 +4,7 @@
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -23,8 +23,8 @@ public:
 
 		Nut::Ref<Nut::VertexBuffer> vertexBuffer;
 		Nut::Ref<Nut::IndexBuffer> indexBuffer;
-		vertexBuffer.reset(Nut::VertexBuffer::Create(vertices, sizeof(vertices)));
-		indexBuffer.reset(Nut::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		vertexBuffer = Nut::VertexBuffer::Create(vertices, sizeof(vertices));
+		indexBuffer  = Nut::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 
 		m_VertexArray = Nut::VertexArray::Create();
 		Nut::BufferLayout layout =
@@ -85,9 +85,9 @@ public:
 		m_SquareVA = Nut::VertexArray::Create();
 
 		Nut::Ref<Nut::VertexBuffer> squareVB;
-		squareVB.reset(Nut::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		squareVB = Nut::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 		Nut::Ref<Nut::IndexBuffer> squareIB;
-		squareIB.reset(Nut::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		squareIB = Nut::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 
 		Nut::BufferLayout squareLayout =
 		{
@@ -102,8 +102,8 @@ public:
 		//auto m_TextureShader = Nut::Shader::Create("assets/shaders/TextureShader.glsl");
 		auto textureShader = m_ShaderLibrary.Load("assets/shaders/TextureShader.glsl");
 
-		std::dynamic_pointer_cast<Nut::OpenGLShader>(textureShader)->Bind();
-		std::dynamic_pointer_cast<Nut::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
+		textureShader->Bind();
+		textureShader->SetInt("u_Texture", 0);
 		m_EmojiTexture = Nut::Texture2D::Create("assets/textures/emoji.png");
 		m_Texture = Nut::Texture2D::Create("assets/textures/rain.jpg");
 	}
@@ -118,8 +118,8 @@ public:
 		Nut::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->Bind();
-		std::dynamic_pointer_cast<Nut::OpenGLShader>(m_SquareShader)->UploadUniformFloat4("u_Color", m_SquareColor);
+		m_SquareShader->Bind();
+		m_SquareShader->SetFloat4("u_Color", m_SquareColor);
 		for (int y = 0; y < 20; y++) {
 			for (int x = 0; x < 20; x++) {
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);

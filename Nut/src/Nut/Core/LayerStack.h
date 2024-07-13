@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Core.h"
-#include "Layer.h"
+#include "Nut/Core/Core.h"
+#include "Nut/Core/Layer.h"
 
 #include <vector>
 
 namespace Nut
 {
-	class NUT_API LayerStack
+	class LayerStack
 	{
 	public:
-		LayerStack();
+		LayerStack() = default;
 		~LayerStack();
 
 		void PushLayer(Layer* layer);				//∆’Õ®Õº≤„Õ∆»Î

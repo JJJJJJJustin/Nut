@@ -1,9 +1,9 @@
 #pragma once
 
-#include "RendererCommand.h"
+#include "Nut/Renderer/RendererCommand.h"
 
-#include "OrthoGraphicCamera.h"
-#include "Shader.h"
+#include "Nut/Renderer/OrthoGraphicCamera.h"
+#include "Nut/Renderer/Shader.h"
 
 namespace Nut
 {
@@ -12,12 +12,14 @@ namespace Nut
 	{
 	public:
 		static void Init();
+		static void Shutdown();
+
 		static void OnWindowResize(uint32_t width, uint32_t height);
 
 		static void BeginScene(OrthoGraphicCamera& camera);
 		static void EndScene();
 
-		static void Submit(const Ref<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform);
+		static void Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform);
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }			//注意静态函数使用时的作用域标识
 	private:

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "OrthoGraphicCamera.h"
+#include "Nut/Renderer/OrthoGraphicCamera.h"
 
-#include "Texture.h"
+#include "Nut/Renderer/Texture.h"
 
 namespace Nut {
 

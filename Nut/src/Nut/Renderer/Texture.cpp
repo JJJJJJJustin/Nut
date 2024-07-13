@@ -1,7 +1,7 @@
 #include "nutpch.h"
-#include "Texture.h"
+#include "Nut/Renderer/Texture.h"
 
-#include "Renderer.h"
+#include "Nut/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace Nut

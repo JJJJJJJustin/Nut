@@ -1,5 +1,5 @@
 #include "nutpch.h"
-#include "Shader.h"
+#include "Nut/Renderer/Shader.h"
 
 #include "Nut/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
@@ -14,7 +14,7 @@ namespace Nut
 		case RendererAPI::API::None: NUT_CORE_ASSERT(false, "RendererAPI::None is currently not supported! ")
 			return nullptr;
 		case RendererAPI::API::OpenGL:
-			return std::make_shared<OpenGLShader>(filepath);
+			return CreateRef<OpenGLShader>(filepath);
 		case RendererAPI::API::DirectX: NUT_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported! ")
 			return nullptr;
 		}
@@ -31,7 +31,7 @@ namespace Nut
 		case RendererAPI::API::None: NUT_CORE_ASSERT(false, "RendererAPI::None is currently not supported! ")
 			return nullptr;
 		case RendererAPI::API::OpenGL:
-			return std::make_shared<OpenGLShader>(name, vertexSrc, fragmentSrc);
+			return CreateRef<OpenGLShader>(name, vertexSrc, fragmentSrc);
 		case RendererAPI::API::DirectX: NUT_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported! ")
 			return nullptr;
 		}

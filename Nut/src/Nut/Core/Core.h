@@ -35,6 +35,7 @@
 	#error "Unknown platform!"
 #endif
 
+/*
 #ifdef NUT_PLATFORM_WINDOWS
 	#ifdef NUT_DYNAMIC_LINK
 		#ifdef NUT_BUILD_DLL
@@ -48,6 +49,7 @@
 #else
 	#error Nut only supports Windows!
 #endif
+*/
 
 #ifdef NUT_DEBUG
 	#define NUT_ENABLE_ASSERTS
@@ -73,6 +75,7 @@
 //将1在二进制数中左移x位: Bit(2)->00000100
 #define Bit(x) (1 << x)
 
+//绑定一个成员函数，并占位参数，稍后使用  !!!是_1而不是 1,宏定义最后不用写; !!!
 #define NUT_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
 namespace Nut 
@@ -82,7 +85,7 @@ namespace Nut
 	template<typename T, typename ... Args>
 	constexpr Ref<T> CreateRef(Args&& ... args)
 	{
-		return std::make_shared<T>( std::forward<Args>(args)... );									// make_shared 的参数是 根据CreateRef所填参数 所动态调整的参数。这些来自CreateRef中的模版参数会被 std::forward 所完美转发
+		return std::make_shared<T>( std::forward<Args>(args)... );							// make_shared 的参数是 根据CreateRef所填参数 所动态调整的参数。这些来自CreateRef中的模版参数会被 std::forward 所完美转发
 	}
 
 	template<typename T>

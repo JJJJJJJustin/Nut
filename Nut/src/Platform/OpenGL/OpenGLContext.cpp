@@ -1,7 +1,7 @@
 #include "nutpch.h"
-#include "OpenGLContext.h"
+#include "Platform/OpenGL/OpenGLContext.h"
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>											// ---- glad is OpenGL specific ----
 
 namespace Nut

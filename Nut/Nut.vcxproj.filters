@@ -1502,5 +1502,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp" />
   </ItemGroup>
 </Project>

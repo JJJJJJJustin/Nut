@@ -21,12 +21,12 @@ namespace Nut {
 
 
 	//An interface for the desktop system which based on Window（基于Windows的桌面系统的接口）
-	class NUT_API Window
+	class Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;					//??? For what
 		//-----------------------All interfaces----------------------------------
-		static Window* Create(const WindowProps& props = WindowProps());		//返回指向Windows类型的指针
+		static Scope<Window> Create(const WindowProps& props = WindowProps());		//返回指向Windows类型的指针
 
 		virtual ~Window() = default;
 

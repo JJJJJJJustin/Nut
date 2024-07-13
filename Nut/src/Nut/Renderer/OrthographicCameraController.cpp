@@ -1,5 +1,5 @@
 #include "nutpch.h"
-#include "OrthographicCameraController.h"
+#include "Nut/Renderer/OrthographicCameraController.h"
 
 #include "Nut/Core/Input.h"
 #include "Nut/Core/KeyCodes.h"

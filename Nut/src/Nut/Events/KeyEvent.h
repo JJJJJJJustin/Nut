@@ -1,9 +1,9 @@
 #pragma once
 
-#include"Event.h"
+#include"Nut/Events/Event.h"
 
 namespace Nut {
-	class NUT_API KeyEvent : public Event
+	class KeyEvent : public Event
 	{
 	public:
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)				//事件：输入事件  输入设备：键盘（输入设备可以不止是键盘，鼠标和触摸屏的输入都算输入）
@@ -17,7 +17,7 @@ namespace Nut {
 	};
 
 
-		class NUT_API KeyPressedEvent : public KeyEvent
+		class KeyPressedEvent : public KeyEvent
 		{
 		public:
 			KeyPressedEvent(int keycode, int repeatCount)
@@ -38,7 +38,7 @@ namespace Nut {
 		};
 
 
-		class NUT_API KeyReleasedEvent : public KeyEvent
+		class KeyReleasedEvent : public KeyEvent
 		{
 		public:
 			KeyReleasedEvent(int keycode)
@@ -54,7 +54,7 @@ namespace Nut {
 			}
 		};
 
-		class NUT_API KeyTypedEvent : public KeyEvent
+		class KeyTypedEvent : public KeyEvent
 		{
 		public:
 			KeyTypedEvent(int keycode)
