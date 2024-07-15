@@ -125,10 +125,10 @@ namespace Nut {
 
 // ------------------------------- Macro --------------------------------------------------------
 #define NUT_PROFILE 1
+
 #if NUT_PROFILE
-    // Resolve which function signature macro will be used. Note that this only
-    // is resolved when the (pre)compiler starts, so the syntax highlighting
-    // could mark the wrong one in your editor!
+    // Resolve which function signature macro will be used. Note that this only is resolved when the (pre)compiler starts, 
+    // so the syntax highlighting could mark the wrong one in your editor!
     // 根据不同机器上的编辑器及其版本确定对应的合适的获取方式，将其定义为 NUT_FUNC_SIG，自动获取函数签名
     #if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
         #define NUT_FUNC_SIG __PRETTY_FUNCTION__
