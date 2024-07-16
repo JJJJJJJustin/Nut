@@ -1,18 +1,19 @@
 #pragma once
 
-#include <string>
-#include <chrono>
 #include <algorithm>
+#include <chrono>
 #include <fstream>
-
+#include <iomanip>
+#include <string>
 #include <thread>
 
 namespace Nut {
     struct ProfileResult
     {
         std::string Name;
-        long long Start, End;
-        uint32_t ThreadID;
+        std::chrono::duration<double, std::micro> Start;
+        std::chrono::microseconds ElapsedTime;
+        std::thread::id ThreadID;
     };
 
     struct InstrumentationSession
@@ -23,55 +24,56 @@ namespace Nut {
     class Instrumentor
     {
     private:
+        std::mutex m_Mutex;                                                             // 加入互斥锁
+
         InstrumentationSession* m_CurrentSession;
         std::ofstream m_OutputStream;
-        int m_ProfileCount;
     public:
-        Instrumentor()                                                                  // Why not Private ? 
-            : m_CurrentSession(nullptr), m_ProfileCount(0)
+        Instrumentor()
+            : m_CurrentSession(nullptr)
         {
         }
 
         void BeginSession(const std::string& name, const std::string& filepath = "results.json")    // 会话用于较高层次的函数(In Entry Point),宏用于较低层次的函数（比如Sandbox 中的绘制操作）
         {                                                                                           // 一个会话(Session),多个分析(InstrumentorTimer)
+            std::lock_guard lock(m_Mutex);
+            if (m_CurrentSession) {
+                // 如果当前会话已经存在，则在开始新会话之前将其关闭。
+                // 针对原始会话的后续分析输出将最终出现在新打开的会话中。
+                // 这比格式错误的分析输出要好。
+                // Edge case: BeginSession() might be before Log::Init()
+                if (Log::GetCoreLogger()) { NUT_CORE_ERROR("Instrumentor::BeginSession('{0}') is creating a new session when session '{1}' already open.", name, m_CurrentSession->Name); }
+                InternalEndSession();
+            }
             m_OutputStream.open(filepath);
-            WriteHeader();
-            m_CurrentSession = new InstrumentationSession{ name };
+            if (m_OutputStream.is_open()) {
+                m_CurrentSession = new InstrumentationSession({ name });                              // InstrumentationSession create mutex first and then WriteHeader manage the lock by std::lock_guard
+                WriteHeader();
+            } else {
+                // Edge case : BeginSession() might be before Log::Init() !!!
+                if (Log::GetCoreLogger()) { NUT_CORE_ERROR("Instrumentor can't open result file '{0}'.", filepath); }
+            }
         }
 
-        void EndSession()
+        void EndSession()                                                                           // Use RAII so manage thread in Session
         {
-            WriteFooter();
-            m_OutputStream.close();
-            delete m_CurrentSession;
-            m_CurrentSession = nullptr;
-            m_ProfileCount = 0;
+            // Must ensure that the mutex has been created when you call InternalEndSession
+            std::lock_guard lock(m_Mutex);
+            InternalEndSession();
         }
-
-        void WriteProfile(const ProfileResult& result)                                              // JSON 文件内容
-        {
-            if (m_ProfileCount++ > 0)                                                               // 先比较，后自增
-                m_OutputStream << ",";
-
-            std::string name = result.Name;
-            std::replace(name.begin(), name.end(), '"', '\'');
-
-            m_OutputStream << "{";
-            m_OutputStream << "\"cat\":\"function\",";
-            m_OutputStream << "\"dur\":" << (result.End - result.Start) << ',';
-            m_OutputStream << "\"name\":\"" << name << "\",";
-            m_OutputStream << "\"ph\":\"X\",";
-            m_OutputStream << "\"pid\":0,";
-            m_OutputStream << "\"tid\":" << result.ThreadID << ",";
-            m_OutputStream << "\"ts\":" << result.Start;
-            m_OutputStream << "}";
-
-            m_OutputStream.flush();                                                                     //尽快刷新进文件流，降低延迟带来的影响（时间计算偏差）
+    private:
+        void InternalEndSession() {                                                                 // End Session logicly
+            if (m_CurrentSession) {
+                WriteFooter();
+                m_OutputStream.close();
+                delete m_CurrentSession;
+                m_CurrentSession = nullptr;
+            }
         }
 
         void WriteHeader()                                                                              // JSON 文件头标
         {
-            m_OutputStream << "{\"otherData\": {},\"traceEvents\":[";
+            m_OutputStream << "{\"otherData\": {},\"traceEvents\":[{}";
             m_OutputStream.flush();
         }
 
@@ -79,6 +81,32 @@ namespace Nut {
         {
             m_OutputStream << "]}";
             m_OutputStream.flush();
+        }
+    public:
+        void WriteProfile(const ProfileResult& result)                                              // JSON 文件内容
+        {
+            std::stringstream json;
+
+            std::string name = result.Name;
+            std::replace(name.begin(), name.end(), '"', '\'');
+
+            json << std::setprecision(3) << std::fixed;                                             // 设置json 字符串流中浮点数的输出都是小数点后保留三位，且切小数点固定的格式
+            json << ",{";                                                                           // 默认添加一个','，故不用判断是否需要','。由于Header中多写了一个{}，故初始化时第一个','并不多余。
+            json << "\"cat\":\"function\",";
+            json << "\"dur\":" << result.ElapsedTime.count() << ',';
+            json << "\"name\":\"" << name << "\",";
+            json << "\"ph\":\"X\",";
+            json << "\"pid\":0,";
+            json << "\"tid\":" << result.ThreadID << ",";
+            json << "\"ts\":" << result.Start.count();
+            json << "}";
+
+            std::lock_guard lock(m_Mutex);
+            if (m_CurrentSession) {
+                m_OutputStream << json.str();
+                m_OutputStream.flush();                                                                 //尽快刷新进文件流，降低延迟带来的影响（时间计算偏差）
+            }
+
         }
 
         static Instrumentor& Get()                                                                      // Only One instance so use static(Singleton 单例模式)
@@ -95,7 +123,7 @@ namespace Nut {
         InstrumentationTimer(const char* name)
             : m_Name(name), m_Stopped(false)
         {
-            m_StartTimepoint = std::chrono::high_resolution_clock::now();
+            m_StartTimepoint = std::chrono::steady_clock::now();
         }
 
         ~InstrumentationTimer()
@@ -106,20 +134,24 @@ namespace Nut {
 
         void Stop()
         {
-            auto endTimepoint = std::chrono::high_resolution_clock::now();
+            auto endTimepoint = std::chrono::steady_clock::now();
 
-            long long start = std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimepoint).time_since_epoch().count();
-            long long end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch().count();
+            //long long start = std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimepoint).time_since_epoch().count();
+            //long long end   = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch().count();
 
-            uint32_t threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());                   //将 Thread ID 映射为哈希值，然后传递给 threadID
-            Instrumentor::Get().WriteProfile({ m_Name, start, end, threadID });                             // In "Instrumentor"
+            auto highResStart = std::chrono::duration<double, std::micro>{ m_StartTimepoint.time_since_epoch() };
+            auto elapsedTime  = 
+              std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch() 
+                - std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimepoint).time_since_epoch();
+
+            Instrumentor::Get().WriteProfile({ m_Name, highResStart, elapsedTime, std::this_thread::get_id()});
 
             m_Stopped = true;
         }
     private:
         bool m_Stopped;
         const char* m_Name;
-        std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimepoint;
+        std::chrono::time_point<std::chrono::steady_clock> m_StartTimepoint;
     };
 }
 

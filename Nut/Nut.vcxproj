@@ -605,6 +605,7 @@
     <ClCompile Include="src\Nut\Core\Layer.cpp" />
     <ClCompile Include="src\Nut\Core\LayerStack.cpp" />
     <ClCompile Include="src\Nut\Core\Log.cpp" />
+    <ClCompile Include="src\Nut\Core\Window.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp" />

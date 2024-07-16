@@ -17,11 +17,6 @@ namespace Nut
 		NUT_CORE_ERROR("GLFW Error ({0}):{1}", error_code, description);
 	}
 
-	Scope<Window> Window::Create(const WindowProps& props)
-	{
-		return CreateScope<WindowsWindow>(props);
-	}
-
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
 		NUT_PROFILE_FUNCTION();

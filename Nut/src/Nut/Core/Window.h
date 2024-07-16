@@ -24,9 +24,9 @@ namespace Nut {
 	class Window
 	{
 	public:
-		using EventCallbackFn = std::function<void(Event&)>;					//??? For what
-		//-----------------------All interfaces----------------------------------
 		static Scope<Window> Create(const WindowProps& props = WindowProps());		//返回指向Windows类型的指针
+		//-----------------------All interfaces----------------------------------
+		using EventCallbackFn = std::function<void(Event&)>;
 
 		virtual ~Window() = default;
 

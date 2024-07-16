@@ -1503,5 +1503,6 @@
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
     <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp" />
+    <ClCompile Include="src\Nut\Core\Window.cpp" />
   </ItemGroup>
 </Project>

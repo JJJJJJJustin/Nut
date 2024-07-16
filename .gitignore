@@ -1,4 +1,4 @@
-## *和**是通配符，* 表示任意一级子目录，** 表示当前目录及其所有子目录中的文件。
+## *和**是通配符，* 表示忽视该一级目录下的文件，** 表示当前目录及其所有子目录中的文件。
 ## \xxx 和 \xxx\。 \xxx 表示匹配 xxx 目录及其直接子目录中的 xxx, \xxx\ 表示表示匹配 xxx 目录及其所有子目录中的 xxx。
 
 # Ignore files and directories in the .vs folder
@@ -14,3 +14,8 @@ bin-int/
 **/bin/
 # ! 表示不忽略vendor/bin/premake目录
 !vendor/bin/premake/
+
+# Ignore all .json files
+/Sandbox/*.json
+# Ignore imgui.ini file
+/Sandbox/imgui.ini
