@@ -1504,5 +1504,6 @@
     </ClCompile>
     <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp" />
     <ClCompile Include="src\Nut\Core\Window.cpp" />
+    <ClCompile Include="src\Nut\Core\Input.cpp" />
   </ItemGroup>
 </Project>

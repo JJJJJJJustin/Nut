@@ -12,6 +12,8 @@ namespace Nut
 		Input(const Input&) = delete;									//对该类对象禁用复制（复制函数）
 		Input& operator=(const Input&) = delete;						//对该类对象禁用赋值操作
 
+		static Scope<Input> Create();
+
 		inline static bool IsKeyPressed(int keycode) { return s_Instance->IsKeyPressedImpl(keycode); }
 
 		inline static bool IsMouseButtonPressed(int button) { return s_Instance->IsMouseButtonPressedImpl(button); }
@@ -26,6 +28,6 @@ namespace Nut
 		virtual float GetMouseXImpl() = 0;
 		virtual float GetMouseYImpl() = 0;
 	private:
-		static Scope<Input> s_Instance;										//在WindowsInput.cpp中初始化（静态成员变量必须被定义或初始化）
+		static Scope<Input> s_Instance;										//在 Input.cpp 中初始化（静态成员变量必须被定义或初始化）
 	};
 }

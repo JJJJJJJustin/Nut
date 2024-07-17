@@ -7,8 +7,6 @@
 
 namespace Nut
 {
-	Scope<Input> Input::s_Instance = CreateScope<WindowsInput>();						//s_Instance 是一个没有包含任何数据的实例对象
-
 	bool WindowsInput::IsKeyPressedImpl(int keycode)					//是否按下？（按下和重复都算做是按下了）
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());

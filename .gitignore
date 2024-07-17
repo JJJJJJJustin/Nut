@@ -15,6 +15,9 @@ bin-int/
 # ! 表示不忽略vendor/bin/premake目录
 !vendor/bin/premake/
 
+# Ingore Log file
+*.log
+
 # Ignore all .json files
 /Sandbox/*.json
 # Ignore imgui.ini file

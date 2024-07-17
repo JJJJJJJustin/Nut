@@ -5,10 +5,34 @@
 
 namespace Nut
 {
+	#pragma region 报错信息回调函数(OpenGLMessageCallback)定义
+	void OpenGLMessageCallback
+	(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam)
+	{
+		switch (severity)
+		{
+		case GL_DEBUG_SEVERITY_HIGH:         NUT_CORE_CRITICAL(message); return;
+		case GL_DEBUG_SEVERITY_MEDIUM:       NUT_CORE_ERROR(message); return;
+		case GL_DEBUG_SEVERITY_LOW:          NUT_CORE_WARN(message); return;
+		case GL_DEBUG_SEVERITY_NOTIFICATION: NUT_CORE_TRACE(message); return;
+		}
+
+		NUT_CORE_ASSERT(false, "Unknown severity level!");
+	}
+	# pragma endregion
 
 	void OpenGLRendererAPI::Init()
 	{
 		NUT_PROFILE_FUNCTION();
+
+		#ifdef NUT_DEBUG
+			//控制OpenGL生成的调试消息的生成和过滤
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+			glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+		#endif
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -36,5 +60,7 @@ namespace Nut
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 		glBindTexture(GL_TEXTURE_2D, 0);													//渲染完之后，解绑当前纹理，避免影响到后续物体纹理的渲染
 	}
+
+
 
 }

@@ -602,6 +602,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Core\Application.cpp" />
+    <ClCompile Include="src\Nut\Core\Input.cpp" />
     <ClCompile Include="src\Nut\Core\Layer.cpp" />
     <ClCompile Include="src\Nut\Core\LayerStack.cpp" />
     <ClCompile Include="src\Nut\Core\Log.cpp" />
