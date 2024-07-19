@@ -29,9 +29,14 @@ namespace Nut
 			s_RendererAPI->SetClearColor(color);
 		}
 	
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)							//GL_STATIC_DRAW
 		{
 			s_RendererAPI->DrawIndexed(vertexArray);
+		}
+
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)	//GL_DYNAMIC_DRAW(with batch rendering)
+		{
+			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
 		}
 	private:
 		static Scope<RendererAPI> s_RendererAPI;

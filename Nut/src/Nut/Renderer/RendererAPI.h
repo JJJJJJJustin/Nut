@@ -24,6 +24,7 @@ namespace Nut
 		virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) = 0;
+		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount) = 0;
 
 		inline static API GetAPI() { return s_API; }			//注意静态函数使用时的作用域标识
 		inline static API SetAPI(API api) { s_API = api; }

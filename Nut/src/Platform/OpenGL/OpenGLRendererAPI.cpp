@@ -61,6 +61,17 @@ namespace Nut
 		glBindTexture(GL_TEXTURE_2D, 0);													//渲染完之后，解绑当前纹理，避免影响到后续物体纹理的渲染
 	}
 
+	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	{
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	// Cherno do:
+	//void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount /*= 0*/){
+	//	uint32_t count = indexCount ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
+	//	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);}
+
 
 
 }
