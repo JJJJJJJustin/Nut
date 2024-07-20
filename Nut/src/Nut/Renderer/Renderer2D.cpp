@@ -91,7 +91,7 @@ namespace Nut {
 		// Shader
 		s_Data.TextureShader = Shader::Create("assets/shaders/TextureShader.glsl");				//根据glsl创建着色器对象
 		s_Data.TextureShader->Bind();															//绑定着色器对象
-		s_Data.TextureShader->SetIntArray("u_Texture", samplers, s_Data.MaxTextureSlots);		//上传所有采样器到对应纹理单元
+		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);		//上传所有采样器到对应纹理单元
 
 		// Texture
 		s_Data.WhiteTexture = Texture2D::Create(1,1);											//通过Create函数设置宽高比，根据包含颜色数据设置内存，直接从底层创建白色纹理
@@ -203,12 +203,10 @@ namespace Nut {
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
 	{
 		NUT_PROFILE_FUNCTION();
-
-		const glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		
 		float textureIndex = 0.0f;
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++) {					// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
-			if (texture == s_Data.Textures[i]) {								//??
+		for (uint32_t i = 1; i < s_Data.TextureSoltIndex; i++) {				// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
+			if (*s_Data.Textures[i].get() == *texture.get()) {
 				textureIndex = (float)i;										// 将纹理在纹理集中的位置作为索引
 				break;
 			}
@@ -222,28 +220,28 @@ namespace Nut {
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
 		s_Data.QuadVBHind->Position = position;
-		s_Data.QuadVBHind->Color = color;
+		s_Data.QuadVBHind->Color = tintColor;
 		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
 		s_Data.QuadVBHind->TexIndex = textureIndex;
 		s_Data.QuadVBHind->TilingFactor = tilingFactor;
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadVBHind->Position = { position.x + size.x, position.y, 0.0f };
-		s_Data.QuadVBHind->Color = color;
+		s_Data.QuadVBHind->Color = tintColor;
 		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
 		s_Data.QuadVBHind->TexIndex = textureIndex;
 		s_Data.QuadVBHind->TilingFactor = tilingFactor;
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadVBHind->Position = { position.x + size.x, position.y + size.y, 0.0f };
-		s_Data.QuadVBHind->Color = color;
+		s_Data.QuadVBHind->Color = tintColor;
 		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
 		s_Data.QuadVBHind->TexIndex = textureIndex;
 		s_Data.QuadVBHind->TilingFactor = tilingFactor;
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadVBHind->Position = { position.x,			position.y + size.y, 0.0f };
-		s_Data.QuadVBHind->Color = color;
+		s_Data.QuadVBHind->Color = tintColor;
 		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
 		s_Data.QuadVBHind->TexIndex = textureIndex;
 		s_Data.QuadVBHind->TilingFactor = tilingFactor;
