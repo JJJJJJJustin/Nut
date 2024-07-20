@@ -20,8 +20,8 @@ bin-int/
 
 # Ignore all .json files
 /Sandbox/*.json
-# Ignore imgui.ini file
-/Sandbox/imgui.ini
 Sandbox/NutProfile-Runtime.json
 Sandbox/NutProfile-Shutdown.json
 Sandbox/NutProfile-Startup.json
+# Ignore imgui.ini file
+/Sandbox/imgui.ini
