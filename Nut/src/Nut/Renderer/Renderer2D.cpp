@@ -21,9 +21,9 @@ namespace Nut {
 
 	struct Renderer2DData
 	{
-		const uint32_t MaxQuads = 100;
-		const uint32_t MaxVertices = MaxQuads * 4;
-		const uint32_t MaxIndices  = MaxQuads * 6;
+		static const uint32_t MaxQuads = 100;
+		static const uint32_t MaxVertices = MaxQuads * 4;
+		static const uint32_t MaxIndices  = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 32;
 
 		Ref<VertexArray> QuadVA;
@@ -45,6 +45,8 @@ namespace Nut {
 			{  0.5f,  0.5f, 0.0f, 1.0f },
 			{ -0.5f,  0.5f, 0.0f, 1.0f }
 		};
+
+		Renderer2D::Statistics Stats;
 	};
 	static Renderer2DData s_Data;														// 更改为栈上分配
 
@@ -120,9 +122,9 @@ namespace Nut {
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 
-		s_Data.QuadIndexCount = 0;																//每结束（刷新）一次批渲染，需要绘制的顶点索引数要从零重新开始
-		s_Data.TextureSoltIndex = 1;															//每结束（刷新）一次批渲染，需要绘制的纹理索引要从一重新开始（排除白色纹理）
-		s_Data.QuadVBHind = s_Data.QuadVBBase;													//每结束（刷新）一次批渲染，需要将后端指针 Hind 的位置赋值为起始位置，从新开始
+		s_Data.QuadIndexCount = 0;																//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的顶点索引数要从零重新开始
+		s_Data.TextureSoltIndex = 1;															//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
+		s_Data.QuadVBHind = s_Data.QuadVBBase;													//每结束一次场景（依次场景中可能包含多个批渲染调用），需要将后端指针 Hind 的位置赋值为起始位置，从新开始
 	}
 
 	void Renderer2D::EndScene()
@@ -135,13 +137,23 @@ namespace Nut {
 		Flush();																				// 更新数据之后绘制（刷新）
 	}
 
+	void Renderer2D::FlushAndReset()															// 如果当前绘制的顶点（或索引）超出了一次批渲染的限制，便开启下一次批渲染，并清零当前记录的顶点数
+	{
+		EndScene();
+
+		s_Data.QuadIndexCount = 0;
+		s_Data.TextureSoltIndex = 1;
+		s_Data.QuadVBHind = s_Data.QuadVBBase;
+	}
+
 	void Renderer2D::Flush()
 	{
 		// Bind texture before rendering
 		for (uint32_t i = 0; i < s_Data.TextureSoltIndex; i++)
-			s_Data.Textures[i]->Bind(i);															// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
+			s_Data.Textures[i]->Bind(i);														// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
 
 		RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
+		s_Data.Stats.DrawCalls++;
 	}
 
 	// -------------------------- Draw func ------------------------------------------------------------------
@@ -153,6 +165,10 @@ namespace Nut {
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
 		NUT_PROFILE_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {			// Maybe Renderer2DData::MaxIndices ??? If Indices more than batch rendering can include,then start new batch rendering
+			FlushAndReset();
+		}
 
 		const float textureIndex = 0.0f;									// Just use the white texutre
 		const float tilingFactor = 1.0f;									// Single color don't need tiling factor
@@ -191,6 +207,8 @@ namespace Nut {
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
@@ -202,6 +220,10 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 		
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
+
 		float textureIndex = 0.0f;
 		for (uint32_t i = 1; i < s_Data.TextureSoltIndex; i++) {				// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
 			if (*s_Data.Textures[i].get() == *texture.get()) {
@@ -249,6 +271,8 @@ namespace Nut {
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
 	}
 	//------------------------------------------------- Rotated Quad --------------------------------------------------------------
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
@@ -259,6 +283,10 @@ namespace Nut {
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
 		NUT_PROFILE_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
@@ -296,6 +324,8 @@ namespace Nut {
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
@@ -306,6 +336,10 @@ namespace Nut {
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		NUT_PROFILE_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
@@ -354,6 +388,20 @@ namespace Nut {
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
+	}
+
+	void Renderer2D::ClearStats()
+	{
+		//s_Data.Stats.DrawCalls = 0;
+		//s_Data.Stats.QuadCount = 0;
+		memset(&s_Data.Stats, 0, sizeof(Statistics));
+	}
+
+	Renderer2D::Statistics Renderer2D::GetStats()
+	{
+		return s_Data.Stats;
 	}
 
 }

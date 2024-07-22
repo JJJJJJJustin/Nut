@@ -21,6 +21,7 @@ public:
 	void OnEvent(Nut::Event& event) override;
 private:
 	Nut::Ref<Nut::Texture2D> m_Texture;
+	Nut::Ref<Nut::Texture2D> m_Emoji;
 
 	Nut::OrthoGraphicCameraController m_CameraController;
 
