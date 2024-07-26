@@ -37,7 +37,7 @@ namespace Nut {
 		QuadVertex* QuadVBHind = nullptr;												// 顶点指针末尾
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> Textures;
-		uint32_t TextureSoltIndex = 1;													// 0 => WhiteTexture
+		uint32_t TextureSlotIndex = 1;													// 0 => WhiteTexture
 
 		glm::vec4 QuadVertexPosition[4]{												// 一个方形的基础顶点(默认将其中心放在坐标系原点上，故在使用translate位移时，可直接位移到位移向量的端点。而为什么是glm::vec4组成的元素，是因为需要将transform矩阵左乘给数组中的元素，因为在矩阵的乘法运算中，两个矩阵相乘正确的前提是前一个矩阵列数等于后一个矩阵的行数。
 			{ -0.5f, -0.5f, 0.0f, 1.0f },
@@ -123,7 +123,7 @@ namespace Nut {
 		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 
 		s_Data.QuadIndexCount = 0;																//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的顶点索引数要从零重新开始
-		s_Data.TextureSoltIndex = 1;															//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
+		s_Data.TextureSlotIndex = 1;															//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
 		s_Data.QuadVBHind = s_Data.QuadVBBase;													//每结束一次场景（依次场景中可能包含多个批渲染调用），需要将后端指针 Hind 的位置赋值为起始位置，从新开始
 	}
 
@@ -131,7 +131,7 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		uint32_t dataSize = (uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase;			// Size 等于后端指针减去前端(hind 在绘制时一直更新数据）
+		uint32_t dataSize = uint32_t((uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase);// Size 等于后端指针减去前端(hind 在绘制时一直更新数据）
 		s_Data.QuadVB->SetData(s_Data.QuadVBBase, dataSize);									// Reset VertexBuffer so flush Vertex data （because of Dynamic Draw)
 
 		Flush();																				// 更新数据之后绘制（刷新）
@@ -142,14 +142,14 @@ namespace Nut {
 		EndScene();
 
 		s_Data.QuadIndexCount = 0;
-		s_Data.TextureSoltIndex = 1;
+		s_Data.TextureSlotIndex = 1;
 		s_Data.QuadVBHind = s_Data.QuadVBBase;
 	}
 
 	void Renderer2D::Flush()
 	{
 		// Bind texture before rendering
-		for (uint32_t i = 0; i < s_Data.TextureSoltIndex; i++)
+		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			s_Data.Textures[i]->Bind(i);														// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
 
 		RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
@@ -166,45 +166,28 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {			// Maybe Renderer2DData::MaxIndices ??? If Indices more than batch rendering can include,then start new batch rendering
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {						// If Indices more than batch rendering can include,then start new batch rendering
 			FlushAndReset();
 		}
 
-		const float textureIndex = 0.0f;									// Just use the white texutre
-		const float tilingFactor = 1.0f;									// Single color don't need tiling factor
+		constexpr size_t quadVertexCount = 4;
+		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		constexpr float textureIndex = 0.0f;									// Just use the white texutre
+		constexpr float tilingFactor = 1.0f;									// Single color don't need tiling factor
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
 		// !!!不要写成 s_Data.QuadVertexPosition[0] * transform，给 transform 左乘一个位置向量这样的操作是无效的。
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[1];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[2];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[3];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
+		for (size_t i = 0; i < quadVertexCount; i++) {
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = color;
+			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 
@@ -219,57 +202,46 @@ namespace Nut {
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
 	{
 		NUT_PROFILE_FUNCTION();
-		
+
 		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
 			FlushAndReset();
 		}
 
+		constexpr size_t quadVertexCount = 4;
+		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		float textureIndex = 0.0f;
-		for (uint32_t i = 1; i < s_Data.TextureSoltIndex; i++) {				// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
+		#pragma region 在纹理集中搜寻纹理
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {				// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
 			if (*s_Data.Textures[i].get() == *texture.get()) {
 				textureIndex = (float)i;										// 将纹理在纹理集中的位置作为索引
 				break;
 			}
 		}
-		if (textureIndex == 0.0f) {												// 若未命中，则将纹理放入纹理集中，并将最新的s_Data.TextureSoltIndex赋予给临时变量textureIndex，并自增一次
-			s_Data.Textures[s_Data.TextureSoltIndex] = texture;
-			textureIndex = float(s_Data.TextureSoltIndex);						// 从TextureSoltIndex = 0开始，依次相纹理集中存入新的纹理。存入后自增一次.
-			
-			s_Data.TextureSoltIndex++;
+		if (textureIndex == 0.0f) {												// 若未命中，则将纹理放入纹理集中，并将最新的s_Data.TextureSlotIndex赋予给临时变量textureIndex，并自增一次
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) {			// 如果纹理数也多于最大值，就刷新一次批渲染
+				FlushAndReset();
+			}
+			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
+			textureIndex = float(s_Data.TextureSlotIndex);						// 从TextureSlotIndex = 0开始，依次相纹理集中存入新的纹理。存入后自增一次.
+
+			s_Data.TextureSlotIndex++;
 		}
+		#pragma endregion
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[1];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[2];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[3];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
+		for (size_t i = 0; i < quadVertexCount; i++)
+		{
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = tintColor;
+			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
+	
 		s_Data.QuadIndexCount += 6;
 
 		s_Data.Stats.QuadCount++;
@@ -288,40 +260,23 @@ namespace Nut {
 			FlushAndReset();
 		}
 
+		constexpr size_t quadVertexCount = 4;
+		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		const float textureIndex = 0.0f;
+		const float tilingFactor = 1.0f;
+
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		const float textureIndex = 0.0f;
-		const float tilingFactor = 1.0f;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[1];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[2];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[3];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
+		for (size_t i = 0; i < quadVertexCount; i++) {
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = color;
+			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 
@@ -341,56 +296,46 @@ namespace Nut {
 			FlushAndReset();
 		}
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
+		constexpr size_t quadVertexCount = 4;
+		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		float textureIndex = 0.0f;
-		for (uint32_t i = 1; i < s_Data.TextureSoltIndex; i++) {
+		#pragma region 在纹理集中搜寻纹理
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
 			if (*s_Data.Textures[i].get() == *texture.get()) {
 				textureIndex = (float)i;
 				break;
 			}
 		}
 		if (textureIndex == 0.0f) {
-			s_Data.Textures[s_Data.TextureSoltIndex] = texture;
-			textureIndex = float(s_Data.TextureSoltIndex);
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) {
+				FlushAndReset();
+			}
+			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
+			textureIndex = float(s_Data.TextureSlotIndex);
 
-			s_Data.TextureSoltIndex++;
+			s_Data.TextureSlotIndex++;
 		}
+		#pragma endregion
 
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[1];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[2];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[3];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
+		for (size_t i = 0; i < quadVertexCount; i++) {
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = tintColor;
+			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 
 		s_Data.Stats.QuadCount++;
 	}
+
+
 
 	void Renderer2D::ClearStats()
 	{
@@ -403,5 +348,7 @@ namespace Nut {
 	{
 		return s_Data.Stats;
 	}
+
+
 
 }

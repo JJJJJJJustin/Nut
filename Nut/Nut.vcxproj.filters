@@ -1427,6 +1427,9 @@
     <ClCompile Include="src\Nut\Core\Application.cpp">
       <Filter>src\Nut\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Nut\Core\Input.cpp">
+      <Filter>src\Nut\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Nut\Core\Layer.cpp">
       <Filter>src\Nut\Core</Filter>
     </ClCompile>
@@ -1436,6 +1439,9 @@
     <ClCompile Include="src\Nut\Core\Log.cpp">
       <Filter>src\Nut\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Nut\Core\Window.cpp">
+      <Filter>src\Nut\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Nut\ImGui\ImGuiBuild.cpp">
       <Filter>src\Nut\ImGui</Filter>
     </ClCompile>
@@ -1443,6 +1449,9 @@
       <Filter>src\Nut\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp">
       <Filter>src\Nut\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Nut\Renderer\OrthoGraphicCamera.cpp">
@@ -1502,8 +1511,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp" />
-    <ClCompile Include="src\Nut\Core\Window.cpp" />
-    <ClCompile Include="src\Nut\Core\Input.cpp" />
   </ItemGroup>
 </Project>

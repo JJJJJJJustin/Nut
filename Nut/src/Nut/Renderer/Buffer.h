@@ -57,27 +57,27 @@ namespace Nut
 			case ShaderDataType::Int2:		return 2;
 			case ShaderDataType::Int3:		return 3;
 			case ShaderDataType::Int4:		return 4;
-			case ShaderDataType::Mat3:		return 3 * 3;
-			case ShaderDataType::Mat4:		return 4 * 4;
+			case ShaderDataType::Mat3:		return 3; //3 * 3
+			case ShaderDataType::Mat4:		return 4; //4 * 4
 			case ShaderDataType::Bool:		return 1;
 			}
 			NUT_CORE_ASSERT(false, "Unknown ShaderDataType !");
 			return 0;
 		}
 
-		uint32_t GetTypeToGLType(ShaderDataType type) {
+		uint32_t GetTypeToGLType(ShaderDataType type) {					// 尽管有些类型是向量，但我们会根据GetComponentCount获取分量个数，计算得到正确的大小
 			switch (type) {
-			case ShaderDataType::Float:		return 0x1406;				//GL_FLOAT == 0x1406
+			case ShaderDataType::Float:		return 0x1406;			//GL_FLOAT == 0x1406
 			case ShaderDataType::Float2:	return 0x1406;
 			case ShaderDataType::Float3:	return 0x1406;
 			case ShaderDataType::Float4:	return 0x1406;
-			case ShaderDataType::Int:		return 0x1404;				//GL_INT == 0x1404
+			case ShaderDataType::Int:		return 0x1404;			//GL_INT == 0x1404
 			case ShaderDataType::Int2:		return 0x1404;
 			case ShaderDataType::Int3:		return 0x1404;
 			case ShaderDataType::Int4:		return 0x1404;
 			case ShaderDataType::Mat3:		return 0x1406;
 			case ShaderDataType::Mat4:		return 0x1406;
-			case ShaderDataType::Bool:		return 0x8B56;				// GL_BOOL == 0x8B56
+			case ShaderDataType::Bool:		return 0x8B56;			// GL_BOOL == 0x8B56
 			}
 			NUT_CORE_ASSERT(false, "Unknown ShaderDataType !");
 			return 0;

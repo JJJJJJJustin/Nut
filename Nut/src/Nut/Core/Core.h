@@ -53,6 +53,17 @@
 
 #ifdef NUT_DEBUG
 	#define NUT_ENABLE_ASSERTS
+
+	#ifdef NUT_PLATFORM_WINDOWS
+		#define NUT_DEBUGBREAK() __debugbreak();
+	#elif NUT_PLATFORM_LINUX
+		#include <signal.h>
+		#define NUT_DEBUGBREAK() raise(SIGTRAP)
+	#else
+		#error	"Platform doesn't support debugbreak yet! "
+	#endif
+#else
+	#define NUT_DEBUGBREAK()
 #endif
 
 #ifdef NUT_ENABLE_ASSERTS
@@ -60,12 +71,12 @@
 	#define NUT_CORE_ASSERT(x, ...) \
 		{if(!x){\
 			NUT_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);\
-			__debugbreak();}\
+			NUT_DEBUGBREAK();}\
 		}
 	#define NUT_ASSERT(x, ...)\
 		{if(!x){\
 			NUT_ERROR("Assertion Failed: {0}", __VA_ARGS__);\
-			__debugbreak();}\
+			NUT_DEBUGBREAK();}\
 		}
 #else
 	#define NUT_CORE_ASSERT(x, ...)

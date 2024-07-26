@@ -1,7 +1,7 @@
 --[[  关于premake中的token（符记）： https://premake.github.io/docs/Tokens/  ]]
 
 workspace "Nut"                     --工作区
-    architecture "x86_64"              --架构
+    architecture "x86_64"           --架构
     startproject "Sandbox"          --[[启动项目]]
 
     configurations
@@ -66,7 +66,8 @@ project "Nut"                       --项目
 
     defines
     {
-        "_CRT_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS",
+        "GLFW_INCLUDE_NONE"
     }
 
     includedirs                     --库文件（包含库目录）
@@ -94,13 +95,12 @@ project "Nut"                       --项目
         defines
         {                           --宏的声明
             "NUT_BUILD_DLL",
-            "GLFW_INCLUDE_NONE"
         }
 
         --  //////////////////////////////////////////////////////////////////////
         --  ////  NOW WE USE NUT AS A STATIC LIB, SO DON'T NEED THIS COMMAND  ////
         --  //////////////////////////////////////////////////////////////////////
-        --[[postbuildcommands           --构建项目完成后执行的指令
+        --[[postbuildcommands       --构建项目完成后执行的指令
         {
             ("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
             --将当前项目的构建目标文件复制到 "../bin/" 下的一个名为 "Debug/Sandbox" 或 "Release/Sandbox" 的子目录中
