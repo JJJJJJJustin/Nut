@@ -2,9 +2,7 @@
 
 #include "Nut.h"
 
-#include "Nut/Renderer/Texture.h"
-
-#include <imgui/imgui.h>
+#include "ParticleSystem.h"
 
 
 class Sandbox2D : public Nut::Layer 
@@ -25,5 +23,8 @@ private:
 
 	Nut::OrthoGraphicCameraController m_CameraController;
 
-	glm::vec4 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };
+	glm::vec4 m_QuadColor= { 0.5412f, 0.1686f, 0.8863f, 1.0f };
+
+	ParticleProps m_Particle;
+	ParticleSystem m_ParticleSystem;
 };
