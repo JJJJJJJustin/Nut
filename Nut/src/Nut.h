@@ -24,4 +24,5 @@
 #include "Nut/Renderer/Buffer.h"
 #include "Nut/Renderer/Shader.h"
 #include "Nut/Renderer/Texture.h"
+#include "Nut/Renderer/SubTexture2D.h"
 #include "Nut/Renderer/VertexArray.h"

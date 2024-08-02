@@ -21,7 +21,7 @@ namespace Nut {
 
 	struct Renderer2DData
 	{
-		static const uint32_t MaxQuads = 100;
+		static const uint32_t MaxQuads = 1000;
 		static const uint32_t MaxVertices = MaxQuads * 4;
 		static const uint32_t MaxIndices  = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 32;
@@ -157,6 +157,7 @@ namespace Nut {
 	}
 
 	// -------------------------- Draw func ------------------------------------------------------------------
+	// -------------------------- Draw Quad
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
 	{
 		DrawQuad({ position.x, position.y, 0.0f }, size, color);
@@ -193,7 +194,7 @@ namespace Nut {
 
 		s_Data.Stats.QuadCount++;
 	}
-
+	// -------------------------- Draw Texture
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
 	{
 		DrawQuad({ position.x, position.y }, size, texture, tilingFactor, tintColor);
@@ -209,6 +210,7 @@ namespace Nut {
 
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		
 		float textureIndex = 0.0f;
 		#pragma region 在纹理集中搜寻纹理
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {				// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
@@ -246,7 +248,64 @@ namespace Nut {
 
 		s_Data.Stats.QuadCount++;
 	}
-	//------------------------------------------------- Rotated Quad --------------------------------------------------------------
+
+	// -------------------------- Draw SubTexture
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	{
+		DrawQuad({ position.x, position.y }, size, subtexture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	{
+		NUT_PROFILE_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
+
+		constexpr size_t quadVertexCount = 4;
+		const glm::vec2* subTexCoords = subtexture->GetCoords();
+		Ref<Texture2D>texture = subtexture->GetTexture();
+
+		float textureIndex = 0.0f;
+		#pragma region 在纹理集中搜寻纹理
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {				// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
+			if (*s_Data.Textures[i].get() == *texture.get()) {
+				textureIndex = (float)i;										// 将纹理在纹理集中的位置作为索引
+				break;
+			}
+		}
+		if (textureIndex == 0.0f) {												// 若未命中，则将纹理放入纹理集中，并将最新的s_Data.TextureSlotIndex赋予给临时变量textureIndex，并自增一次
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) {			// 如果纹理数也多于最大值，就刷新一次批渲染
+				FlushAndReset();
+			}
+			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
+			textureIndex = float(s_Data.TextureSlotIndex);						// 从TextureSlotIndex = 0开始，依次相纹理集中存入新的纹理。存入后自增一次.
+
+			s_Data.TextureSlotIndex++;
+		}
+		#pragma endregion
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+
+		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
+		for (size_t i = 0; i < quadVertexCount; i++)
+		{
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = tintColor;
+			s_Data.QuadVBHind->TexCoord = subTexCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
+
+		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
+	}
+	// ------------------------------------- Rotated Quad --------------------------------------------------------------
+	// ------------------------------------- Draw Quad
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
@@ -283,6 +342,7 @@ namespace Nut {
 		s_Data.Stats.QuadCount++;
 	}
 
+	// ------------------------------------- Draw Texture
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
@@ -325,6 +385,61 @@ namespace Nut {
 			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
 			s_Data.QuadVBHind->Color = tintColor;
 			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
+
+		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
+	}
+
+	// ------------------------------------- Draw SubTexture
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subtexture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		NUT_PROFILE_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
+
+		constexpr size_t quadVertexCount = 4;
+		const glm::vec2* subTexCoords = subtexture->GetCoords();
+		Ref<Texture2D> texture = subtexture->GetTexture();
+
+		float textureIndex = 0.0f;
+		#pragma region 在纹理集中搜寻纹理
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.Textures[i].get() == *texture.get()) {
+				textureIndex = (float)i;
+				break;
+			}
+		}
+		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) {
+				FlushAndReset();
+			}
+			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
+			textureIndex = float(s_Data.TextureSlotIndex);
+
+			s_Data.TextureSlotIndex++;
+		}
+		#pragma endregion
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		for (size_t i = 0; i < quadVertexCount; i++) {
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = tintColor;
+			s_Data.QuadVBHind->TexCoord = subTexCoords[i];
 			s_Data.QuadVBHind->TexIndex = textureIndex;
 			s_Data.QuadVBHind->TilingFactor = tilingFactor;
 			s_Data.QuadVBHind++;

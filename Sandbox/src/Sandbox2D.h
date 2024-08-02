@@ -20,6 +20,8 @@ public:
 private:
 	Nut::Ref<Nut::Texture2D> m_Texture;
 	Nut::Ref<Nut::Texture2D> m_Emoji;
+	Nut::Ref<Nut::Texture2D> m_SpriteSheet, m_SpriteSheetRPG;
+	Nut::Ref<Nut::SubTexture2D> m_Box, m_InfoBox, m_Flag;
 
 	Nut::OrthoGraphicCameraController m_CameraController;
 
