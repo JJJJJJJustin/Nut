@@ -113,6 +113,8 @@ namespace Nut {
 	void Renderer2D::Shutdown()
 	{
 		NUT_PROFILE_FUNCTION();
+
+		delete[] s_Data.QuadVBBase;
 	}
 
 	void Renderer2D::BeginScene(const OrthoGraphicCamera& camera)
@@ -148,11 +150,14 @@ namespace Nut {
 
 	void Renderer2D::Flush()
 	{
+		if (s_Data.QuadIndexCount == 0)
+			return;																				// 如果依次运行下来后发现没有需要绘制的图形，则返回空并跳出，不运行之后代码以节省性能
+
 		// Bind texture before rendering
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			s_Data.Textures[i]->Bind(i);														// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
 
-		RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
+		RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);						// 运行至此处时进行渲染
 		s_Data.Stats.DrawCalls++;
 	}
 

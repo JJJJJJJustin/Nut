@@ -1,7 +1,7 @@
 #pragma once
 
 // For use by Nut applications
-#include "Nut/Core/Core.h"
+#include "Nut/Core/Base.h"
 
 #include "Nut/Core/Application.h"
 #include "Nut/Core/Layer.h"

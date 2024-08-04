@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Nut/Core/Core.h"
+#include "Nut/Core/Base.h"
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 

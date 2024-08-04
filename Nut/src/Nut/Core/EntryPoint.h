@@ -1,5 +1,5 @@
 #pragma once
-#include "Nut/Core/Core.h"
+#include "Nut/Core/Base.h"
 
 #ifdef NUT_PLATFORM_WINDOWS
 

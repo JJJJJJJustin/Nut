@@ -2,7 +2,7 @@
 
 #include "nutpch.h"
 
-#include "Nut\Core\Core.h"
+#include "Nut\Core\Base.h"
 
 namespace Nut {
 	/*I hear that from the Cherno :

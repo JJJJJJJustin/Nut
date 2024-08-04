@@ -146,7 +146,7 @@
   <ItemGroup>
     <ClInclude Include="src\Nut.h" />
     <ClInclude Include="src\Nut\Core\Application.h" />
-    <ClInclude Include="src\Nut\Core\Core.h" />
+    <ClInclude Include="src\Nut\Core\Base.h" />
     <ClInclude Include="src\Nut\Core\EntryPoint.h" />
     <ClInclude Include="src\Nut\Core\Input.h" />
     <ClInclude Include="src\Nut\Core\KeyCodes.h" />

@@ -63,7 +63,7 @@
     <ClInclude Include="src\Nut\Core\Application.h">
       <Filter>src\Nut\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Nut\Core\Core.h">
+    <ClInclude Include="src\Nut\Core\Base.h">
       <Filter>src\Nut\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Nut\Core\EntryPoint.h">

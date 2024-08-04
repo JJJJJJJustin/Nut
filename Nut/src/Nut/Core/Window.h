@@ -2,7 +2,7 @@
 
 #include "nutpch.h"
 
-#include "Core.h"
+#include "Nut/Core/Base.h"
 #include "Nut/Events/Event.h"													//??? For what: For the class name Event which bu used in the following lines of code
 
 namespace Nut {

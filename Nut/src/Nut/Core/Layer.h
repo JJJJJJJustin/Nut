@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Nut/Core/Core.h"
+#include "Nut/Core/Base.h"
 #include "Nut/Core/Timestep.h"
 #include "Nut/Events/Event.h"
 
