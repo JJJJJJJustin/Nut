@@ -6,6 +6,23 @@
 #include <imgui/imgui.h>
 
 
+static const char* s_GameMap = {
+	"AAAAAAAAAAAAAAAAAMMA"
+	"AAAAAAAAAAAAAAAALLLL"
+	"AAAAAAAAAAAAAAAADDDD"
+	"SAAAAAAAAAAAAAAAAAAA"
+	"LWWWWLAAAAAAAAAAABAA"
+	"LWWWWLLLLAAAAAAAAAAA"
+	"DDDDDDDDDAAAALLLLGGL"
+	"AAAAAAAAAAAAADDDDDDD"
+	"AAAAAAAAAAAAAAAAAAAA"
+	"AAALLLLAALLLLLLLLLLL"
+	"GGGDDDDGGDDDDDDDDDDD"
+	"DDDDDDDDDDDDDDDDDDDD" };
+static const  uint32_t s_MapWidth = 20;
+static const  uint32_t s_MapHeight = strlen(s_GameMap) / s_MapWidth;
+
+
 Sandbox2D::Sandbox2D()
 	:Layer("Sandbox2D"), m_CameraController(1280.0f / 720.0f, true)
 {
@@ -19,12 +36,19 @@ void Sandbox2D::OnAttach()
 	m_Emoji = Nut::Texture2D::Create("assets/textures/emoji.png");
 	
 	// Test 1
-	m_SpriteSheet = Nut::Texture2D::Create("assets/game/textures/tilemap_packed .png");
-	m_Box = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 9, 8 } /* ,{1,1} */ );
-	m_InfoBox = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 10, 8 }, { 1, 1 });
+	m_SpriteSheet = Nut::Texture2D::Create("assets/game/textures/tilemap_packed.png");
+	m_TilesMap['D'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 4, 8 } /* ,{1,1} */);
+	m_TilesMap['G'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 0, 8 });
+	m_TilesMap['L'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 0, 6 });
+	m_TilesMap['W'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 13, 5 });
+	m_TilesMap['B'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 9, 8 });
+	m_TilesMap['K'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 7, 7 });
+	m_TilesMap['F'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 11, 3 });
+	m_TilesMap['M'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 8, 2 });
+	m_TilesMap['S'] = Nut::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, {  5, 1 });
 	// Test2
-	m_SpriteSheetRPG = Nut::Texture2D::Create("assets/game/textures/RPGpack_sheet_2X.png");
-	m_Flag = Nut::SubTexture2D::Create(m_SpriteSheetRPG, { 128, 128 }, { 2, 1 }, {1, 2});
+	m_SpriteSheetRole = Nut::Texture2D::Create("assets/game/textures/tilemap(2).png");
+	m_Role = Nut::SubTexture2D::Create(m_SpriteSheetRole, { 16, 16 }, { 0, 3 }, { 1, 1 });
 
 	#pragma region Particle Init here
 	m_Particle.ColorBegin = { 138 / 255.0f, 43 / 255.0f, 226 / 255.0f, 1.0f };
@@ -35,6 +59,8 @@ void Sandbox2D::OnAttach()
 	m_Particle.VelocityVariation = { 3.0f, 1.0f };
 	m_Particle.Position = { 0.0f, 0.0f };
 	#pragma endregion
+
+	m_CameraController.SetZoomLevel(5.0f);
 }
 
 void Sandbox2D::OnDetach()
@@ -53,7 +79,7 @@ void Sandbox2D::OnUpdate(Nut::Timestep ts)
 	Nut::Renderer2D::ClearStats();										// 每次更新前都要将Stats统计数据清零
 	{
 		NUT_PROFILE_SCOPE("RenderCommand Prep");
-		Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		Nut::RendererCommand::Clear();
 	}
 	{
@@ -102,9 +128,23 @@ void Sandbox2D::OnUpdate(Nut::Timestep ts)
 
 
 		Nut::Renderer2D::BeginScene(m_CameraController.GetCamera());
-		Nut::Renderer2D::DrawQuad({ 1.0f, 1.0f, 0.0f }, { 1.0f, 1.0f }, m_Box);
-		Nut::Renderer2D::DrawQuad({ 1.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, m_InfoBox);
-		Nut::Renderer2D::DrawQuad({ 0.0f, 0.0f, 0.0f }, { 1.0f, 2.0f }, m_Flag);
+
+		for (uint32_t x = 0; x < s_MapWidth; x++) {
+			for (uint32_t y = 0; y < s_MapHeight; y++)
+			{
+				char keyChar = s_GameMap[x + y * s_MapWidth];
+
+				Nut::Ref<Nut::SubTexture2D> subTexture;
+				if (m_TilesMap.find(keyChar) != m_TilesMap.end()) {
+					subTexture = m_TilesMap[keyChar];
+					Nut::Renderer2D::DrawQuad({ x, s_MapHeight - y , 0.0f }, { 1.0f, 1.0f }, subTexture);
+				}
+				else
+					Nut::Renderer2D::DrawQuad({ x, s_MapHeight - y, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f, 1.0f });
+			}
+		}
+		Nut::Renderer2D::DrawQuad({ 18.0f, 7.0f, 0.5f }, { 1.0f, 1.0f }, m_Role);
+
 		Nut::Renderer2D::EndScene();
 	}
 }

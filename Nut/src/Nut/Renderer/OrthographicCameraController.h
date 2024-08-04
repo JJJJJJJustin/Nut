@@ -29,11 +29,13 @@ namespace Nut {
 		OrthoGraphicCamera& GetCamera() { return m_Camera; }
 		const OrthoGraphicCamera& GetCamera() const { return m_Camera; }
 
-		void SetZoomLevel(float level) { m_ZoomLevel = level; }
+		void SetZoomLevel(float level) { m_ZoomLevel = level; UpdateViewport(); }
 		float GetZoomLevel() const { return m_ZoomLevel; }
 
 		const OrthoGraphicCameraBounds& GetBounds() const { return m_Bounds; }			// 获取摄像机当前位置、朝向（摄像机状态；Left, Right, Bottom, Top）
 	private:
+		void UpdateViewport();
+
 		bool OnMouseScrolled(MouseScrolledEvent e);
 		bool OnWindowResized(WindowResizeEvent e);
 	private:

@@ -18,10 +18,11 @@ public:
 	void OnImGuiRender() override;
 	void OnEvent(Nut::Event& event) override;
 private:
-	Nut::Ref<Nut::Texture2D> m_Texture;
-	Nut::Ref<Nut::Texture2D> m_Emoji;
-	Nut::Ref<Nut::Texture2D> m_SpriteSheet, m_SpriteSheetRPG;
-	Nut::Ref<Nut::SubTexture2D> m_Box, m_InfoBox, m_Flag;
+	Nut::Ref<Nut::Texture2D> m_Texture, m_Emoji;
+	Nut::Ref<Nut::Texture2D> m_SpriteSheet, m_SpriteSheetRole;
+	Nut::Ref<Nut::SubTexture2D> m_Role;
+
+	std::unordered_map<char, Nut::Ref<Nut::SubTexture2D>> m_TilesMap;
 
 	Nut::OrthoGraphicCameraController m_CameraController;
 
