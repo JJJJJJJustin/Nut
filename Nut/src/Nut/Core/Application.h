@@ -29,6 +29,7 @@ namespace Nut {
 		inline Window& GetWindow() { return *m_Window; }			//返回下面这个指向Window的指针
 		inline static Application& Get() { return *s_Instance; }	//! ! !返回的是s_Instance这个指向Application的指针
 																	//（为什么函数是引用传递？：因为application是一个单例，如果不使用&则会多出一个复制，这有悖于单例模式的只有一个对象的要求
+		inline void WindowClose() { m_Running = false; }			// 不同于 OnWindowClose ，WindowClose 是公有的关闭窗口函数，而 OnWindowClose 是回调函数中的事件处理
 	private:
 		void Run();													// Run 函数现在为私有（ Run 函数中定义 RunLoop）
 
