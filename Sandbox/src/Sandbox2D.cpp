@@ -242,7 +242,8 @@ void Sandbox2D::OnImGuiRender()
 	ImGui::Text("Indices: %d", stats.GetIndexCount());
 
 	ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(m_QuadColor));
-	//ImGui::Image();
+	ImTextureID textureID = (void*)m_Emoji->GetRendererID();
+	ImGui::Image(textureID, ImVec2{256.0f, 256.0f});
 	ImGui::End();
 	// -------------------------------------------------------------------------------------------------------
 
