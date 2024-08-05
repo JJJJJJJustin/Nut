@@ -64,11 +64,11 @@ namespace Nut {
 
 		for (auto iter = m_LayerStack.rbegin(); iter != m_LayerStack.rend(); ++iter)	//图层的事件处理是反向的（从尾到头），！！！反向迭代器中的 iter 需要使用前置递增（先加后用）
 		{
-			(*iter)->OnEvent(e);														//从最后一个迭代器所指的元素开始，逐个逆向相应事件
 			if (e.Handled)																//如果在OnEvent中成功进行处理并将Handled变为true，则跳出循环
 			{
 				break;
 			}
+			(*iter)->OnEvent(e);														//从最后一个迭代器所指的元素开始，逐个逆向相应事件
 		}
 	}
 

@@ -21,6 +21,7 @@ namespace Nut {
         std::string Name;
     };
 
+    // ------------------------ Instrumentor ( Output .json)-------------------------------------------
     class Instrumentor
     {
     private:
@@ -166,7 +167,7 @@ namespace Nut {
         #define NUT_FUNC_SIG __PRETTY_FUNCTION__
     #elif defined(__DMC__) && (__DMC__ >= 0x810)
         #define NUT_FUNC_SIG __PRETTY_FUNCTION__
-    #elif defined(__FUNCSIG__)
+    #elif defined(__FUNCSIG__) || defined(_MSC_VER)
         #define NUT_FUNC_SIG __FUNCSIG__
     #elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) || (defined(__IBMCPP__) && (__IBMCPP__ >= 500))
         #define NUT_FUNC_SIG __FUNCTION__
