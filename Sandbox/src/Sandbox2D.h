@@ -19,12 +19,9 @@ public:
 	void OnEvent(Nut::Event& event) override;
 private:
 	Nut::Ref<Nut::Texture2D> m_Texture, m_Emoji;
-	Nut::Ref<Nut::Texture2D> m_SpriteSheet, m_SpriteSheetRole;
-	Nut::Ref<Nut::SubTexture2D> m_Role;
+	Nut::Ref<Nut::Texture2D> m_SpriteSheet;
 
 	std::unordered_map<char, Nut::Ref<Nut::SubTexture2D>> m_TilesMap;
-
-	Nut::Ref<Nut::FrameBuffer> m_Framebuffer;
 
 	Nut::OrthoGraphicCameraController m_CameraController;
 

@@ -114,6 +114,9 @@
     <ClInclude Include="src\Nut\Renderer\Buffer.h">
       <Filter>src\Nut\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Nut\Renderer\FrameBuffer.h">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Nut\Renderer\GraphicsContext.h">
       <Filter>src\Nut\Renderer</Filter>
     </ClInclude>
@@ -138,6 +141,9 @@
     <ClInclude Include="src\Nut\Renderer\Shader.h">
       <Filter>src\Nut\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Nut\Renderer\SubTexture2D.h">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Nut\Renderer\Texture.h">
       <Filter>src\Nut\Renderer</Filter>
     </ClInclude>
@@ -148,6 +154,9 @@
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLFrameBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h">
@@ -1422,9 +1431,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Nut\Renderer\SubTexture2D.h" />
-    <ClInclude Include="src\Nut\Renderer\FrameBuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLFrameBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Core\Application.cpp">
@@ -1454,6 +1460,9 @@
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp">
       <Filter>src\Nut\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Nut\Renderer\FrameBuffer.cpp">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp">
       <Filter>src\Nut\Renderer</Filter>
     </ClCompile>
@@ -1478,6 +1487,9 @@
     <ClCompile Include="src\Nut\Renderer\Shader.cpp">
       <Filter>src\Nut\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Nut\Renderer\SubTexture2D.cpp">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Nut\Renderer\Texture.cpp">
       <Filter>src\Nut\Renderer</Filter>
     </ClCompile>
@@ -1488,6 +1500,9 @@
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLFrameBuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp">
@@ -1514,8 +1529,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Nut\Renderer\SubTexture2D.cpp" />
-    <ClCompile Include="src\Nut\Renderer\FrameBuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLFrameBuffer.cpp" />
   </ItemGroup>
 </Project>

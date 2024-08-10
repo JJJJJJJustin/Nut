@@ -31,8 +31,7 @@ group "Dependencies"
     include "Nut/vendor/GLFW"
     include "Nut/vendor/Glad"
     include "Nut/vendor/imgui"
-
-group ""                                                                        --包含所有未分组的文件
+group "" 
 
 --[[
     XXXX
@@ -174,3 +173,56 @@ project "Sandbox"
             defines "NUT_DIST"
             runtime "Release"
             optimize "on"
+
+---------------------------------------------------------------------------------------------------------------
+project "Nut-Editor"
+location "Nut-Editor"
+kind "ConsoleApp"
+language "C++"
+cppdialect "C++17"
+staticruntime "on"
+
+targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+files                          
+{
+   "%{prj.name}/src/**.h",
+   "%{prj.name}/src/**.cpp"
+}
+
+includedirs                      
+{
+    "Nut/vendor/spdlog/include",
+    "Nut/src",
+    "Nut/vendor",
+    "%{IncludeDir.glm}"
+}
+
+links
+{
+    "Nut"
+}
+
+filter "system:windows"        
+    systemversion "latest"
+
+    defines
+    {
+        
+    }
+
+    filter "configurations:Debug"
+        defines "NUT_DEBUG"
+        runtime "Debug"
+        symbols "on"            
+
+    filter "configurations:Release"
+        defines "NUT_Release"
+        runtime "Release"
+        optimize "on"           
+
+    filter "configurations:Dist"
+        defines "NUT_DIST"
+        runtime "Release"
+        optimize "on"
