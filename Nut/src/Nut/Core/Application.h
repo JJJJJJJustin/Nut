@@ -18,7 +18,7 @@ namespace Nut {
 	class Application
 	{
 	public:
-		Application();
+		Application(const std::string& name = "Nut App");
 		virtual ~Application();
 
 		void OnEvent(Event& e);							//事件分发

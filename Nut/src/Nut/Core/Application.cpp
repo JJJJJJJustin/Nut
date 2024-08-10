@@ -14,14 +14,14 @@ namespace Nut {
 
 	Application* Application::s_Instance = nullptr;										//! ! !初始化唯一实例的静态成员s_Instance
 
-	Application::Application()
+	Application::Application(const std::string& name /* = Nut App */ )
 	{
 		NUT_PROFILE_FUNCTION();
 
 		NUT_CORE_ASSERT(!s_Instance, "Application already exists! (The class Application is a Singleton, it just support one instance!)");
 		s_Instance = this;																//! ! !对唯一实例的静态成员的定义
 
-		m_Window = Window::Create();							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
+		m_Window = Window::Create(WindowProps(name));							//（上下文在Create中被初始化）这里的m_Window和WindowsWindow.h中的m_Window不是同一个
 		m_Window->SetVSync(true);
 		m_Window->SetEventCallback(NUT_BIND_EVENT_FN(Application::OnEvent));
 		

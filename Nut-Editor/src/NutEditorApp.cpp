@@ -9,6 +9,7 @@ namespace Nut {
 	{
 	public:
 		NutEditor()
+			:Application("Nut Editor")
 		{
 			PushLayer(new EditorLayer());
 		}
