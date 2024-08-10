@@ -163,6 +163,7 @@
     <ClInclude Include="src\Nut\Events\MouseEvent.h" />
     <ClInclude Include="src\Nut\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Nut\Renderer\Buffer.h" />
+    <ClInclude Include="src\Nut\Renderer\FrameBuffer.h" />
     <ClInclude Include="src\Nut\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Nut\Renderer\OrthoGraphicCamera.h" />
     <ClInclude Include="src\Nut\Renderer\OrthographicCameraController.h" />
@@ -176,6 +177,7 @@
     <ClInclude Include="src\Nut\Renderer\VertexArray.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLFrameBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
@@ -611,6 +613,7 @@
     <ClCompile Include="src\Nut\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Nut\Renderer\FrameBuffer.cpp" />
     <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp" />
     <ClCompile Include="src\Nut\Renderer\OrthoGraphicCamera.cpp" />
     <ClCompile Include="src\Nut\Renderer\OrthographicCameraController.cpp" />
@@ -624,6 +627,7 @@
     <ClCompile Include="src\Nut\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLFrameBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />

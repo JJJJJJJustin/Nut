@@ -32,6 +32,8 @@ void Sandbox2D::OnAttach()
 {
 	NUT_PROFILE_FUNCTION();
 
+	m_Framebuffer = Nut::FrameBuffer::Create({ 1280, 720 });
+
 	m_Texture = Nut::Texture2D::Create("assets/textures/Checkerboard.png");
 	m_Emoji = Nut::Texture2D::Create("assets/textures/emoji.png");
 	
@@ -79,13 +81,14 @@ void Sandbox2D::OnUpdate(Nut::Timestep ts)
 	Nut::Renderer2D::ClearStats();										// 每次更新前都要将Stats统计数据清零
 	{
 		NUT_PROFILE_SCOPE("RenderCommand Prep");
+		m_Framebuffer->Bind();											// 在颜色被设置之前就声明帧缓冲
 		Nut::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		Nut::RendererCommand::Clear();
 	}
 	{
 		NUT_PROFILE_SCOPE("Renderer2D Draw");
 
-#if 0
+#if 1
 		static float temp = 0.0f;
 		temp += ts * 100.0f;
 
@@ -108,6 +111,7 @@ void Sandbox2D::OnUpdate(Nut::Timestep ts)
 		Nut::Renderer2D::EndScene();
 #endif
 
+#if 0
 		if (Nut::Input::IsMouseButtonPressed(NUT_MOUSE_BUTTON_LEFT))
 		{
 			auto [x, y] = Nut::Input::GetMousePos();							// 获取窗口中鼠标当前的位置
@@ -146,6 +150,8 @@ void Sandbox2D::OnUpdate(Nut::Timestep ts)
 		Nut::Renderer2D::DrawQuad({ 18.0f, 7.0f, 0.5f }, { 1.0f, 1.0f }, m_Role);
 
 		Nut::Renderer2D::EndScene();
+#endif
+		m_Framebuffer->Unbind();
 	}
 }
 
@@ -245,8 +251,8 @@ void Sandbox2D::OnImGuiRender()
 
 		ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(m_QuadColor));
 
-		ImTextureID textureID = (void*)m_Emoji->GetRendererID();
-		ImGui::Image(textureID, ImVec2{ 256.0f, 256.0f });
+		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID();
+		ImGui::Image(textureID, ImVec2{ 1280.0f, 720.0f });
 
 		ImGui::End();
 		// -------------------------------------------------------------------------------------------------------

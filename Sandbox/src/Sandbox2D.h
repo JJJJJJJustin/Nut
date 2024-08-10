@@ -24,6 +24,8 @@ private:
 
 	std::unordered_map<char, Nut::Ref<Nut::SubTexture2D>> m_TilesMap;
 
+	Nut::Ref<Nut::FrameBuffer> m_Framebuffer;
+
 	Nut::OrthoGraphicCameraController m_CameraController;
 
 	glm::vec4 m_QuadColor= { 0.5412f, 0.1686f, 0.8863f, 1.0f };
