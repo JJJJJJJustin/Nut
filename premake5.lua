@@ -2,7 +2,7 @@
 
 workspace "Nut"                     --工作区
     architecture "x86_64"           --架构
-    startproject "Sandbox"          --[[启动项目]]
+    startproject "Nut-Editor"          --[[启动项目]]
 
     configurations
     {                               --配置

@@ -18,12 +18,10 @@ namespace Nut {
 		void OnEvent(Event& event) override;
 	private:
 		Ref<Texture2D> m_Texture, m_Emoji;
-		Ref<Texture2D> m_SpriteSheet, m_SpriteSheetRole;
-		Ref<SubTexture2D> m_Role;
-
-		std::unordered_map<char, Ref<SubTexture2D>> m_TilesMap;
 
 		Ref<FrameBuffer> m_Framebuffer;
+
+		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 
 		OrthoGraphicCameraController m_CameraController;
 

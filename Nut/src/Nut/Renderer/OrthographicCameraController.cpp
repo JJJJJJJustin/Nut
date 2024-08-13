@@ -59,6 +59,12 @@ namespace Nut {
 		dispathcer.Dispatch<WindowResizeEvent>(NUT_BIND_EVENT_FN(OrthoGraphicCameraController::OnWindowResized));
 	}
 
+	void OrthoGraphicCameraController::Resize(float width, float height)
+	{
+		m_AspectRatio = width / height;
+		UpdateViewport();
+	}
+	
 	void OrthoGraphicCameraController::UpdateViewport()
 	{
 		m_Bounds = { -m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel };	//更新物体所在的世界空间的边界，以便更新矩阵

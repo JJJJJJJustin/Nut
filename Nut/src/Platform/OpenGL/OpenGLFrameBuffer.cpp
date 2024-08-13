@@ -8,16 +8,24 @@ namespace Nut
 	OpenGLFrameBuffer::OpenGLFrameBuffer(const FrameBufferSpecification& spec)
 		:m_Specification(spec)
 	{
-		Resize();
+		Recreate();
 	}
 
 	OpenGLFrameBuffer::~OpenGLFrameBuffer()
 	{
 		glDeleteFramebuffers(1, &m_RendererID);
+		glDeleteTextures(1, &m_ColorAttachment);
+		glDeleteRenderbuffers(1, &m_BufferAttachment);
 	}
 
-	void OpenGLFrameBuffer::Resize()
+	void OpenGLFrameBuffer::Recreate()
 	{
+		if (m_RendererID) 
+		{
+			glDeleteFramebuffers(1, &m_RendererID);
+			glDeleteTextures(1, &m_ColorAttachment);
+			glDeleteRenderbuffers(1, &m_BufferAttachment);
+		}
 		// --------- Create Framebuffer Object ---------------
 		glCreateFramebuffers(1, &m_RendererID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
@@ -46,6 +54,7 @@ namespace Nut
 	void OpenGLFrameBuffer::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
+		glViewport(0, 0, m_Specification.Width, m_Specification.Height);							// 及时为渲染结果更新视口
 	}
 
 	void OpenGLFrameBuffer::Unbind()
@@ -53,4 +62,11 @@ namespace Nut
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void OpenGLFrameBuffer::Resize(uint32_t width, uint32_t height)
+	{
+		m_Specification.Width = width;
+		m_Specification.Height = height;
+
+		Recreate();
+	}
 }
