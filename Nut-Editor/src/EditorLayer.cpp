@@ -32,8 +32,10 @@ namespace Nut {
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		NUT_PROFILE_FUNCTION();												// 一个作用域只能声明一个 Timer 变量
+
 		// Update
-		m_CameraController.OnUpdate(ts);
+		if(m_ViewportFocused)
+			m_CameraController.OnUpdate(ts);
 
 		// Render
 		Renderer2D::ClearStats();										// 每次更新前都要将Stats统计数据清零
@@ -172,6 +174,11 @@ namespace Nut {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
+
+		m_ViewportFocused = ImGui::IsWindowFocused();
+		m_ViewportHovered = ImGui::IsWindowHovered();
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+
 		ImVec2 panelSize = ImGui::GetContentRegionAvail();													// 获取面板大小
 		if (m_ViewportSize != *(glm::vec2*)&panelSize)
 		{
