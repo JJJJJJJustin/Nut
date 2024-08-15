@@ -34,18 +34,21 @@ namespace Nut {
 		NUT_PROFILE_FUNCTION();												// 一个作用域只能声明一个 Timer 变量
 
 		// Logic Update
-		ImVec2 panelSize = ImGui::GetContentRegionAvail();
-		if (m_ViewportSize != *((glm::vec2*)&panelSize)){
-			m_ViewportSize = { panelSize.x, panelSize.y };														// 及时更新视口大小
-			m_Framebuffer->Resize((uint32_t)panelSize.x, (uint32_t)panelSize.y);
-			m_CameraController.Resize(panelSize.x, panelSize.y);
-		}
+		//ImVec2 panelSize = ImGui::GetContentRegionAvail();
+		//if (m_ViewportSize != *((glm::vec2*)&panelSize) && m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f){
+		//	m_ViewportSize = { panelSize.x, panelSize.y };														// 及时更新视口大小
+		//	m_Framebuffer->Resize((uint32_t)panelSize.x, (uint32_t)panelSize.y);
+		//	m_CameraController.Resize(panelSize.x, panelSize.y);
+		//}
 
-		/*if ((m_ViewportSize.x != m_Framebuffer->GetSpecification().Width || m_ViewportSize.y != m_Framebuffer->GetSpecification().Height) && m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
+		if ((m_ViewportSize.x != m_Framebuffer->GetSpecification().Width || m_ViewportSize.y != m_Framebuffer->GetSpecification().Height) 
+			&& m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.Resize(m_ViewportSize.x, m_ViewportSize.y);
-		}*/
+		}
+
+
 		// Screen Update
 		if(m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
@@ -191,6 +194,8 @@ namespace Nut {
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+		ImVec2 panelSize = ImGui::GetContentRegionAvail();
+		m_ViewportSize = { panelSize.x, panelSize.y };
 
 		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
