@@ -7,6 +7,8 @@ namespace Nut
 	class Input 
 	{
 	public:
+		virtual ~Input() = default;
+
 		static bool IsKeyPressed(int keycode);
 
 		static bool IsMouseButtonPressed(int button);

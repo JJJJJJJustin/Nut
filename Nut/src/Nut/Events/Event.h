@@ -44,8 +44,9 @@ namespace Nut {
 	{
 		friend class EventDispatcher;										//声明友元EventDispatcher
 	public:
-		bool Handled = false;												//是否已经处理（Handled）
+		virtual ~Event() = default;
 
+		bool Handled = false;												//是否已经处理（Handled）
 
 		virtual EventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;

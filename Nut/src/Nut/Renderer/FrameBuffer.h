@@ -15,6 +15,8 @@ namespace Nut
 	class FrameBuffer
 	{
 	public:
+		virtual ~FrameBuffer() = default;
+
 		static Ref<FrameBuffer> Create(const FrameBufferSpecification& spec);
 
 		virtual void Bind() = 0;
