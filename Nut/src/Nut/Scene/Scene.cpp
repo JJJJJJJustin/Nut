@@ -20,6 +20,9 @@ namespace Nut
 			TransformComponent(const glm::mat4& trans)
 				:Transform(trans) {}
 			TransformComponent(const TransformComponent&) = default;				//复制函数
+
+			operator glm::mat4& () { return Transform; }
+			operator const glm::mat4& () const { return Transform; }
 		};
 
 		struct MeshComponent
@@ -43,7 +46,7 @@ namespace Nut
 			//auto transform = m_Registry.get<TransformComponent>(entity);			// 在注册表中检索transform组件，性能弱（祖册表包含所有实体）
 		}
 
-		auto group = m_Registry.group<TransformComponent, MeshComponent>(entt::get<MeshComponent>);
+		auto group = m_Registry.group<TransformComponent>(entt::get<MeshComponent>);
 		for (auto entity : group)
 		{
 			auto& [transform, mesh] = group.get<TransformComponent, MeshComponent>(entity);
