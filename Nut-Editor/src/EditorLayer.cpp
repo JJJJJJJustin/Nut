@@ -21,6 +21,10 @@ namespace Nut {
 		m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_Emoji = Texture2D::Create("assets/textures/emoji.png");
 
+		m_ActiveScene = CreateRef<Scene>();
+		m_SquareEntity = m_ActiveScene->CreateEntity();
+		m_ActiveScene->Reg().emplace<TransformComponent>(m_SquareEntity, glm::mat4{ 1.0f });
+		m_ActiveScene->Reg().emplace<SpriteComponent>(m_SquareEntity, glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
 	}
 
 	void EditorLayer::OnDetach()
@@ -41,42 +45,24 @@ namespace Nut {
 			m_CameraController.Resize(m_ViewportSize.x, m_ViewportSize.y);
 		}
 
-
-		// Screen Update
+		// Camera Update
 		if(m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
 
 		// Render
 		{
 			NUT_PROFILE_SCOPE("RenderCommand Prep");
-			m_Framebuffer->Bind();											// 在颜色被设置之前就声明帧缓冲
 
 			Renderer2D::ClearStats();										// 每次更新前都要将Stats统计数据清零
+			m_Framebuffer->Bind();											// 在颜色被设置之前就声明帧缓冲
 			RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 			RendererCommand::Clear();
 		}
 		{
 			NUT_PROFILE_SCOPE("Renderer2D Draw");
 #if 1
-			static float temp = 0.0f;
-			temp += ts * 100.0f;
-
 			Renderer2D::BeginScene(m_CameraController.GetCamera());
-			Renderer2D::DrawQuad({ 1.0f,  1.0f }, { 1.0f, 1.0f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-			Renderer2D::DrawQuad({ 1.0f, -1.0f }, { 0.5f, 1.0f }, m_QuadColor);
-			Renderer2D::DrawRotatedQuad({ -2.0f, -0.0f }, { 1.0f, 1.0f }, glm::radians(temp), m_Emoji);
-			Renderer2D::DrawQuad({ -0.0f,  -0.0f, -0.1f }, { 10.0f, 10.0f }, m_Texture, 10.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-			Renderer2D::EndScene();
-
-			Renderer2D::BeginScene(m_CameraController.GetCamera());
-			for (float y = -5.0f; y < 5.0f; y += 0.5f)
-			{
-				for (float x = -5.0f; x < 5.0f; x += 0.5f)
-				{
-					glm::vec4 color = { 0.0f ,(x + 5.0f) / 10.0f, (y + 5.0f) / 10.0f, 0.7f };
-					Renderer2D::DrawQuad({ x,y }, { 0.45f, 0.45f }, color);
-				}
-			}
+			m_ActiveScene->OnUpdate(ts);
 			Renderer2D::EndScene();
 #endif
 

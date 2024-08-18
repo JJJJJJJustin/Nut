@@ -1,19 +1,17 @@
 #include "nutpch.h"
 #include "Scene.h"
 
+#include "Component.h"
+#include "Nut/Renderer/Renderer2D.h"
+
 #include "glm/glm.hpp"
 
 namespace Nut
 {
 
-	static void DoMath(const glm::mat4& transform) 
-	{
-		// Do some math
-	}
-
 	Scene::Scene()
 	{
-		struct TransformComponent {
+		/*struct TransformComponent {
 			glm::mat4 Transform;
 
 			TransformComponent() = default;
@@ -50,10 +48,30 @@ namespace Nut
 		for (auto entity : group)
 		{
 			auto& [transform, mesh] = group.get<TransformComponent, MeshComponent>(entity);
-		}
+		}*/
+
 	}
 
 	Scene::~Scene()
 	{
 	}
+
+	entt::entity Scene::CreateEntity()
+	{
+		return entt::entity();
+	}
+
+	void Scene::OnUpdate(Timestep ts)
+	{
+		// Do some rendering
+		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);		// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
+		for (auto entity : group) {
+			auto& [transform, color] = group.get<TransformComponent, SpriteComponent>(entity);
+
+			Renderer2D::DrawQuad(transform, color);
+		}
+	}
+
+
+
 }

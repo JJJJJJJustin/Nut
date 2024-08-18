@@ -16,6 +16,9 @@
 #include "Nut/Renderer/OrthoGraphicCameraController.h"
 
 #include "Nut/ImGui/ImGuiLayer.h"
+
+#include "Nut/Scene/Scene.h"
+#include "Nut/Scene/Component.h"
 //--------------- Renderer -------------------------
 #include "Nut/Renderer/Renderer.h"
 #include "Nut/Renderer/Renderer2D.h"
