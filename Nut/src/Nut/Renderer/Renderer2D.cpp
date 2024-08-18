@@ -163,12 +163,7 @@ namespace Nut {
 
 	// -------------------------- Draw func ------------------------------------------------------------------
 	// -------------------------- Draw Quad
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
-	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, color);
-	}
-
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 	{
 		NUT_PROFILE_FUNCTION();
 
@@ -181,11 +176,8 @@ namespace Nut {
 		constexpr float textureIndex = 0.0f;									// Just use the white texutre
 		constexpr float tilingFactor = 1.0f;									// Single color don't need tiling factor
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
-
-		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
-		// !!!不要写成 s_Data.QuadVertexPosition[0] * transform，给 transform 左乘一个位置向量这样的操作是无效的。
+																				// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
+																				// !!!不要写成 s_Data.QuadVertexPosition[0] * transform，给 transform 左乘一个位置向量这样的操作是无效的。
 		for (size_t i = 0; i < quadVertexCount; i++) {
 			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
 			s_Data.QuadVBHind->Color = color;
@@ -199,13 +191,24 @@ namespace Nut {
 
 		s_Data.Stats.QuadCount++;
 	}
-	// -------------------------- Draw Texture
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		DrawQuad({ position.x, position.y }, size, texture, tilingFactor, tintColor);
+		DrawQuad({ position.x, position.y, 0.0f }, size, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+	{
+		NUT_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+
+		DrawQuad(transform, color);							// calc the transform then draw it with "matrix function"
+	}
+
+	// -------------------------- Draw Texture
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		NUT_PROFILE_FUNCTION();
 
@@ -215,9 +218,9 @@ namespace Nut {
 
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
-		
+
 		float textureIndex = 0.0f;
-		#pragma region 在纹理集中搜寻纹理
+	#pragma region 在纹理集中搜寻纹理
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {				// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
 			if (*s_Data.Textures[i].get() == *texture.get()) {
 				textureIndex = (float)i;										// 将纹理在纹理集中的位置作为索引
@@ -233,10 +236,7 @@ namespace Nut {
 
 			s_Data.TextureSlotIndex++;
 		}
-		#pragma endregion
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+	#pragma endregion
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
 		for (size_t i = 0; i < quadVertexCount; i++)
@@ -248,19 +248,29 @@ namespace Nut {
 			s_Data.QuadVBHind->TilingFactor = tilingFactor;
 			s_Data.QuadVBHind++;
 		}
-	
+
 		s_Data.QuadIndexCount += 6;
 
 		s_Data.Stats.QuadCount++;
 	}
 
-	// -------------------------- Draw SubTexture
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
 	{
-		DrawQuad({ position.x, position.y }, size, subtexture, tilingFactor, tintColor);
+		DrawQuad({ position.x, position.y }, size, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	{
+		NUT_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+
+		DrawQuad(transform, texture, tilingFactor, tintColor);
+	}
+
+	// -------------------------- Draw SubTexture
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		NUT_PROFILE_FUNCTION();
 
@@ -273,7 +283,7 @@ namespace Nut {
 		Ref<Texture2D>texture = subtexture->GetTexture();
 
 		float textureIndex = 0.0f;
-		#pragma region 在纹理集中搜寻纹理
+	#pragma region 在纹理集中搜寻纹理
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {				// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。（这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
 			if (*s_Data.Textures[i].get() == *texture.get()) {
 				textureIndex = (float)i;										// 将纹理在纹理集中的位置作为索引
@@ -289,10 +299,7 @@ namespace Nut {
 
 			s_Data.TextureSlotIndex++;
 		}
-		#pragma endregion
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+	#pragma endregion
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
 		for (size_t i = 0; i < quadVertexCount; i++)
@@ -309,14 +316,26 @@ namespace Nut {
 
 		s_Data.Stats.QuadCount++;
 	}
-	// ------------------------------------- Rotated Quad --------------------------------------------------------------
-	// ------------------------------------- Draw Quad
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+
+
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
+		DrawQuad({ position.x, position.y }, size, subtexture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	{
+		NUT_PROFILE_FUNCTION();
+		
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+
+		DrawQuad(transform, subtexture, tilingFactor, tintColor);
+	}
+
+	// ------------------------------------- Rotated Quad --------------------------------------------------------------
+	// ------------------------------------- Draw Quad
+	void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, float rotation, const glm::vec4& color)
 	{
 		NUT_PROFILE_FUNCTION();
 
@@ -328,10 +347,6 @@ namespace Nut {
 		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		const float textureIndex = 0.0f;
 		const float tilingFactor = 1.0f;
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
 		for (size_t i = 0; i < quadVertexCount; i++) {
 			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
@@ -347,13 +362,25 @@ namespace Nut {
 		s_Data.Stats.QuadCount++;
 	}
 
-	// ------------------------------------- Draw Texture
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	{
+		NUT_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		DrawRotatedQuad(transform, rotation, color);
+	}
+
+	// ------------------------------------- Draw Texture
+	void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		NUT_PROFILE_FUNCTION();
 
@@ -364,7 +391,7 @@ namespace Nut {
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		float textureIndex = 0.0f;
-		#pragma region 在纹理集中搜寻纹理
+	#pragma region 在纹理集中搜寻纹理
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
 			if (*s_Data.Textures[i].get() == *texture.get()) {
 				textureIndex = (float)i;
@@ -380,11 +407,7 @@ namespace Nut {
 
 			s_Data.TextureSlotIndex++;
 		}
-		#pragma endregion
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+	#pragma endregion
 
 		for (size_t i = 0; i < quadVertexCount; i++) {
 			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
@@ -400,13 +423,25 @@ namespace Nut {
 		s_Data.Stats.QuadCount++;
 	}
 
-	// ------------------------------------- Draw SubTexture
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subtexture, tilingFactor, tintColor);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		NUT_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		DrawRotatedQuad(transform, rotation, texture, tilingFactor, tintColor);
+	}
+
+	// ------------------------------------- Draw SubTexture
+	void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		NUT_PROFILE_FUNCTION();
 
@@ -419,27 +454,23 @@ namespace Nut {
 		Ref<Texture2D> texture = subtexture->GetTexture();
 
 		float textureIndex = 0.0f;
-		#pragma region 在纹理集中搜寻纹理
-		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
-			if (*s_Data.Textures[i].get() == *texture.get()) {
-				textureIndex = (float)i;
-				break;
+	#pragma region 在纹理集中搜寻纹理
+			for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+				if (*s_Data.Textures[i].get() == *texture.get()) {
+					textureIndex = (float)i;
+					break;
+				}
 			}
-		}
-		if (textureIndex == 0.0f) {
-			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) {
-				FlushAndReset();
+			if (textureIndex == 0.0f) {
+				if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) {
+					FlushAndReset();
+				}
+				s_Data.Textures[s_Data.TextureSlotIndex] = texture;
+				textureIndex = float(s_Data.TextureSlotIndex);
+
+				s_Data.TextureSlotIndex++;
 			}
-			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
-			textureIndex = float(s_Data.TextureSlotIndex);
-
-			s_Data.TextureSlotIndex++;
-		}
-		#pragma endregion
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+	#pragma endregion
 
 		for (size_t i = 0; i < quadVertexCount; i++) {
 			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
@@ -453,6 +484,21 @@ namespace Nut {
 		s_Data.QuadIndexCount += 6;
 
 		s_Data.Stats.QuadCount++;
+	}
+
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subtexture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		DrawRotatedQuad(transform, rotation, subtexture, tilingFactor, tintColor);
 	}
 
 

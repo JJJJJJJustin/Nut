@@ -175,6 +175,7 @@
     <ClInclude Include="src\Nut\Renderer\SubTexture2D.h" />
     <ClInclude Include="src\Nut\Renderer\Texture.h" />
     <ClInclude Include="src\Nut\Renderer\VertexArray.h" />
+    <ClInclude Include="src\Nut\Scene\Component.h" />
     <ClInclude Include="src\Nut\Scene\Scene.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
