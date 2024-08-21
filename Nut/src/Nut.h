@@ -18,6 +18,7 @@
 #include "Nut/ImGui/ImGuiLayer.h"
 
 #include "Nut/Scene/Scene.h"
+#include "Nut/Scene/Entity.h"
 #include "Nut/Scene/Component.h"
 //--------------- Renderer -------------------------
 #include "Nut/Renderer/Renderer.h"

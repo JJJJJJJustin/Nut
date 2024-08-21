@@ -1430,6 +1430,7 @@
     </ClInclude>
     <ClInclude Include="src\Nut\Scene\Scene.h" />
     <ClInclude Include="src\Nut\Scene\Component.h" />
+    <ClInclude Include="src\Nut\Scene\Entity.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Core\Application.cpp">
@@ -1526,5 +1527,6 @@
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
     <ClCompile Include="src\Nut\Scene\Scene.cpp" />
+    <ClCompile Include="src\Nut\Scene\Entity.cpp" />
   </ItemGroup>
 </Project>

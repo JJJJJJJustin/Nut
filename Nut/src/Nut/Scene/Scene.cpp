@@ -1,8 +1,9 @@
 #include "nutpch.h"
 #include "Scene.h"
 
-#include "Component.h"
 #include "Nut/Renderer/Renderer2D.h"
+#include "Nut/Scene/Component.h"
+#include "Nut/Scene/Entity.h"
 
 #include "glm/glm.hpp"
 
@@ -56,9 +57,15 @@ namespace Nut
 	{
 	}
 
-	entt::entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(const std::string& name)
 	{
-		return entt::entity();
+		Entity entity = { m_Registry.create(), this };
+
+		entity.AddComponent<TransformComponent>(glm::mat4{ 1.0f });
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Unnamed Entity" : name;
+
+		return entity;
 	}
 
 	void Scene::OnUpdate(Timestep ts)

@@ -5,9 +5,20 @@
 namespace Nut
 {
 
+	struct TagComponent
+	{
+		std::string Tag;
+
+		TagComponent() = default;
+		TagComponent(const std::string& tag)
+			:Tag(tag) {};
+		TagComponent(const TagComponent&) = default;
+
+	};
+
 	struct TransformComponent
 	{
-		glm::mat4 Transform{ 1.0f };
+		glm::mat4 Transform{ 1.0f };											// 矩阵默认初始化为 { 1.0f }
 
 		TransformComponent() = default;
 		TransformComponent(const glm::mat4& transform)

@@ -1,0 +1,53 @@
+#pragma once
+
+#include "entt.hpp"
+
+#include "Nut/Scene/Scene.h"
+
+namespace Nut
+{
+
+	class Entity
+	{
+	public:
+		Entity() = default;
+		Entity(entt::entity entityHandle, Scene* scene);
+		Entity(const Entity& other) = default;
+
+		~Entity() = default;
+
+		template<typename T, typename... Args>
+		T& AddComponent(Args&&... args)
+		{
+			NUT_CORE_ASSERT(!HasComponent<T>(), "This Entity already has component!");
+			return m_Scene->Reg().emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+		}
+
+		template<typename T>
+		T& GetComponent()
+		{
+			NUT_CORE_ASSERT(HasComponent<T>(), "This Entity does not have component!");
+			return m_Scene->Reg().get<T>(m_EntityHandle);
+		}
+
+		template<typename T>
+		void RemoveComponent()
+		{
+			NUT_CORE_ASSERT(HasComponent<T>(), "This Entity does not have component!");
+			m_Scene->Reg().remove<T>(m_EntityHandle);
+		}
+
+		template <typename T>
+		bool HasComponent()
+		{
+			return m_Scene->Reg().all_of<T>(m_EntityHandle);
+		}
+
+	private:
+		entt::entity m_EntityHandle{ entt::null };
+		Scene* m_Scene = nullptr;
+	};
+	
+
+
+}

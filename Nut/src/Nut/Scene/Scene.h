@@ -5,6 +5,7 @@
 
 namespace Nut
 {
+	class Entity;												//Ç°ÏòÉùÃ÷
 
 	class Scene
 	{
@@ -14,7 +15,7 @@ namespace Nut
 
 		void OnUpdate(Timestep ts);
 
-		entt::entity CreateEntity();
+		Entity CreateEntity(const std::string& name = "");
 
 		// TEMP
 		entt::registry& Reg() { return m_Registry; }
