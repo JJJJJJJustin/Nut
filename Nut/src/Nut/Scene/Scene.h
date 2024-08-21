@@ -21,6 +21,8 @@ namespace Nut
 		entt::registry& Reg() { return m_Registry; }
 	private:
 		entt::registry m_Registry;
+
+		friend class Entity;
 	};
 
 
