@@ -162,11 +162,11 @@ namespace Nut {
 		ImGui::Text("Vertices: %d", stats.GetVertexCount());
 		ImGui::Text("Indices: %d", stats.GetIndexCount());
 
-		if (m_SquareEntity.HasComponent<TagComponent>()) 
+		if (m_SquareEntity) 
 		{
 			ImGui::Separator();
 			auto& tag = m_SquareEntity.GetComponent<TagComponent>().Tag;
-			ImGui::Text("%s", tag.c_str());
+			ImGui::Text(tag.c_str());
 
 			auto& squareColor = m_SquareEntity.GetComponent<SpriteComponent>().Color;
 			ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(squareColor));

@@ -43,6 +43,7 @@ namespace Nut
 			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
+		operator bool() const { return m_EntityHandle != entt::null; }
 	private:
 		entt::entity m_EntityHandle{ entt::null };
 		Scene* m_Scene = nullptr;
