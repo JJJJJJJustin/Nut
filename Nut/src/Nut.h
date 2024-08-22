@@ -13,6 +13,7 @@
 #include "Nut/Core/KeyCodes.h"
 #include "Nut/Core/MouseButtonCodes.h"
 
+#include "Nut/Renderer/Camera.h"
 #include "Nut/Renderer/OrthoGraphicCameraController.h"
 
 #include "Nut/ImGui/ImGuiLayer.h"

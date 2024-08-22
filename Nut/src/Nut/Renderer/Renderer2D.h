@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Nut/Renderer/Camera.h"
 #include "Nut/Renderer/OrthoGraphicCamera.h"
 
 #include "Nut/Renderer/Texture.h"
@@ -13,6 +14,7 @@ namespace Nut {
 		static void Init();
 		static void Shutdown();
 
+		static void BeginScene(const Camera& camera, const glm::mat4& viewMatrix);
 		static void BeginScene(const OrthoGraphicCamera& camera);
 		static void EndScene();
 

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
+
+#include "Nut/Renderer/Camera.h"
 
 namespace Nut
 {
@@ -41,5 +43,18 @@ namespace Nut
 		operator glm::vec4& () { return Color; }
 		operator const glm::vec4& () const { return Color; }
 	};
+
+	struct CameraComponent
+	{
+		Nut::Camera Camera;
+		bool Primary = false;
+
+		CameraComponent() = default;
+		CameraComponent(const glm::mat4& projection)
+			:Camera(projection){};
+		CameraComponent(const CameraComponent&) = default;
+	
+	};
+
 
 }

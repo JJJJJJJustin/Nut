@@ -1431,6 +1431,7 @@
     <ClInclude Include="src\Nut\Scene\Scene.h" />
     <ClInclude Include="src\Nut\Scene\Component.h" />
     <ClInclude Include="src\Nut\Scene\Entity.h" />
+    <ClInclude Include="src\Nut\Renderer\Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Core\Application.cpp">

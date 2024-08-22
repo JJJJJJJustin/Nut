@@ -22,8 +22,18 @@ namespace Nut {
 		m_Emoji = Texture2D::Create("assets/textures/emoji.png");
 
 		m_ActiveScene = CreateRef<Scene>();
+
 		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
 		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
+
+		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
+		m_CameraEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.5412f, 0.1686f, 0.8863f, 1.0f });
+		m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f));
+
+		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Camera");
+		m_SecondCamera.AddComponent<SpriteComponent>(glm::vec4{ 0.5412f, 0.1686f, 0.8863f, 1.0f });
+		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+		secondController.Primary = true;
 	}
 
 	void EditorLayer::OnDetach()
@@ -60,9 +70,7 @@ namespace Nut {
 		{
 			NUT_PROFILE_SCOPE("Renderer2D Draw");
 #if 1
-			Renderer2D::BeginScene(m_CameraController.GetCamera());
 			m_ActiveScene->OnUpdate(ts);
-			Renderer2D::EndScene();
 #endif
 
 			m_Framebuffer->Unbind();
