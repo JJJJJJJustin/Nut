@@ -27,13 +27,12 @@ namespace Nut {
 		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
 
 		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
-		m_CameraEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.5412f, 0.1686f, 0.8863f, 1.0f });
-		m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f));
+		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f));
+		firstController.Primary = true;
 
 		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Camera");
-		m_SecondCamera.AddComponent<SpriteComponent>(glm::vec4{ 0.5412f, 0.1686f, 0.8863f, 1.0f });
 		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
-		secondController.Primary = true;
+		secondController.Primary = false;
 	}
 
 	void EditorLayer::OnDetach()
@@ -72,7 +71,6 @@ namespace Nut {
 #if 1
 			m_ActiveScene->OnUpdate(ts);
 #endif
-
 			m_Framebuffer->Unbind();
 		}
 	}
@@ -180,6 +178,14 @@ namespace Nut {
 			ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(squareColor));
 			ImGui::Separator();
 		}
+
+		if(ImGui::Checkbox("World space Camera", &m_PrimaryCamera))
+		{
+			m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
+			m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
+		}
+		m_PrimaryCamera == true ? 
+			ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3])) : ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_SecondCamera.GetComponent<TransformComponent>().Transform[3]));
 
 		ImGui::End();
 
