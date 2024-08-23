@@ -189,6 +189,11 @@ namespace Nut {
 		m_PrimaryCamera == true ? 
 			ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3])) : ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_SecondCamera.GetComponent<TransformComponent>().Transform[3]));
 
+		auto& camera = m_SecondCamera.GetComponent<CameraComponent>().Camera;
+			float orthoSize = camera.GetOrthographicSize();
+			if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
+				camera.SetOrthographicSize(orthoSize);
+
 		ImGui::End();
 		// ---------------------------------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));

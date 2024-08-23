@@ -21,6 +21,8 @@ namespace Nut
 	private:
 		entt::registry m_Registry;
 
+		uint32_t m_ViewportWidth, m_ViewportHeight;			// maybe useful
+
 		friend class Entity;
 	};
 
