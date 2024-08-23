@@ -1432,6 +1432,7 @@
     <ClInclude Include="src\Nut\Scene\Component.h" />
     <ClInclude Include="src\Nut\Scene\Entity.h" />
     <ClInclude Include="src\Nut\Renderer\Camera.h" />
+    <ClInclude Include="src\Nut\Scene\SceneCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Core\Application.cpp">
@@ -1529,5 +1530,6 @@
     </ClCompile>
     <ClCompile Include="src\Nut\Scene\Scene.cpp" />
     <ClCompile Include="src\Nut\Scene\Entity.cpp" />
+    <ClCompile Include="src\Nut\Scene\SceneCamera.cpp" />
   </ItemGroup>
 </Project>

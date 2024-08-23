@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Nut/Renderer/Camera.h"
+#include "Nut/Scene/SceneCamera.h"
 
 namespace Nut
 {
@@ -46,12 +46,11 @@ namespace Nut
 
 	struct CameraComponent
 	{
-		Nut::Camera Camera;
+		SceneCamera Camera;
 		bool Primary = false;
+		bool FixedAspectRatio = false;
 
 		CameraComponent() = default;
-		CameraComponent(const glm::mat4& projection)
-			:Camera(projection){};
 		CameraComponent(const CameraComponent&) = default;
 	
 	};

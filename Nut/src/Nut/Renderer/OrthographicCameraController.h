@@ -25,7 +25,7 @@ namespace Nut {
 
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
-		void Resize(float width, float height);
+		void OnResize(float width, float height);
 
 		OrthoGraphicCamera& GetCamera() { return m_Camera; }
 		const OrthoGraphicCamera& GetCamera() const { return m_Camera; }
