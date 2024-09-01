@@ -180,6 +180,7 @@
     <ClInclude Include="src\Nut\Scene\Entity.h" />
     <ClInclude Include="src\Nut\Scene\Scene.h" />
     <ClInclude Include="src\Nut\Scene\SceneCamera.h" />
+    <ClInclude Include="src\Nut\Scene\ScriptableEntity.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLFrameBuffer.h" />

@@ -31,6 +31,33 @@ namespace Nut
 
 	void Scene::OnUpdate(Timestep ts)
 	{
+		// Update scripts
+		
+		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+			{
+				bool cameraPrimary;
+				auto cameraView = m_Registry.view<CameraComponent>();
+				for (auto entity : cameraView)
+				{
+					cameraPrimary = cameraView.get<CameraComponent>(entity).Primary;
+				}
+
+				if (!nsc.Instance)
+				{
+					nsc.InstantiateFunction();
+					nsc.Instance->m_ScriptableEntity = Entity{ entity, this };		// 回调函数中的entity是一个uint，记载id,故需要为m_ScriptableEntity调用构造函数，传入id和Scene的指针。
+
+					if (nsc.OnCreateFunction)
+						nsc.OnCreateFunction(nsc.Instance);
+				}
+
+				if (nsc.OnUpdateFunction && cameraPrimary) {
+					nsc.OnUpdateFunction(nsc.Instance, ts);
+					
+				}
+			});
+
+		// Render 2D objects
 		Camera* mainCamera = nullptr;
 		glm::mat4* mainTransform = nullptr;
 
@@ -39,7 +66,7 @@ namespace Nut
 		{
 			auto& [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
 			// 若检测到某摄像机被标记为主摄像机，则传出主摄像机的数据，然后跳出。
-			if(camera.Primary)
+			if (camera.Primary)
 			{
 				mainCamera = &camera.Camera;
 				mainTransform = &transform.Transform;
@@ -61,6 +88,7 @@ namespace Nut
 			Renderer2D::EndScene();
 		}
 
+		
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)

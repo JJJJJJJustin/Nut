@@ -20,6 +20,7 @@
 
 #include "Nut/Scene/Scene.h"
 #include "Nut/Scene/Entity.h"
+//#include "Nut/Scene/ScriptableEntity.h" 
 #include "Nut/Scene/Component.h"
 //--------------- Renderer -------------------------
 #include "Nut/Renderer/Renderer.h"

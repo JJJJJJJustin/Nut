@@ -1,5 +1,7 @@
 #include "EditorLayer.h"
 
+#include "Nut/Scene/ScriptableEntity.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -32,7 +34,39 @@ namespace Nut {
 
 		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Camera");
 		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>();
+		secondController.Camera.SetOrthographicSize(5.0f);
 		secondController.Primary = false;
+
+		class CameraController : public ScriptableEntity
+		{
+		public:
+			void OnCreate() 
+			{
+			
+			}
+
+			void OnDestroy()
+			{
+
+			}
+
+			void OnUpdate(Timestep ts)
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				float speed = 5.0f;
+
+				if (Input::IsKeyPressed(NUT_KEY_A))
+					transform[3][0] += speed * ts;
+				if (Input::IsKeyPressed(NUT_KEY_D))
+					transform[3][0] -= speed * ts;
+				if (Input::IsKeyPressed(NUT_KEY_W))
+					transform[3][1] -= speed * ts;
+				if (Input::IsKeyPressed(NUT_KEY_S))
+					transform[3][1] += speed * ts;
+			}
+			
+		};
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 	}
 
 	void EditorLayer::OnDetach()
@@ -190,9 +224,9 @@ namespace Nut {
 			ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3])) : ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_SecondCamera.GetComponent<TransformComponent>().Transform[3]));
 
 		auto& camera = m_SecondCamera.GetComponent<CameraComponent>().Camera;
-			float orthoSize = camera.GetOrthographicSize();
-			if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
-				camera.SetOrthographicSize(orthoSize);
+		float orthoSize = camera.GetOrthographicSize();
+		if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
+			camera.SetOrthographicSize(orthoSize);
 
 		ImGui::End();
 		// ---------------------------------------------------
