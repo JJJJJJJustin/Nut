@@ -33,8 +33,9 @@ namespace Nut
 	{
 		// Update scripts
 		
-		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
-			{
+		m_Registry.view<NativeScriptComponent>().each
+		(
+			[=](auto entity, auto& nsc){
 				bool cameraPrimary;
 				auto cameraView = m_Registry.view<CameraComponent>();
 				for (auto entity : cameraView)
@@ -51,11 +52,10 @@ namespace Nut
 						nsc.OnCreateFunction(nsc.Instance);
 				}
 
-				if (nsc.OnUpdateFunction && cameraPrimary) {
+				if (nsc.OnUpdateFunction && cameraPrimary)							// 确保只有作为主相机时才可以被脚本更新（比如进行位移）
 					nsc.OnUpdateFunction(nsc.Instance, ts);
-					
-				}
-			});
+			}
+		);
 
 		// Render 2D objects
 		Camera* mainCamera = nullptr;
