@@ -1532,5 +1532,6 @@
     <ClCompile Include="src\Nut\Scene\Scene.cpp" />
     <ClCompile Include="src\Nut\Scene\Entity.cpp" />
     <ClCompile Include="src\Nut\Scene\SceneCamera.cpp" />
+    <ClCompile Include="src\Nut\Scene\ScriptableEntity.cpp" />
   </ItemGroup>
 </Project>

@@ -31,42 +31,14 @@ namespace Nut {
 		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
 		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>();
 		firstController.Primary = true;
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			//添加本机脚本
 
 		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Camera");
 		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>();
 		secondController.Camera.SetOrthographicSize(5.0f);
 		secondController.Primary = false;
+		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			//添加本机脚本
 
-		class CameraController : public ScriptableEntity
-		{
-		public:
-			void OnCreate() 
-			{
-			
-			}
-
-			void OnDestroy()
-			{
-
-			}
-
-			void OnUpdate(Timestep ts)
-			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
-				float speed = 5.0f;
-
-				if (Input::IsKeyPressed(NUT_KEY_A))
-					transform[3][0] += speed * ts;
-				if (Input::IsKeyPressed(NUT_KEY_D))
-					transform[3][0] -= speed * ts;
-				if (Input::IsKeyPressed(NUT_KEY_W))
-					transform[3][1] -= speed * ts;
-				if (Input::IsKeyPressed(NUT_KEY_S))
-					transform[3][1] += speed * ts;
-			}
-			
-		};
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 	}
 
 	void EditorLayer::OnDetach()
@@ -94,21 +66,17 @@ namespace Nut {
 			m_CameraController.OnUpdate(ts);
 
 		// Render
-		{
-			NUT_PROFILE_SCOPE("RenderCommand Prep");
+		Renderer2D::ClearStats();										// 每次更新前都要将Stats统计数据清零
+		m_Framebuffer->Bind();											// 在颜色被设置之前就声明帧缓冲
+		
+		RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RendererCommand::Clear();
 
-			Renderer2D::ClearStats();										// 每次更新前都要将Stats统计数据清零
-			m_Framebuffer->Bind();											// 在颜色被设置之前就声明帧缓冲
-			RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-			RendererCommand::Clear();
-		}
-		{
-			NUT_PROFILE_SCOPE("Renderer2D Draw");
-#if 1
-			m_ActiveScene->OnUpdate(ts);
-#endif
-			m_Framebuffer->Unbind();
-		}
+		m_ActiveScene->OnUpdate(ts);
+		m_ActiveScene->OnScript(ts);								// 更新本机脚本
+
+		m_Framebuffer->Unbind();
+		
 	}
 
 	void EditorLayer::OnImGuiRender()

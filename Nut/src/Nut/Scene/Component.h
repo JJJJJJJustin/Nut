@@ -61,24 +61,22 @@ namespace Nut
 	{
 		ScriptableEntity* Instance = nullptr;
 
-		// Set functions
-		std::function<void()> InstantiateFunction;
-		std::function<void()> DestroyInstanceFunction;
+		// Set functions( Use std::function )
+		std::function<ScriptableEntity* ()> InstantiateScript;//ÊµÀý»¯½Å±¾
+		std::function<void(NativeScriptComponent*)> DeinstantiateScript;
+		/* Set functions( Use function pointer ) 
+		   ( Both of them are correct, but function pointer will faster, and better at performance )
+		
+		ScriptableEntity* (*InstantiateScript)();
+		void (*DestroyScript)(NativeScriptComponent*);*/
 
-		std::function<void(ScriptableEntity*)> OnCreateFunction;
-		std::function<void(ScriptableEntity*)> OnDestroyFunction;
-		std::function<void(ScriptableEntity*, Timestep)> OnUpdateFunction;
 
 		// Send functions so we can use them later
 		template<typename T>
 		void Bind()
 		{
-			InstantiateFunction = [&]() { Instance = new T(); };
-			DestroyInstanceFunction = [&]() {delete (T*)Instance; Instance = nullptr;};  // Why need to define Instance with nullptr?? 
-		
-			OnCreateFunction  = [](ScriptableEntity* instance) {((T*)instance)->OnCreate(); };
-			OnDestroyFunction = [](ScriptableEntity* instance) {((T*)instance)->OnDestroy(); };
-			OnUpdateFunction  = [](ScriptableEntity* instance, Timestep ts) {((T*)instance)->OnUpdate(ts); };
+			InstantiateScript = []() { return new T(); };
+			DeinstantiateScript = [](NativeScriptComponent* nsc) {delete nsc->Instance; nsc->Instance = nullptr;};  // Why need to define nsc->Instance with nullptr?? 
 		}
 	};
 
