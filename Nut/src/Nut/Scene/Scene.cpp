@@ -83,7 +83,6 @@ namespace Nut
 			{
 				if (!nsc.Instance)
 				{
-					std::cout << "Instance is valid";
 					nsc.Instance = nsc.InstantiateScript();
 					nsc.Instance->m_ScriptableEntity = Entity{ entity, this };	// 回调函数中的entity是一个uint，记载id,故需要为m_ScriptableEntity调用构造函数，传入id和Scene的指针。
 
