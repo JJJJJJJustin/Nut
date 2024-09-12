@@ -75,7 +75,7 @@ namespace Nut
 		template<typename T>
 		void Bind()
 		{
-			InstantiateScript = []() { return new T(); };
+			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
 			DeinstantiateScript = [](NativeScriptComponent* nsc) {delete nsc->Instance; nsc->Instance = nullptr;};  // Why need to define nsc->Instance with nullptr?? 
 		}
 	};
