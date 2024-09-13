@@ -39,6 +39,7 @@ namespace Nut {
 		secondController.Primary = false;
 		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			//添加本机脚本
 
+		m_HierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -164,6 +165,9 @@ namespace Nut {
 		}
 		#pragma endregion
 		// ----------- Should be writen in Dockspace( Between dockspace's ImGui::Begin() <-> ImGui::End() ) ----
+		// ----------- Hierarchy Panel -------------------------------------------
+		m_HierarchyPanel.OnImGuiRender();
+		// ----------- Test Panel---------------------------------------------
 		ImGui::Begin("Test");
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
@@ -197,7 +201,7 @@ namespace Nut {
 			camera.SetOrthographicSize(orthoSize);
 
 		ImGui::End();
-		// ---------------------------------------------------
+		// ----------- Viewport Image --------------------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
 

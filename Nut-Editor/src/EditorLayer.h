@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Nut.h"
+#include "Panels/SceneHierarchyPanel.h"
 
 
 namespace Nut {
@@ -17,6 +18,7 @@ namespace Nut {
 		void OnImGuiRender() override;
 		void OnEvent(Event& event) override;
 	private:
+		// Scene
 		Ref<Texture2D> m_Texture, m_Emoji;
 
 		Ref<FrameBuffer> m_Framebuffer;
@@ -34,6 +36,8 @@ namespace Nut {
 
 		glm::vec4 m_QuadColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };
 
+		// Panels
+		SceneHierarchyPanel m_HierarchyPanel;
 	};
 
 }
