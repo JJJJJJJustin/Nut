@@ -17,6 +17,7 @@ namespace Nut
 		void OnImGuiRender();
 	private:
 		void DrawEntityNode(Entity entity);
+		void DrawComponents(Entity entity);
 	private:
 		Ref<Scene> m_Context;									// Active scene is the context, Entity (which is being used) is the selectionContext
 		Entity m_SelectionContext;

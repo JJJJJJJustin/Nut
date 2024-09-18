@@ -192,8 +192,6 @@ namespace Nut {
 			m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
 			m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
 		}
-		m_PrimaryCamera == true ? 
-			ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3])) : ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_SecondCamera.GetComponent<TransformComponent>().Transform[3]));
 
 		auto& camera = m_SecondCamera.GetComponent<CameraComponent>().Camera;
 		float orthoSize = camera.GetOrthographicSize();

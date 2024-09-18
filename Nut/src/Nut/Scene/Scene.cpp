@@ -89,8 +89,8 @@ namespace Nut
 					nsc.Instance->OnCreate();
 				}
 
-				if(cc.Primary)
-					nsc.Instance->OnUpdate(ts);
+				/*if(cc.Primary)*/
+				nsc.Instance->OnUpdate(ts);
 			}
 		);
 	
