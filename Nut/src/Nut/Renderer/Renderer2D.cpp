@@ -117,6 +117,7 @@ namespace Nut {
 		delete[] s_Data.QuadVBBase;
 	}
 
+	// If camera belongs to type "Camera", then use this function( ViewMatrix need to be filled in manually )
 	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& viewMatrix)
 	{
 		NUT_PROFILE_FUNCTION();

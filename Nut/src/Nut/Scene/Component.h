@@ -47,7 +47,7 @@ namespace Nut
 
 	struct CameraComponent
 	{
-		SceneCamera Camera;
+		SceneCamera Camera;		// ToDo: think about moving to Scene
 		bool Primary = false;
 		bool FixedAspectRatio = false;
 

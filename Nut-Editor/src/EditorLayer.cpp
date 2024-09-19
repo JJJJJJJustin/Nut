@@ -25,8 +25,11 @@ namespace Nut {
 
 		m_ActiveScene = CreateRef<Scene>();
 
-		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
+		m_SquareEntity = m_ActiveScene->CreateEntity("BlueSquare");
 		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
+
+		m_RedSquare = m_ActiveScene->CreateEntity("RedSquare");
+		m_RedSquare.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 0.0f, 1.0f, 1.0f });
 
 		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
 		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>();

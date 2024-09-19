@@ -85,11 +85,84 @@ namespace Nut
 			{
 				auto& transform = entity.GetComponent<TransformComponent>().Transform;
 				ImGui::DragFloat3("Position", glm::value_ptr(transform[3]), 0.1f);
+				ImGui::TreePop();
 			}
-			ImGui::TreePop();
 		}
 
+		if(entity.HasComponent<CameraComponent>())
+		{
+			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			{
+				auto& cameraComponent = entity.GetComponent<CameraComponent>();
+				auto& camera = cameraComponent.Camera;
+				bool& primary = cameraComponent.Primary;
+				bool& fixedAspectRatio = cameraComponent.FixedAspectRatio;
+				
+				//  -------- Draw Check Box --------
+				ImGui::Checkbox("Primary", &primary);
 
+				// Draw Combo Box
+				const char* projectionType[] = {"Perspective", "Orthographic" };
+				const char* currentProjectionType = projectionType[(int)camera.GetProjectionType()];
+				if (ImGui::BeginCombo("Projection", currentProjectionType))		// Combo box preview value needs to be a c_str
+				{
+					// -------- Draw drop-down Selection List --------
+					for (int i = 0; i < 2; i++) 
+					{
+						bool isSelected = (projectionType[i] == currentProjectionType);
+						if(ImGui::Selectable(projectionType[i], isSelected))	// (What isSelected do:) Is this option is current projection type ? Default highlight : Not highlight
+						{
+							currentProjectionType = projectionType[i];		// ?????????
+							camera.SetProjectionType((SceneCamera::ProjectionType)i);
+							//camera.ViewportResize()
+						}
+
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();	// ?????????
+					}
+					ImGui::EndCombo();
+				}
+
+				// -------- Draw Perspective Camera Controller --------
+				if(camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+				{
+					float verticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
+					if(ImGui::DragFloat("Vertical FOV", &verticalFov))		// ??? what is VerticalFov ? what's the suitable number usually ? what's the differenice when we change fov?
+						camera.SetPerspectiveVerticalFOV(glm::radians(verticalFov));
+
+					float perspectiveNear = camera.GetPerspectiveNearClip();
+					if (ImGui::DragFloat("Near", &perspectiveNear))
+						camera.SetPerspectiveNearClip(perspectiveNear);
+
+					float perspectiveFar = camera.GetPerspectiveFarClip();
+					if(ImGui::DragFloat("Far", &perspectiveFar))
+						camera.SetPerspectiveFarClip(perspectiveFar);
+				}
+
+				// -------- Draw Orthographic Camera Controller --------
+				if(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
+				{
+					ImGui::Checkbox("Fixed Aspect Ratio", &fixedAspectRatio);
+
+					float orthoSize = camera.GetOrthographicSize();
+					if(ImGui::DragFloat("Size", &orthoSize))
+						camera.SetOrthographicSize(orthoSize);
+
+					float orthoNear = camera.GetOrthographicNearClip();
+					if (ImGui::DragFloat("Near", &orthoNear))
+						camera.SetOrthographicNearClip(orthoNear);
+
+					float orthoFar = camera.GetOrthographicFarClip();
+					if(ImGui::DragFloat("Far", &orthoFar))
+						camera.SetOrthographicFarClip(orthoFar);
+				}
+			
+				ImGui::TreePop();
+			}
+
+
+
+		}
 	}
 
 

@@ -24,7 +24,7 @@ namespace Nut {
 		Ref<FrameBuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;
-		Entity m_SquareEntity;
+		Entity m_SquareEntity, m_RedSquare;
 		Entity m_CameraEntity, m_SecondCamera;
 
 		bool m_PrimaryCamera = true;
