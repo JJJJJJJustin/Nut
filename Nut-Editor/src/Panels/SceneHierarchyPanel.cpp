@@ -2,13 +2,13 @@
 #include "SceneHierarchyPanel.h"
 
 #include "Nut/Scene/Component.h"
+#include "../EditorLayer.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Nut
 {
-
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
 	{
 		SetContext(scene);
@@ -104,21 +104,23 @@ namespace Nut
 				// Draw Combo Box
 				const char* projectionType[] = {"Perspective", "Orthographic" };
 				const char* currentProjectionType = projectionType[(int)camera.GetProjectionType()];
-				if (ImGui::BeginCombo("Projection", currentProjectionType))		// Combo box preview value needs to be a c_str
+				if (ImGui::BeginCombo("Projection", currentProjectionType))			// Combo box preview value needs to be a c_str
 				{
 					// -------- Draw drop-down Selection List --------
 					for (int i = 0; i < 2; i++) 
 					{
 						bool isSelected = (projectionType[i] == currentProjectionType);
-						if(ImGui::Selectable(projectionType[i], isSelected))	// (What isSelected do:) Is this option is current projection type ? Default highlight : Not highlight
+						if(ImGui::Selectable(projectionType[i], isSelected))		// (What isSelected do:) Is this option is current projection type ? Default highlight : Not highlight
 						{
-							currentProjectionType = projectionType[i];		// ?????????
+							currentProjectionType = projectionType[i];				// If you select one projection, then update current projection type string as latest
 							camera.SetProjectionType((SceneCamera::ProjectionType)i);
-							//camera.ViewportResize()
+
+							glm::vec2 viewportSize = EditorLayer::Get().GetImGuiViewportSize();
+							m_Context->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 						}
 
 						if (isSelected)
-							ImGui::SetItemDefaultFocus();	// ?????????
+							ImGui::SetItemDefaultFocus();	// 用于更新焦点（焦点不同于高亮显示）
 					}
 					ImGui::EndCombo();
 				}
@@ -127,7 +129,7 @@ namespace Nut
 				if(camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 				{
 					float verticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-					if(ImGui::DragFloat("Vertical FOV", &verticalFov))		// ??? what is VerticalFov ? what's the suitable number usually ? what's the differenice when we change fov?
+					if(ImGui::DragFloat("Vertical FOV", &verticalFov))
 						camera.SetPerspectiveVerticalFOV(glm::radians(verticalFov));
 
 					float perspectiveNear = camera.GetPerspectiveNearClip();

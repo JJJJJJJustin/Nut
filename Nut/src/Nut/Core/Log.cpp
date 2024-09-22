@@ -21,7 +21,7 @@ namespace Nut {
 		logSinks[1]->set_pattern("[%T] [%l] %n: %v");
 
 		//创建日志记录器
-		s_CoreLogger = std::make_shared<spdlog::logger>("HAZEL", begin(logSinks), end(logSinks));			// Logger with range on sinks: logger(std::string name, It begin, It end) 传入所有需要使用的日志目标
+		s_CoreLogger = std::make_shared<spdlog::logger>("NUT", begin(logSinks), end(logSinks));			// Logger with range on sinks: logger(std::string name, It begin, It end) 传入所有需要使用的日志目标
 		spdlog::register_logger(s_CoreLogger);																// Register the given logger with the given name(使用给定的名称注册给定的记录器)
 		s_CoreLogger->set_level(spdlog::level::trace);														// Core_Logger 记录 Trace 及以上级别的信息
 		s_CoreLogger->flush_on(spdlog::level::trace);														// 记录日志消息时立即将缓冲区的日志刷新到输出目标,防止意外崩溃导致信息丢失

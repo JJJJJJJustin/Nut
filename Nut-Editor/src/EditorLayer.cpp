@@ -9,9 +9,13 @@
 
 
 namespace Nut {
+	EditorLayer* EditorLayer::s_Instance = nullptr;		// Initialize s_Instance as null, then give it a value(this pointer) in constructor
+
 	EditorLayer::EditorLayer()
 		:Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f, true)
 	{
+		NUT_CORE_ASSERT(!s_Instance, "EditorLayer Instance already exists!(EditorLayer is a Singleton!)");
+		s_Instance = this;
 	}
 
 	void EditorLayer::OnAttach()

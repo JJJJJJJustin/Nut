@@ -11,13 +11,21 @@ namespace Nut {
 		EditorLayer();
 		virtual ~EditorLayer() = default;
 
+		// For Getting Instance
+		static EditorLayer& Get(){ return *s_Instance; }	//使用 * 对指针类型的变量 s_Instance 进行解引用，返回指针变量所指向对象的引用
+
 		void OnAttach() override;
 		void OnDetach() override;
 
 		void OnUpdate(Timestep ts) override;
 		void OnImGuiRender() override;
 		void OnEvent(Event& event) override;
+	public:
+		glm::vec2 GetImGuiViewportSize() { return m_ViewportSize; };
 	private:
+		// Instance 
+		static EditorLayer* s_Instance;		// s_Instance is a pointer type variable, cuz it takes 'this' pointer and 'nullptr'
+		
 		// Scene
 		Ref<Texture2D> m_Texture, m_Emoji;
 
