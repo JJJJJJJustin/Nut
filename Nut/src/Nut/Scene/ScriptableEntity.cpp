@@ -36,17 +36,17 @@ namespace Nut
 
 		// 所以说这将更新所有包含脚本组件的实体，而且每一个实体的 transform 改变的数值相同，这导致每一个实体都会受键盘影响而移动，尽管此时只有一个实体被显示出来。
 		// --------------------------------------------------------------------------------------------------------------------------------------------------------
-		auto& transform = GetComponent<TransformComponent>().Transform;
+		auto& translation = GetComponent<TransformComponent>().Translation;
 		float speed = 5.0f;
 
 		if (Input::IsKeyPressed(NUT_KEY_A))
-			transform[3][0] += speed * ts;
+			translation.x += speed * ts;
 		if (Input::IsKeyPressed(NUT_KEY_D))
-			transform[3][0] -= speed * ts;
+			translation.x -= speed * ts;
 		if (Input::IsKeyPressed(NUT_KEY_W))
-			transform[3][1] -= speed * ts;
+			translation.y -= speed * ts;
 		if (Input::IsKeyPressed(NUT_KEY_S))
-			transform[3][1] += speed * ts;
+			translation.y += speed * ts;
 	}
 
 

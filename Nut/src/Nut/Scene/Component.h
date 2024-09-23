@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Nut/Scene/SceneCamera.h"
 #include "Nut/Scene/ScriptableEntity.h"
@@ -21,15 +22,24 @@ namespace Nut
 
 	struct TransformComponent
 	{
-		glm::mat4 Transform{ 1.0f };											// 矩阵默认初始化为 { 1.0f }
+		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
 		TransformComponent() = default;
-		TransformComponent(const glm::mat4& transform)
-			:Transform(transform) {};
+		TransformComponent(const glm::vec3& translation)		// TODO: Maybe it needs to take type glm::mat4 as parameter ?
+			:Translation(translation) {};
 		TransformComponent(const TransformComponent&) = default;
 
-		operator glm::mat4& () { return Transform; }
-		operator const glm::mat4& () const { return Transform; }
+		glm::mat4 GetTransform() const
+		{
+			glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), Rotation.x, {1.0f, 0.0f, 0.0f}) 
+				* glm::rotate(glm::mat4(1.0f), Rotation.y, { 0.0f, 1.0f, 0.0f })
+				* glm::rotate(glm::mat4(1.0f), Rotation.z, { 0.0f, 0.0f, 1.0f });
+			// Or you can use :(episode 93) glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
+
+			return glm::translate(glm::mat4(1.0f), Translation) * rotation * glm::scale(glm::mat4(1.0f), Scale);
+		}
 	};
 
 	struct SpriteComponent
