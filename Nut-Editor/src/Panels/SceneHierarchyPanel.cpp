@@ -44,8 +44,27 @@ namespace Nut
 		ImGui::End();
 
 		ImGui::Begin("Properties");
-		if(m_SelectionContext)
+		if (m_SelectionContext) {
 			DrawComponents(m_SelectionContext);
+			
+			// Draw "add component menu"
+			if (ImGui::Button("AddComponent")) 
+				ImGui::OpenPopup("AddComponentMenu");
+			if(ImGui::BeginPopup("AddComponentMenu"))
+			{
+				if (ImGui::MenuItem("CameraComponent")) 
+				{
+					m_SelectionContext.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				if (ImGui::MenuItem("SpriteRendererComponent")) 
+				{
+					m_SelectionContext.AddComponent<SpriteComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+		}
 		ImGui::End();
 	}
 
@@ -65,6 +84,7 @@ namespace Nut
 		// but delete the entity directly in the ContextItem Menu, 
 		// the program will crash because it is still using the previously deleted entity 
 		// (in the conditional judgment of the second tree node rendering)
+		
 		bool entityDeleted = false;
 		if(ImGui::BeginPopupContextItem())
 		{
@@ -215,11 +235,34 @@ namespace Nut
 
 		if (entity.HasComponent<SpriteComponent>())
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(SpriteComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			bool open = ImGui::TreeNodeEx((void*)typeid(SpriteComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer");
+
+			// Draw component settings menu(including remove button)
+			float buttonWidth = ImGui::CalcTextSize("+").x + GImGui->Style.FramePadding.x * 2.0f;
+			float buttonHeight = ImGui::CalcTextSize("+").y + GImGui->Style.FramePadding.y * 2.0f;
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
+			if (ImGui::Button("+", { buttonWidth, buttonHeight })) {
+				ImGui::OpenPopup("ComponentSettings");
+			}
+
+			bool deleted = false;
+			if (ImGui::BeginPopup("ComponentSettings")) {
+				if(ImGui::MenuItem("Remove component"))
+					deleted = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (open)
 			{
 				auto& controller = entity.GetComponent<SpriteComponent>();
 				ImGui::ColorEdit4("Color", glm::value_ptr(controller.Color));
 				ImGui::TreePop();
+			}
+
+			if (deleted) {
+				entity.RemoveComponent<SpriteComponent>();
 			}
 		}
 	}
