@@ -33,6 +33,14 @@ namespace Nut
 		if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())		// When mouse left was pressed and mouse position was in SceneHierarchy Panel, then...
 			m_SelectionContext = {};
 
+		// Right-click on blank space of the window
+		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))	// Disable 'ContextWindow' from covering previous 'ContextItem Menu'(Which was in SceneHierarchyPanel::DrawEntityNode)
+		{
+			if (ImGui::MenuItem("Create Empty Entity"))
+				m_Context->CreateEntity("Empty Entity");
+			ImGui::EndPopup();
+		}
+
 		ImGui::End();
 
 		ImGui::Begin("Properties");
@@ -43,7 +51,7 @@ namespace Nut
 
 
 
-	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
+	void SceneHierarchyPanel::DrawEntityNode(Entity& entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
@@ -53,6 +61,20 @@ namespace Nut
 		if(ImGui::IsItemClicked())				// Needs to be put under the ImGuiTreeNodeEx
 			m_SelectionContext = entity;
 		
+		// If you do not mark this temporary variable "deleted" as true(After this code: ImGui::MenuItem), 
+		// but delete the entity directly in the ContextItem Menu, 
+		// the program will crash because it is still using the previously deleted entity 
+		// (in the conditional judgment of the second tree node rendering)
+		bool entityDeleted = false;
+		if(ImGui::BeginPopupContextItem())
+		{
+			// Define this menu according to your needs
+			if (ImGui::MenuItem("Delete Entity"))
+				entityDeleted = true;
+
+			ImGui::EndPopup();
+		}
+
 		if(opened)
 		{
 			// Draw nested TreeNode
@@ -63,9 +85,15 @@ namespace Nut
 
 			ImGui::TreePop();
 		}
+
+		if (entityDeleted) {
+			m_Context->DestroyEntity(entity);
+			if(entity == m_SelectionContext)
+				m_SelectionContext = {};
+		}
 	}
 
-	void SceneHierarchyPanel::DrawComponents(Entity entity)
+	void SceneHierarchyPanel::DrawComponents(Entity& entity)
 	{
 		if(entity.HasComponent<TagComponent>())
 		{
@@ -92,6 +120,7 @@ namespace Nut
 				ImGui::TreePop();
 			}			
 		}
+
 
 		if (entity.HasComponent<TransformComponent>())
 		{

@@ -29,6 +29,11 @@ namespace Nut
 		return entity;
 	}
 
+	void Scene::DestroyEntity(Entity& entity)
+	{
+		m_Registry.destroy(entity);
+	}
+
 	void Scene::OnUpdate(Timestep ts)
 	{
 		// Render 2D objects
