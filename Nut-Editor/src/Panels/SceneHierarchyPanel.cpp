@@ -64,6 +64,8 @@ namespace Nut
 				}
 				ImGui::EndPopup();
 			}
+			glm::vec2 viewportSize = EditorLayer::Get().GetImGuiViewportSize();
+			m_Context->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		}
 		ImGui::End();
 	}
