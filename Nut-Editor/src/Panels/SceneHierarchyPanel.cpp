@@ -269,6 +269,9 @@ namespace Nut
 
 	void SceneHierarchyPanel::DrawVec3Controller(const std::string& label, glm::vec3& values, float resetValue /*= 0.0f*/, float columnWidth /*= 100.0f*/)
 	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
 		ImGui::PushID(label.c_str());
 
 		ImGui::Columns(2);
@@ -286,10 +289,12 @@ namespace Nut
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.6f, 0.1f, 0.0f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.1f, 0.0f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.6f, 0.1f, 0.0f, 1.0f });
+			ImGui::PushFont(boldFont);
 			if (ImGui::Button("X", buttonSize))
 			{
 				values.x = resetValue;
 			}
+			ImGui::PopFont();
 			ImGui::PopStyleColor(3);									// PopStyleColor as many as you set
 
 			ImGui::SameLine();
@@ -300,10 +305,12 @@ namespace Nut
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.6f, 0.1f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.0f, 0.9f, 0.1f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.6f, 0.1f, 1.0f });
+			ImGui::PushFont(boldFont);
 			if (ImGui::Button("Y", buttonSize))
 			{
 				values.y = resetValue;
 			}
+			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
@@ -314,10 +321,12 @@ namespace Nut
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.0f, 0.6f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.1f, 0.0f, 0.9f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.0f, 0.6f, 1.0f });
+			ImGui::PushFont(boldFont);
 			if (ImGui::Button("Z", buttonSize))
 			{
 				values.z = resetValue;
 			}
+			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
