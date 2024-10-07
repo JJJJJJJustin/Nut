@@ -44,27 +44,8 @@ namespace Nut
 		ImGui::End();
 
 		ImGui::Begin("Properties");
-		if (m_SelectionContext) {
+		if (m_SelectionContext)
 			DrawComponents(m_SelectionContext);
-			
-			// Draw "add component menu"
-			if (ImGui::Button("AddComponent")) 
-				ImGui::OpenPopup("AddComponentMenu");
-			if(ImGui::BeginPopup("AddComponentMenu"))
-			{
-				if (ImGui::MenuItem("CameraComponent")) 
-				{
-					m_SelectionContext.AddComponent<CameraComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::MenuItem("SpriteRendererComponent")) 
-				{
-					m_SelectionContext.AddComponent<SpriteComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
-		}
 		ImGui::End();
 	}
 
@@ -119,27 +100,38 @@ namespace Nut
 		if(entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
-			if (ImGui::TreeNodeEx((void*)typeid(TagComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Tag"))
+
+			// Clear old data and then fill with new data
+			char buffer[256];
+			memset(buffer, 0, sizeof(buffer));
+			strcpy_s(buffer, sizeof(buffer), tag.c_str());		// It's Safer than strcpy() :)
+			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 			{
-				ImGui::Columns(2);
-				ImGui::SetColumnWidth(0, 100.0f);
-				ImGui::Text("Tagname");
+				// Update tag, so next time when we copy string from tag, the buffer data will be init by latest string
+				tag = std::string(buffer);
+			};
 
-				ImGui::NextColumn();
-				// Clear old data and then fill with new data
-				char buffer[256];
-				memset(buffer, 0, sizeof(buffer));
-				strcpy_s(buffer, sizeof(buffer), tag.c_str());		// It's Safer than strcpy() :)
-				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+			ImGui::SameLine();
+			ImGui::PushItemWidth(-1); {
+				// Draw "add component menu"
+				if (ImGui::Button("AddComponent"))
+					ImGui::OpenPopup("AddComponentMenu");
+				if (ImGui::BeginPopup("AddComponentMenu"))
 				{
-					// Update tag, so next time when we copy string from tag, the buffer data will be init by latest string
-					tag = std::string(buffer);
-				};
-
-				ImGui::Columns(1);
-
-				ImGui::TreePop();
-			}			
+					if (ImGui::MenuItem("CameraComponent"))
+					{
+						m_SelectionContext.AddComponent<CameraComponent>();
+						ImGui::CloseCurrentPopup();
+					}
+					if (ImGui::MenuItem("SpriteRendererComponent"))
+					{
+						m_SelectionContext.AddComponent<SpriteComponent>();
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+			}
+			ImGui::PopItemWidth();
 		}
 
 		DrawComponent<TransformComponent>("Transform", entity, [](auto& component)
@@ -232,18 +224,23 @@ namespace Nut
 	template<typename T, typename UIFunction>
 	static void SceneHierarchyPanel::DrawComponent(const std::string& name, Entity& entity, UIFunction uiFunc)
 	{
-		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 
 		if (entity.HasComponent<T>())
 		{
 			auto& component = entity.GetComponent<T>();
+			ImVec2 contentRegionAvail = ImGui::GetContentRegionAvail();									// We need to get the correct size of the available content region, which is in the properties window, not in the tree node drawn in this window
 
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4,4 });
+			float lineHeight = ImGui::CalcTextSize("+").y + GImGui->Style.FramePadding.y * 2.0f;		// We need to get the correct size of the button, which is set in the StyleVar scope
+			// Draw tree node
+			ImGui::Separator();
 			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-			// Draw component settings menu(including remove button)
-			float buttonWidth = ImGui::CalcTextSize("+").x + GImGui->Style.FramePadding.x * 2.0f;
-			float buttonHeight = ImGui::CalcTextSize("+").y + GImGui->Style.FramePadding.y * 2.0f;
-			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
-			if (ImGui::Button("+", { buttonWidth, buttonHeight })) {
+			ImGui::PopStyleVar();
+
+			// Draw component settings menu (including remove button)
+			ImGui::SameLine(contentRegionAvail.x - lineHeight * 0.5f);
+			if (ImGui::Button("+", { lineHeight, lineHeight })) {
 				ImGui::OpenPopup("ComponentSettings");
 			}
 
