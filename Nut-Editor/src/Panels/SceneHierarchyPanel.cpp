@@ -75,7 +75,7 @@ namespace Nut
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 		// Draw first TreeNode
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0);
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0);
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 		if(ImGui::IsItemClicked())				// Needs to be put under the ImGuiTreeNodeEx
 			m_SelectionContext = entity;
@@ -98,7 +98,7 @@ namespace Nut
 		if(opened)
 		{
 			// Draw nested TreeNode
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 			bool opened = ImGui::TreeNodeEx((void*)666999, flags, tag.c_str());
 			if (opened)
 				ImGui::TreePop();
@@ -115,6 +115,7 @@ namespace Nut
 
 	void SceneHierarchyPanel::DrawComponents(Entity& entity)
 	{
+		// For Tag component, we not use template function: SceneHierarchyPanel::DrawComponent, because it cannot be deleted.
 		if(entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -141,129 +142,127 @@ namespace Nut
 			}			
 		}
 
-
-		if (entity.HasComponent<TransformComponent>())
+		DrawComponent<TransformComponent>("Transform", entity, [](auto& component)
 		{
-			if(ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
-			{
-				auto& tc = entity.GetComponent<TransformComponent>();
-				DrawVec3Controller("Translation", tc.Translation);
+			DrawVec3Controller("Translation", component.Translation);
 
-				glm::vec3 rotation = glm::degrees(tc.Rotation);	// Check the notes to learn more
-				DrawVec3Controller("Rotation", rotation);
-				tc.Rotation = glm::radians(rotation);
+			glm::vec3 rotation = glm::degrees(component.Rotation);	// Check the notes to learn more
+			DrawVec3Controller("Rotation", rotation);
+			component.Rotation = glm::radians(rotation);
 
-				DrawVec3Controller("Scale", tc.Scale, 1.0f);	// Scale will be reset but at least 1.0f
-				ImGui::TreePop();
-			}
-		}
+			DrawVec3Controller("Scale", component.Scale, 1.0f);	// Scale will be reset but at least 1.0f
+		});
 
-		if(entity.HasComponent<CameraComponent>())
+
+		// I passed 'This pointer' though lambda expression (because I use Non-static member variables: m_Context,I need to specify the capture method)
+		DrawComponent<CameraComponent>("Camera", entity, [this](auto& component)
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
-			{
-				auto& cameraComponent = entity.GetComponent<CameraComponent>();
-				auto& camera = cameraComponent.Camera;
-				bool& primary = cameraComponent.Primary;
-				bool& fixedAspectRatio = cameraComponent.FixedAspectRatio;
-				
-				//  -------- Draw Check Box --------
-				ImGui::Checkbox("Primary", &primary);
+			auto& camera = component.Camera;
+			bool& primary = component.Primary;
+			bool& fixedAspectRatio = component.FixedAspectRatio;
 
-				// Draw Combo Box
-				const char* projectionType[] = {"Perspective", "Orthographic" };
-				const char* currentProjectionType = projectionType[(int)camera.GetProjectionType()];
-				if (ImGui::BeginCombo("Projection", currentProjectionType))			// Combo box preview value needs to be a c_str
+			//  -------- Draw Check Box --------
+			ImGui::Checkbox("Primary", &primary);
+			// --------- Draw Combo Box --------
+			const char* projectionType[] = { "Perspective", "Orthographic" };
+			const char* currentProjectionType = projectionType[(int)camera.GetProjectionType()];
+			if (ImGui::BeginCombo("Projection", currentProjectionType))			// Combo box preview value needs to be a c_str
+			{
+				// -------- Draw drop-down Selection List --------
+				for (int i = 0; i < 2; i++)
 				{
-					// -------- Draw drop-down Selection List --------
-					for (int i = 0; i < 2; i++) 
+					bool isSelected = (projectionType[i] == currentProjectionType);
+					if (ImGui::Selectable(projectionType[i], isSelected))		// (What isSelected do:) Is this option is current projection type ? Default highlight : Not highlight
 					{
-						bool isSelected = (projectionType[i] == currentProjectionType);
-						if(ImGui::Selectable(projectionType[i], isSelected))		// (What isSelected do:) Is this option is current projection type ? Default highlight : Not highlight
-						{
-							currentProjectionType = projectionType[i];				// If you select one projection, then update current projection type string as latest
-							camera.SetProjectionType((SceneCamera::ProjectionType)i);
+						currentProjectionType = projectionType[i];				// If you select one projection, then update current projection type string as latest
+						camera.SetProjectionType((SceneCamera::ProjectionType)i);
 
-							glm::vec2 viewportSize = EditorLayer::Get().GetImGuiViewportSize();
-							m_Context->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-						}
-
-						if (isSelected)
-							ImGui::SetItemDefaultFocus();	// 用于更新焦点（焦点不同于高亮显示）
+						glm::vec2 viewportSize = EditorLayer::Get().GetImGuiViewportSize();
+						m_Context->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 					}
-					ImGui::EndCombo();
+
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();	// 用于更新焦点（焦点不同于高亮显示）
 				}
-
-				// -------- Draw Perspective Camera Controller --------
-				if(camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
-				{
-					float verticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-					if(ImGui::DragFloat("Vertical FOV", &verticalFov, 1.0f, 30.0f, 120.0f))
-						camera.SetPerspectiveVerticalFOV(glm::radians(verticalFov));
-
-					float perspectiveNear = camera.GetPerspectiveNearClip();
-					if (ImGui::DragFloat("Near", &perspectiveNear))
-						camera.SetPerspectiveNearClip(perspectiveNear);
-
-					float perspectiveFar = camera.GetPerspectiveFarClip();
-					if(ImGui::DragFloat("Far", &perspectiveFar))
-						camera.SetPerspectiveFarClip(perspectiveFar);
-				}
-
-				// -------- Draw Orthographic Camera Controller --------
-				if(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
-				{
-					ImGui::Checkbox("Fixed Aspect Ratio", &fixedAspectRatio);
-
-					float orthoSize = camera.GetOrthographicSize();
-					if(ImGui::DragFloat("Size", &orthoSize))
-						camera.SetOrthographicSize(orthoSize);
-
-					float orthoNear = camera.GetOrthographicNearClip();
-					if (ImGui::DragFloat("Near", &orthoNear))
-						camera.SetOrthographicNearClip(orthoNear);
-
-					float orthoFar = camera.GetOrthographicFarClip();
-					if(ImGui::DragFloat("Far", &orthoFar))
-						camera.SetOrthographicFarClip(orthoFar);
-				}
-			
-				ImGui::TreePop();
+				ImGui::EndCombo();
 			}
 
-		}
+			// -------- Draw Perspective Camera Controller --------
+			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+			{
+				float verticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
+				if (ImGui::DragFloat("Vertical FOV", &verticalFov, 1.0f, 30.0f, 120.0f))
+					camera.SetPerspectiveVerticalFOV(glm::radians(verticalFov));
 
-		if (entity.HasComponent<SpriteComponent>())
+				float perspectiveNear = camera.GetPerspectiveNearClip();
+				if (ImGui::DragFloat("Near", &perspectiveNear))
+					camera.SetPerspectiveNearClip(perspectiveNear);
+
+				float perspectiveFar = camera.GetPerspectiveFarClip();
+				if (ImGui::DragFloat("Far", &perspectiveFar))
+					camera.SetPerspectiveFarClip(perspectiveFar);
+			}
+
+			// -------- Draw Orthographic Camera Controller --------
+			if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
+			{
+				ImGui::Checkbox("Fixed Aspect Ratio", &fixedAspectRatio);
+
+				float orthoSize = camera.GetOrthographicSize();
+				if (ImGui::DragFloat("Size", &orthoSize))
+					camera.SetOrthographicSize(orthoSize);
+
+				float orthoNear = camera.GetOrthographicNearClip();
+				if (ImGui::DragFloat("Near", &orthoNear))
+					camera.SetOrthographicNearClip(orthoNear);
+
+				float orthoFar = camera.GetOrthographicFarClip();
+				if (ImGui::DragFloat("Far", &orthoFar))
+					camera.SetOrthographicFarClip(orthoFar);
+			}
+		});
+
+		DrawComponent<SpriteComponent>("Sprite Renderer", entity, [](auto& component)
 		{
-			bool open = ImGui::TreeNodeEx((void*)typeid(SpriteComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer");
+			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+		});
+	}
 
+	// ------------------------ Some definitions ------------------------------------------
+	template<typename T, typename UIFunction>
+	static void SceneHierarchyPanel::DrawComponent(const std::string& name, Entity& entity, UIFunction uiFunc)
+	{
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
+
+		if (entity.HasComponent<T>())
+		{
+			auto& component = entity.GetComponent<T>();
+
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
 			// Draw component settings menu(including remove button)
 			float buttonWidth = ImGui::CalcTextSize("+").x + GImGui->Style.FramePadding.x * 2.0f;
 			float buttonHeight = ImGui::CalcTextSize("+").y + GImGui->Style.FramePadding.y * 2.0f;
-
 			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
 			if (ImGui::Button("+", { buttonWidth, buttonHeight })) {
 				ImGui::OpenPopup("ComponentSettings");
 			}
 
-			bool deleted = false;
+			bool removeComponent = false;
 			if (ImGui::BeginPopup("ComponentSettings")) {
-				if(ImGui::MenuItem("Remove component"))
-					deleted = true;
+				if (ImGui::MenuItem("Remove component"))
+					removeComponent = true;
 
 				ImGui::EndPopup();
 			}
 
 			if (open)
 			{
-				auto& controller = entity.GetComponent<SpriteComponent>();
-				ImGui::ColorEdit4("Color", glm::value_ptr(controller.Color));
+				uiFunc(component);
 				ImGui::TreePop();
 			}
 
-			if (deleted) {
-				entity.RemoveComponent<SpriteComponent>();
-			}
+			if (removeComponent)
+				entity.RemoveComponent<T>();
 		}
 	}
 
