@@ -37,7 +37,8 @@ project "Nut"                                                   --项目
         "%{IncludeDir.ImGui}",                                      --将IncludeDir表中ImGui键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.glm}",                                        --将IncludeDir表中glm键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.stb_image}",
-        "%{IncludeDir.entt}"
+        "%{IncludeDir.entt}",
+        "%{IncludeDir.yaml_cpp}"
     }
 
     links                                                       --为Nut项目(.dll)链接文件
@@ -45,6 +46,7 @@ project "Nut"                                                   --项目
         "GLFW",                                                     --链接上方group中的项目GLFW
         "Glad",                                                     --链接上方group中的项目Glad
         "ImGui",                                                    --链接上方group中的项目ImGui
+        "yaml-cpp",                                                 --链接根目录premake文件里group中的项目yaml-cpp
         "opengl32.lib"
     }
 

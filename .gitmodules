@@ -14,3 +14,6 @@
 	path = Nut/vendor/glm
 	url = https://github.com/g-truc/glm
 	branch = master
+[submodule "Nut/vendor/yaml-cpp"]
+	path = Nut/vendor/yaml-cpp
+	url = https://github.com/JJJJJJJustin/yaml-cpp

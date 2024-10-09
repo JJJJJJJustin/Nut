@@ -26,6 +26,7 @@ IncludeDir["ImGui"] = "%{wks.location}/Nut/vendor/imgui"                        
 IncludeDir["glm"] = "%{wks.location}/Nut/vendor/glm"                            --将表的"ImGui"键索引到此路径
 IncludeDir["stb_image"] = "%{wks.location}/Nut/vendor/stb_image"
 IncludeDir["entt"] = "%{wks.location}/Nut/vendor/Entt/include"
+IncludeDir["yaml_cpp"] = "%{wks.location}/Nut/vendor/yaml-cpp/include"
 
 ---------------------------------------------------------------------------------------
 --包含Nut/Nut/vendor/GLFW、Nut/Nut/vendor/Glad、Nut/Nut/vendor/imgui中的premake文件，将其作为依赖项，并合并到这里
@@ -33,6 +34,7 @@ group "Dependencies"
     include "Nut/vendor/GLFW"
     include "Nut/vendor/Glad"
     include "Nut/vendor/imgui"
+    include "Nut/vendor/yaml-cpp"
 group "" 
 
 include "Nut"
