@@ -25,7 +25,8 @@ project "Nut"                                                   --项目
     defines
     {
         "_CRT_SECURE_NO_WARNINGS",
-        "GLFW_INCLUDE_NONE"
+        "GLFW_INCLUDE_NONE",
+        "YAML_CPP_STATIC_DEFINE"
     }
 
     includedirs                                                 --库文件（包含库目录）

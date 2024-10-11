@@ -12,6 +12,11 @@ project "Nut-Editor"
         "src/**.h",
         "src/**.cpp"
     }
+    
+    defines
+    {
+        "YAML_CPP_STATIC_DEFINE"
+    }
 
     includedirs                      
     {
@@ -19,7 +24,8 @@ project "Nut-Editor"
         "%{wks.location}/Nut/src",
         "%{wks.location}/Nut/vendor",
         "%{IncludeDir.glm}",
-        "%{IncludeDir.entt}"
+        "%{IncludeDir.entt}",
+        "%{IncludeDir.yaml_cpp}"
     }
 
     links
@@ -29,11 +35,6 @@ project "Nut-Editor"
 
     filter "system:windows"        
         systemversion "latest"
-
-        defines
-        {
-        
-        }
 
         filter "configurations:Debug"
             defines "NUT_DEBUG"

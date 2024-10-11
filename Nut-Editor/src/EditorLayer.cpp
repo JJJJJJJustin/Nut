@@ -1,6 +1,7 @@
 #include "EditorLayer.h"
 
 #include "Nut/Scene/ScriptableEntity.h"
+#include "Nut/Scene/SceneSerializer.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -28,7 +29,7 @@ namespace Nut {
 		m_Emoji = Texture2D::Create("assets/textures/emoji.png");
 
 		m_ActiveScene = CreateRef<Scene>();
-
+#if 0
 		m_SquareEntity = m_ActiveScene->CreateEntity("BlueSquare");
 		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
 
@@ -45,7 +46,7 @@ namespace Nut {
 		secondController.Camera.SetOrthographicSize(5.0f);
 		secondController.Primary = false;
 		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			//添加本机脚本
-
+#endif
 		m_HierarchyPanel.SetContext(m_ActiveScene);
 	}
 
@@ -164,6 +165,8 @@ namespace Nut {
 				if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
 				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
 				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }*/
+				if (ImGui::MenuItem("SaveToFile")) { SceneSerializer serializer(m_ActiveScene);  serializer.SceneSerializer::Serialize("assets/scenes/Example.yaml"); }
+				if (ImGui::MenuItem("LoadFromFile")) { SceneSerializer serializer(m_ActiveScene);  serializer.SceneSerializer::Deserialize("assets/scenes/Example.yaml"); }
 				if (ImGui::MenuItem("Exit")) { Application::Get().WindowClose(); }
 
 				/*ImGui::Separator();
