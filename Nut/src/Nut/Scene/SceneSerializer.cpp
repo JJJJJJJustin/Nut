@@ -83,7 +83,7 @@ namespace Nut
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "Scene" << YAML::Value << "Untitled";
-        out << YAML::Key << "Entites" << YAML::Value << YAML::BeginSeq;
+        out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
         m_Scene->m_Registry.view<entt::entity>().each([&](auto entityID) 
             {
                 Entity entity{ entityID, m_Scene.get() };
@@ -124,7 +124,7 @@ namespace Nut
         NUT_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
         // According to data, we reproduce the scene
-        auto entities = data["Entity"];
+        auto entities = data["Entities"];
         if(entities)
         {
             for (auto entity : entities) 
@@ -132,17 +132,17 @@ namespace Nut
                 uint64_t uuid;
                 std::string name;
 
+                uuid = entity["Entity"].as<uint64_t>();                         // TODO
                 // Enter the TagComponent map, 
                 // and search for tag in submap(submap is stroed in TagComponent map)
                 auto tc = entity["TagComponent"];       
                 if (tc)
                     name = tc["Tag"].as<std::string>();
-                uuid = entity["Entity"].as<uint64_t>(); // TODO
                 
                 NUT_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
-                Entity& desirializedEntity = m_Scene->CreateEntity(name);       // Create a new entity in m_Scene with all defalur values
+                Entity& deserializedEntity = m_Scene->CreateEntity(name);       // Create a new entity in m_Scene with all defalur values
                 
-                DeserializeEntity(entity, desirializedEntity);                  // Update values in this entity accroding to yaml file
+                DeserializeEntity(entity, deserializedEntity);                  // Update values in this entity accroding to yaml file
             }
         }
         return true;
@@ -243,8 +243,8 @@ namespace Nut
         auto cameraComponent = data["CameraComponent"];
         if(cameraComponent)
         {
-            auto& cameraProps = data["Camera"];                                     // One of the submap of camera component
-            auto& cc = entity.GetComponent<CameraComponent>();
+            auto& cameraProps = cameraComponent["Camera"];                                     // One of the submap of camera component
+            auto& cc = entity.AddComponent<CameraComponent>();
 
             cc.Camera.SetProjectionType((SceneCamera::ProjectionType)cameraProps["ProjectionType"].as<int>());
             cc.Camera.SetPerspectiveVerticalFOV(cameraProps["PerspectiveFOV"].as<float>());
@@ -256,13 +256,13 @@ namespace Nut
             // Unlike Camera, Primary is a separate key-value mapping, 
             // while Camera is a map that requires further access.
             cc.Primary = cameraComponent["Primary"].as<bool>();
-            cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
+            cc.FixedAspectRatio = cameraComponent["Fixed Aspect Ratio"].as<bool>();
         }
 
         auto spriteComponent = data["SpriteComponent"];
         if (spriteComponent)
         {
-            auto& sc = entity.GetComponent<SpriteComponent>();
+            auto& sc = entity.AddComponent<SpriteComponent>();
             sc.Color = spriteComponent["Color"].as<glm::vec4>();
         }
     }
