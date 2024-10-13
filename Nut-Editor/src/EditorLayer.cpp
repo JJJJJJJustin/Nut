@@ -2,6 +2,7 @@
 
 #include "Nut/Scene/ScriptableEntity.h"
 #include "Nut/Scene/SceneSerializer.h"
+#include "Nut/Utils/PlatformUtils.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -47,7 +48,7 @@ namespace Nut {
 		secondController.Primary = false;
 		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			//添加本机脚本
 #endif
-		m_HierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -165,9 +166,14 @@ namespace Nut {
 				if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
 				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
 				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }*/
-				if (ImGui::MenuItem("SaveToFile")) { SceneSerializer serializer(m_ActiveScene);  serializer.SceneSerializer::Serialize("assets/scenes/Example.yaml"); }
-				if (ImGui::MenuItem("LoadFromFile")) { SceneSerializer serializer(m_ActiveScene);  serializer.SceneSerializer::Deserialize("assets/scenes/Example.yaml"); }
-				if (ImGui::MenuItem("Exit")) { Application::Get().WindowClose(); }
+				if (ImGui::MenuItem("New"))
+					NewScene();
+				if (ImGui::MenuItem("Save As..."))
+					SaveSceneAs();
+				if (ImGui::MenuItem("Open..."))
+					OpenScene();
+				if (ImGui::MenuItem("Exit")) 
+					Application::Get().WindowClose(); 
 
 				/*ImGui::Separator();
 				if (ImGui::MenuItem("Close", NULL, false))
@@ -181,7 +187,7 @@ namespace Nut {
 		#pragma endregion
 		// ----------- Should be writen in Dockspace( Between dockspace's ImGui::Begin() <-> ImGui::End() ) ----
 		// ----------- Hierarchy Panel -------------------------------------------
-		m_HierarchyPanel.OnImGuiRender();
+		m_SceneHierarchyPanel.OnImGuiRender();
 		// ----------- Test Panel---------------------------------------------
 		ImGui::Begin("Stats");
 		auto stats = Renderer2D::GetStats();
@@ -217,6 +223,37 @@ namespace Nut {
 	void EditorLayer::OnEvent(Event& event)
 	{
 		m_CameraController.OnEvent(event);
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		std::string filepath = FileDialogs::OpenFile("Nut Scene(*.yaml)\0 * .yaml\0All Files (*.*)\0*.*\0\0");	// ????why filedialogs need to return string
+		if (!filepath.empty()) 
+		{
+			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);// We use it cuz we must flash framebuffer after we open file
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
+
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(filepath);
+		}
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		std::string filepath = FileDialogs::SaveFile("Nut Scene()(*.yaml)\0 * .yaml\0");
+		if (!filepath.empty()) 
+		{
+			SceneSerializer deserializer(m_ActiveScene);
+			deserializer.Serialize(filepath);
+		}
 	}
 
 

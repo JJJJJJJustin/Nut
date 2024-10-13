@@ -16,8 +16,13 @@ namespace Nut
 	}
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& scene)
-	{
+	{	
+		// After resetting the scene, we need to reflash the active scene which is m_Context here
+		// And we also need to set m_SelectionContext with{} (->empty), 
+		// Otherwise m_SelectionContext will cause a crash.
+		// Because it's still accessing data from the old scene, but scene has been deleted / reset
 		m_Context = scene;
+		m_SelectionContext = {};
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()

@@ -22,6 +22,10 @@ namespace Nut {
 		void OnEvent(Event& event) override;
 	public:
 		glm::vec2 GetImGuiViewportSize() { return m_ViewportSize; };
+
+		void NewScene();
+		void OpenScene();
+		void SaveSceneAs();
 	private:
 		// Instance 
 		static EditorLayer* s_Instance;		// s_Instance is a pointer type variable, cuz it takes 'this' pointer and 'nullptr'
@@ -45,7 +49,7 @@ namespace Nut {
 		glm::vec4 m_QuadColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };
 
 		// Panels
-		SceneHierarchyPanel m_HierarchyPanel;
+		SceneHierarchyPanel m_SceneHierarchyPanel;
 	};
 
 }
