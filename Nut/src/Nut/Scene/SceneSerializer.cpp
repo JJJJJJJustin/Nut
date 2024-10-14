@@ -158,7 +158,7 @@ namespace Nut
     // ---------------------------------------------------------
     // ------------------- Some definations --------------------
     // ---------------------------------------------------------
-    void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
+    void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity& entity)
     {
         out << YAML::BeginMap; // Entity
         out << YAML::Key << "Entity" << YAML::Value << "256257383941";          // TODO: Entity ID goes here
@@ -184,17 +184,6 @@ namespace Nut
             out << YAML::Key << "Rotation"    << YAML::Value << tc.Rotation;
             out << YAML::Key << "Scale"       << YAML::Value << tc.Scale;
             
-            out << YAML::EndMap;
-        }
-
-        if (entity.HasComponent<SpriteComponent>()) 
-        {
-            out << YAML::Key << "SpriteComponent";
-            out << YAML::BeginMap;
-
-            auto& color = entity.GetComponent<SpriteComponent>().Color;
-            out << YAML::Key << "Color" << YAML::Value << color;
-
             out << YAML::EndMap;
         }
 
@@ -224,6 +213,17 @@ namespace Nut
         
         }
 
+        if (entity.HasComponent<SpriteComponent>()) 
+        {
+            out << YAML::Key << "SpriteComponent";
+            out << YAML::BeginMap;
+
+            auto& color = entity.GetComponent<SpriteComponent>().Color;
+            out << YAML::Key << "Color" << YAML::Value << color;
+
+            out << YAML::EndMap;
+        }
+
         out << YAML::EndMap;
     }
 
@@ -236,8 +236,8 @@ namespace Nut
         {
             auto& tc = entity.GetComponent<TransformComponent>();
             tc.Translation = transformComponent["Translation"].as<glm::vec3>();
-            tc.Translation = transformComponent["Rotation"].as<glm::vec3>();
-            tc.Translation = transformComponent["Scale"].as<glm::vec3>();
+            tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
+            tc.Scale = transformComponent["Scale"].as<glm::vec3>();
         }
 
         auto cameraComponent = data["CameraComponent"];
