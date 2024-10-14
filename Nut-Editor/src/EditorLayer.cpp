@@ -166,11 +166,11 @@ namespace Nut {
 				if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
 				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
 				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }*/
-				if (ImGui::MenuItem("New"))
+				if (ImGui::MenuItem("New", "Ctrl + N"))
 					NewScene();
-				if (ImGui::MenuItem("Save As..."))
+				if (ImGui::MenuItem("Save As...", "Ctrl + S"))
 					SaveSceneAs();
-				if (ImGui::MenuItem("Open..."))
+				if (ImGui::MenuItem("Open...", "Ctrl + O"))
 					OpenScene();
 				if (ImGui::MenuItem("Exit")) 
 					Application::Get().WindowClose(); 
@@ -223,6 +223,48 @@ namespace Nut {
 	void EditorLayer::OnEvent(Event& event)
 	{
 		m_CameraController.OnEvent(event);
+
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>(NUT_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+	}
+
+
+	// ------------------------------------------------------------------------------------------------------------
+	// --------------------------------------- Some definations ---------------------------------------------------
+	// ------------------------------------------------------------------------------------------------------------
+
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
+	{
+		// You can triggering this event only once,
+		// because if you try to tirgger this event again, 
+		// the event.GetRepeatCount will biger than 0.
+		// And function will return false
+		if (event.GetRepeatCount() > 0)
+			return false;
+
+		bool ctrl = Input::IsKeyPressed(NUT_KEY_LEFT_CONTROL) || Input::IsKeyPressed(NUT_KEY_RIGHT_CONTROL);
+		bool shift = Input::IsKeyPressed(NUT_KEY_LEFT_SHIFT) || Input::IsKeyPressed(NUT_KEY_RIGHT_SHIFT);
+		switch (event.GetKeyCode())
+		{
+			case NUT_KEY_N: {
+				if (ctrl)
+					NewScene();
+
+				break;
+			}
+			case NUT_KEY_O: {
+				if (ctrl)
+					OpenScene();
+
+				break;
+			}
+			case NUT_KEY_S: {
+				if (ctrl && shift)
+					SaveSceneAs();
+
+				break;
+			}
+		}
 	}
 
 	void EditorLayer::NewScene()

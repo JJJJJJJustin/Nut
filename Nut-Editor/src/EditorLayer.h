@@ -21,6 +21,8 @@ namespace Nut {
 		void OnImGuiRender() override;
 		void OnEvent(Event& event) override;
 	public:
+		bool OnKeyPressed(KeyPressedEvent& event);
+
 		glm::vec2 GetImGuiViewportSize() { return m_ViewportSize; };
 
 		void NewScene();
