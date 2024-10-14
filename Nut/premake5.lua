@@ -19,7 +19,10 @@ project "Nut"                                                   --项目
        "vendor/stb_image/**.h",
        "vendor/stb_image/**.cpp",
        "vendor/glm/glm/**.hpp",
-       "vendor/glm/glm/**.inl"
+       "vendor/glm/glm/**.inl",
+
+       "vendor/ImGuizmo/ImGuizmo.h",
+       "vendor/ImGuizmo/ImGuizmo.cpp"
     }
 
     defines
@@ -39,7 +42,8 @@ project "Nut"                                                   --项目
         "%{IncludeDir.glm}",                                        --将IncludeDir表中glm键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.entt}",
-        "%{IncludeDir.yaml_cpp}"
+        "%{IncludeDir.yaml_cpp}",
+        "%{IncludeDir.ImGuizmo}"
     }
 
     links                                                       --为Nut项目(.dll)链接文件
@@ -50,6 +54,9 @@ project "Nut"                                                   --项目
         "yaml-cpp",                                                 --链接根目录premake文件里group中的项目yaml-cpp
         "opengl32.lib"
     }
+
+    filter "files:vendor/ImGuizmo/**.cpp"                       --?? why
+    flags {"NoPCH"}
 
     filter "system:windows"                                     --过滤器(如果系统是windows)   >>> !!!  filter, not filters  !!!
         systemversion "latest"                                      --windows SDK 版本

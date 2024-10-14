@@ -17,3 +17,6 @@
 [submodule "Nut/vendor/yaml-cpp"]
 	path = Nut/vendor/yaml-cpp
 	url = https://github.com/JJJJJJJustin/yaml-cpp
+[submodule "Nut/vendor/ImGuizmo"]
+	path = Nut/vendor/ImGuizmo
+	url = https://github.com/JJJJJJJustin/ImGuizmo
