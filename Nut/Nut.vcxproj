@@ -162,6 +162,7 @@
     <ClInclude Include="src\Nut\Events\KeyEvent.h" />
     <ClInclude Include="src\Nut\Events\MouseEvent.h" />
     <ClInclude Include="src\Nut\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="src\Nut\Math\Math.h" />
     <ClInclude Include="src\Nut\Renderer\Buffer.h" />
     <ClInclude Include="src\Nut\Renderer\Camera.h" />
     <ClInclude Include="src\Nut\Renderer\FrameBuffer.h" />
@@ -619,6 +620,7 @@
     <ClCompile Include="src\Nut\Core\Window.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Nut\ImGui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\Nut\Math\Math.cpp" />
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Nut\Renderer\FrameBuffer.cpp" />
     <ClCompile Include="src\Nut\Renderer\GraphicsContext.cpp" />

@@ -19,6 +19,9 @@
     <Filter Include="src\Nut\ImGui">
       <UniqueIdentifier>{3DA243FE-A962-BF34-729D-08B2DE1C0411}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Nut\Math">
+      <UniqueIdentifier>{8CBBAEE8-781E-3E8D-21A4-76430DE60910}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Nut\Renderer">
       <UniqueIdentifier>{D9BB9D94-C5B4-BCE6-EEE6-A16BDA3E9CF2}</UniqueIdentifier>
     </Filter>
@@ -119,6 +122,9 @@
     </ClInclude>
     <ClInclude Include="src\Nut\ImGui\ImGuiLayer.h">
       <Filter>src\Nut\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Nut\Math\Math.h">
+      <Filter>src\Nut\Math</Filter>
     </ClInclude>
     <ClInclude Include="src\Nut\Renderer\Buffer.h">
       <Filter>src\Nut\Renderer</Filter>
@@ -1486,6 +1492,9 @@
     </ClCompile>
     <ClCompile Include="src\Nut\ImGui\ImGuiLayer.cpp">
       <Filter>src\Nut\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Nut\Math\Math.cpp">
+      <Filter>src\Nut\Math</Filter>
     </ClCompile>
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp">
       <Filter>src\Nut\Renderer</Filter>
