@@ -1,13 +1,17 @@
 #include "EditorLayer.h"
 
-#include "Nut/Scene/ScriptableEntity.h"
-#include "Nut/Scene/SceneSerializer.h"
-#include "Nut/Utils/PlatformUtils.h"
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui/imgui.h>
+
+#include "Nut/Scene/ScriptableEntity.h"
+#include "Nut/Scene/SceneSerializer.h"
+#include "Nut/Utils/PlatformUtils.h"
+
+#include <ImGuizmo.h>
+
+#include "Nut/Math/Math.h"
 
 
 namespace Nut {
@@ -202,9 +206,10 @@ namespace Nut {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
 
+		// Viewport
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
-		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
 
 		ImVec2 panelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { panelSize.x, panelSize.y };
@@ -212,8 +217,51 @@ namespace Nut {
 		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
-		ImGui::PopStyleVar();
+		// Gizmos
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (selectedEntity && m_GizmoType != -1) 
+		{
+			// Set operating enviroment
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, (float)ImGui::GetWindowWidth(), (float)ImGui::GetWindowHeight());
+
+			// Get camera projection matrix & camera view matrix & transform matrix
+			Entity cameraEntity = m_ActiveScene->GetPrimaryCamera();
+			// Camera Projection
+			const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+			const auto& cameraProjection = camera.GetProjection();
+			// Camera View
+			auto& cameraTransform = cameraEntity.GetComponent<TransformComponent>().GetTransform();
+			glm::mat4 cameraView = glm::inverse(cameraTransform);
+			// Transform
+			auto& tc = selectedEntity.GetComponent<TransformComponent>();
+			glm::mat4 transform = tc.GetTransform();
+
+			// Snapping
+			float snapValue = 0.5f;
+			bool snap = Input::IsKeyPressed(NUT_KEY_LEFT_CONTROL);
+			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+				snap = 10.0f;
+			float snapValues[3] = { snapValue, snapValue, snapValue };
+
+			// Manipulate
+			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), 
+				ImGuizmo::OPERATION(m_GizmoType), ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 translation, rotation, scale;
+				Math::DecomposeTransform(transform, translation, rotation, scale);
+				glm::vec3 deltaRotation = rotation - tc.Rotation;
+				tc.Translation = translation;
+				tc.Rotation += deltaRotation;
+				tc.Scale = scale;
+			}
+		}
+
 		ImGui::End();
+		ImGui::PopStyleVar();
 		// -------------------------------------------------------------------------------------------------------
 
 		ImGui::End();
@@ -246,6 +294,7 @@ namespace Nut {
 		bool shift = Input::IsKeyPressed(NUT_KEY_LEFT_SHIFT) || Input::IsKeyPressed(NUT_KEY_RIGHT_SHIFT);
 		switch (event.GetKeyCode())
 		{
+			// Dialog
 			case NUT_KEY_N: {
 				if (ctrl)
 					NewScene();
@@ -262,6 +311,28 @@ namespace Nut {
 				if (ctrl && shift)
 					SaveSceneAs();
 
+				break;
+			}
+
+			// Gizmo
+			case NUT_KEY_Q:
+			{
+				m_GizmoType = -1;
+				break;
+			}
+			case NUT_KEY_W:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				break;
+			}
+			case NUT_KEY_E:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+				break;
+			}
+			case NUT_KEY_R:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 				break;
 			}
 		}

@@ -13,12 +13,14 @@ namespace Nut
 		Scene();
 		~Scene();
 
+		Entity CreateEntity(const std::string& name = "");
+		void DestroyEntity(Entity& entity);
+
 		void OnUpdate(Timestep ts);
 		void OnScript(Timestep ts);
 		void OnViewportResize(uint32_t width, uint32_t height);
 
-		Entity CreateEntity(const std::string& name = "");
-		void DestroyEntity(Entity& entity);
+		Entity GetPrimaryCamera();
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

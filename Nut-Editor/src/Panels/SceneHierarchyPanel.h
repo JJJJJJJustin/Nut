@@ -17,6 +17,8 @@ namespace Nut
 		void SetContext(const Ref<Scene>& scene);				// Must be used to Init Context!!! For updating Active Scene(which you are using)
 
 		void OnImGuiRender();
+
+		Entity GetSelectedEntity() const { return m_SelectionContext; }
 	private:
 		void DrawEntityNode(Entity& entity);
 		void DrawComponents(Entity& entity);

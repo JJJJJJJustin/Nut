@@ -11,6 +11,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+#include <ImGuizmo.h>
+
 namespace Nut
 {
 	ImGuiLayer::ImGuiLayer()
@@ -86,6 +88,7 @@ namespace Nut
 		ImGui_ImplOpenGL3_NewFrame();						//每一帧开始时准备 OpenGL 渲染环境以供 Dear ImGui 绘制 UI 元素
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();									//清除之前的 UI 数据，准备接受新的 UI 绘制指令（准备新帧），并更新输入状态
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiLayer::OnImGuiRender()						//此函数将会被设置在 Begin 和 End 之间，并且可以由任何层编写
