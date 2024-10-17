@@ -3,6 +3,7 @@
 
 #include "Nut.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Nut/Renderer/EditorCamera.h"
 
 
 namespace Nut {
@@ -42,9 +43,9 @@ namespace Nut {
 		Ref<Scene> m_ActiveScene;
 		Entity m_SquareEntity, m_RedSquare;
 		Entity m_CameraEntity, m_SecondCamera;
-		std::vector<Entity> m_Entities;
 
 		OrthoGraphicCameraController m_CameraController;
+		EditorCamera m_EditorCamera;
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 
