@@ -233,12 +233,18 @@ namespace Nut {
 
 			// Get camera projection matrix & camera view matrix & transform matrix
 			Entity cameraEntity = m_ActiveScene->GetPrimaryCamera();
+#if 0		// Draw gizmos for the entities we create in Actual-Game(Which will use Runtime camera to check things)
 			// Camera Projection
 			const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
 			const auto& cameraProjection = camera.GetProjection();
 			// Camera View
 			auto& cameraTransform = cameraEntity.GetComponent<TransformComponent>().GetTransform();
 			glm::mat4 cameraView = glm::inverse(cameraTransform);
+#endif
+#if 1		// Draw gizmos for the entities we create in Nut-Editor(Which will use Editor camera to check things)
+			const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+			const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
+#endif
 			// Transform
 			auto& tc = selectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 transform = tc.GetTransform();
