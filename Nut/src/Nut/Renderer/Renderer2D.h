@@ -2,6 +2,7 @@
 
 #include "Nut/Renderer/Camera.h"
 #include "Nut/Renderer/OrthoGraphicCamera.h"
+#include "Nut/Renderer/EditorCamera.h"
 
 #include "Nut/Renderer/Texture.h"
 #include "Nut/Renderer/SubTexture2D.h"
@@ -15,6 +16,7 @@ namespace Nut {
 		static void Shutdown();
 
 		static void BeginScene(const Camera& camera, const glm::mat4& viewMatrix);
+		static void BeginScene(const EditorCamera& camera);
 		static void BeginScene(const OrthoGraphicCamera& camera);
 		static void EndScene();
 

@@ -122,7 +122,7 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		glm::mat4 viewProjectionMatrix = camera.GetProjection() * viewMatrix;
+		glm::mat4 viewProjectionMatrix = camera.GetProjection() * glm::inverse(viewMatrix);
 
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
@@ -142,6 +142,20 @@ namespace Nut {
 		s_Data.QuadIndexCount = 0;																//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的顶点索引数要从零重新开始
 		s_Data.TextureSlotIndex = 1;															//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
 		s_Data.QuadVBHind = s_Data.QuadVBBase;													//每结束一次场景（依次场景中可能包含多个批渲染调用），需要将后端指针 Hind 的位置赋值为起始位置，从新开始
+	}
+
+	void Renderer2D::BeginScene(const EditorCamera& camera) 
+	{
+		NUT_PROFILE_FUNCTION();
+
+		glm::mat4 viewProjectionMatrix = camera.GetViewProjection();
+
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
+
+		s_Data.QuadIndexCount = 0;
+		s_Data.TextureSlotIndex = 1;
+		s_Data.QuadVBHind = s_Data.QuadVBBase;
 	}
 
 	void Renderer2D::EndScene()

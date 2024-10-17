@@ -34,6 +34,8 @@ namespace Nut {
 		m_Emoji = Texture2D::Create("assets/textures/emoji.png");
 
 		m_ActiveScene = CreateRef<Scene>();
+
+		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 #if 0
 		m_SquareEntity = m_ActiveScene->CreateEntity("BlueSquare");
 		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
@@ -73,11 +75,14 @@ namespace Nut {
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+
+			m_EditorCamera.SetViewportSize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
 		// Camera Update
 		if(m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
+		m_EditorCamera.OnUpdate(ts);
 
 		// Render
 		Renderer2D::ClearStats();										// 每次更新前都要将Stats统计数据清零
@@ -86,8 +91,8 @@ namespace Nut {
 		RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RendererCommand::Clear();
 
-		m_ActiveScene->OnUpdate(ts);
-		m_ActiveScene->OnScript(ts);								// 更新本机脚本
+		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);				// Now we just update EditorCamera in Nut-Editor APP, rather than RuntimeCamera in game
+		//m_ActiveScene->OnScript(ts);									// 更新本机脚本
 
 		m_Framebuffer->Unbind();
 		
@@ -271,6 +276,7 @@ namespace Nut {
 	void EditorLayer::OnEvent(Event& event)
 	{
 		m_CameraController.OnEvent(event);
+		m_EditorCamera.OnEvent(event);
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(NUT_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
