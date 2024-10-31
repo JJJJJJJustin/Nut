@@ -1,5 +1,9 @@
 #pragma once
 
+namespace Nut { namespace Tool {
+	std::vector<std::pair<std::string, int>> ReadFile(const std::string& filename);
+} }
+
 namespace Nut
 {
 
@@ -29,4 +33,13 @@ namespace Nut
 		static std::vector<Process> priority_scheduling(std::vector<Process>& processes);
 	};
 
+	class RoundAlgorithm
+	{
+	public:
+		// 生成随机进程
+		static void generate_processes(std::vector<Process>& processes, int num_processes);
+
+		// 实现算法
+		static std::vector<Process> round_robin(std::vector<Process>& processes, int time_quantum, const std::string& output_filename);
+	};
 }

@@ -14,7 +14,7 @@
 
 #include "Nut/Math/Math.h"
 
-#include "PriorityAlgorithm.h"
+#include "Algorithm.h"
 
 namespace Nut {
 	EditorLayer* EditorLayer::s_Instance = nullptr;		// Initialize s_Instance as null, then give it a value(this pointer) in constructor
@@ -30,17 +30,18 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		m_Framebuffer = FrameBuffer::Create({ 1280, 720 });
+		m_Framebuffer = FrameBuffer::Create({ 1280, 720, 1, {FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::Depth} });
 
 		m_ActiveScene = CreateRef<Scene>();
 
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 #if 1
+		srand(static_cast<unsigned int>(time(0)));	// 设置随机种子
+		int num_processes = rand() % 5 + 4;			// 生成4到8个进程
 		std::vector<Process> processes;
-		srand(static_cast<unsigned int>(time(0))); // 设置随机种子
-		int num_processes = rand() % 5 + 4; // 生成4到8个进程
 
 		PriorityAlgorithm::generate_processes(processes, num_processes);
+
 		std::vector<Process> completedProcesses = PriorityAlgorithm::priority_scheduling(processes);
 
 		float deep = 1.0f;
@@ -60,8 +61,153 @@ namespace Nut {
 		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
 		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>();
 		firstController.Primary = true;
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			//添加本机脚本
+		//m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			//添加本机脚本
 #endif
+#if 0
+		srand(static_cast<unsigned>(time(0)));	// 设置随机种子
+		int num_processes = rand() % 5 + 4;		// 进程数在4到8之间
+		int time_segment = 5;					// 时间片
+		std::vector<Process> processes;
+
+		RoundAlgorithm::generate_processes(processes, num_processes);
+		RoundAlgorithm::round_robin(processes, time_segment, "E:/VS/Nut/OSAlgorithms/assets/data/data.txt");
+		std::vector<std::pair<std::string, int>> completedProcesses = Tool::ReadFile("E:/VS/Nut/OSAlgorithms/assets/data/data.txt");
+
+		int i = 0;
+		float translateX = 0;
+
+		for (auto& process : completedProcesses)
+		{
+			translateX += process.second;
+
+			if (process.first == "P1")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P2")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P3")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 1.0f, 0.0f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P4")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 0.0f, 1.0f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P5")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 0.0f, 1.0f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P6")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P7")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 0.0f, 0.0f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P8")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.5f, 0.0f, 0.5f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P9")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.5f, 0.5f, 0.0f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+			else if (process.first == "P10")
+			{
+				std::string name = process.first + '-' + std::to_string(i);
+				Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+				squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.3f, 0.1f, 0.5f, 1.0f });
+
+				auto& tc = squareEntity.GetComponent<TransformComponent>();
+				tc.Translation = glm::vec3{ translateX, 0, 0 };
+				tc.Scale = glm::vec3{ process.second ,1, 1 };
+			}
+
+			i++;
+		}
+
+#endif
+#if 0
+		int n = rand() % 5 + 4; // 随机生成4~8个进程
+		int m = 4; // 资源种类固定为4
+		Banker banker(n, m);
+
+		banker.printStatus();
+
+		// 测试资源请求
+		banker.requestResources(0, { 1, 1, 1, 1 });
+		banker.releaseResources(0, { 0, 1, 0, 1 });
+		banker.requestResources(1, { 2, 0, 2, 0 });
+#endif
+
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
@@ -225,7 +371,7 @@ namespace Nut {
 		ImVec2 panelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { panelSize.x, panelSize.y };
 
-		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID();
+		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID();				// Defined in OpenGLFramebuffer.h
 		ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 		// Gizmos
@@ -388,4 +534,4 @@ namespace Nut {
 	}
 
 
-}
+	}

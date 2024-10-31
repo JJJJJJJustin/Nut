@@ -1,0 +1,11 @@
+Time: 0 - Running process: P2 ( executed for 2s and finished.
+Time: 2 - Running process: P4 ( executed for 5s and finished.
+Time: 7 - Running process: P6 ( executed for 4s and finished.
+Time: 11 - Running process: P8 ( executed for 3s and finished.
+Time: 14 - Running process: P3 ( executed for 4s and finished.
+Time: 18 - Running process: P7 ( executed for 5s and not finished.
+Time: 23 - Running process: P1 ( executed for 5s and finished.
+Time: 28 - Running process: P5 ( executed for 2s and finished.
+Time: 30 - Running process: P7 ( executed for 5s and not finished.
+Time: 35 - Running process: P7 ( executed for 5s and not finished.
+Time: 40 - Running process: P7 ( executed for 1s and finished.
