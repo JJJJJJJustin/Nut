@@ -2,13 +2,45 @@
 
 namespace Nut
 {
+	/*struct FramebufferTextureSpecification
+	{
+		FramebufferTextureSpecification() = default;
+		FramebufferTextureSpecification(FramebufferTextureFormat format)
+			: TextureFormat(format) {}
+		FramebufferTextureFormat TextureFormat = FramebufferTextureFormat::None;
+		// TODO: filtering/wrap
+	};*/
+
+	enum class FrameBufferAttachmentFormat			// The formats of attachment
+	{
+		None = 0,
+
+		// Color Attachment
+		RGBA8,
+
+		// Depth / Stencil Attachment
+		DEPTH24STENCIL8,
+
+		// Defaults
+		Depth = DEPTH24STENCIL8
+
+	};
+
+	struct FrameBufferAttachmentsSpecification
+	{
+		FrameBufferAttachmentsSpecification() = default;
+		FrameBufferAttachmentsSpecification(std::initializer_list<FrameBufferAttachmentFormat> attachments)
+			: Attachments(attachments) {}
+
+		std::vector<FrameBufferAttachmentFormat> Attachments;
+	};
 
 	struct FrameBufferSpecification
 	{
 		uint32_t Width, Height;
 		uint32_t Samples = 1;
 
-		// FrameBuffer Format
+		FrameBufferAttachmentsSpecification Attachments;
 		//bool SwapChainTarget = false;
 	};
 
@@ -24,7 +56,7 @@ namespace Nut
 
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
-		virtual uint32_t GetColorAttachmentRendererID() const = 0;
+		virtual uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const = 0;
 		virtual const FrameBufferSpecification& GetSpecification() const = 0;
 
 	};

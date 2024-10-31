@@ -28,7 +28,7 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		m_Framebuffer = FrameBuffer::Create({ 1280, 720 });
+		m_Framebuffer = FrameBuffer::Create({ 1280, 720, 1, {FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::Depth} });
 
 		m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_Emoji = Texture2D::Create("assets/textures/emoji.png");
@@ -177,7 +177,7 @@ namespace Nut {
 				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }*/
 				if (ImGui::MenuItem("New", "Ctrl + N"))
 					NewScene();
-				if (ImGui::MenuItem("Save As...", "Ctrl + S"))
+				if (ImGui::MenuItem("Save As...", "Ctrl + Shift + S"))
 					SaveSceneAs();
 				if (ImGui::MenuItem("Open...", "Ctrl + O"))
 					OpenScene();
