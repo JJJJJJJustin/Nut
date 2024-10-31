@@ -154,7 +154,7 @@ namespace Nut
 		// ---------- Mapping the fragment shader's output variables to different color attachments ------------
 		if (m_ColorAttachmentIDs.size() > 1)
 		{
-			NUT_CORE_ASSERT(m_ColorAttachmentIDs.size() <= 4, "");
+			NUT_CORE_ASSERT((m_ColorAttachmentIDs.size() <= 4), "");
 
 			GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
 			glDrawBuffers(m_ColorAttachmentIDs.size(), buffers);

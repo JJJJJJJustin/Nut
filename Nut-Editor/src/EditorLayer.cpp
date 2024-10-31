@@ -28,7 +28,7 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		m_Framebuffer = FrameBuffer::Create({ 1280, 720, 1, {FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::Depth} });
+		m_Framebuffer = FrameBuffer::Create({ 1280, 720, 1, {FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::Depth} });
 
 		m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_Emoji = Texture2D::Create("assets/textures/emoji.png");
@@ -219,7 +219,7 @@ namespace Nut {
 		ImVec2 panelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { panelSize.x, panelSize.y };
 
-		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID();
+		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID(1);
 		ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 		// Gizmos
