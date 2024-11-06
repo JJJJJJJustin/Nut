@@ -136,6 +136,9 @@ namespace Nut
 				case FrameBufferAttachmentFormat::RGBA8:
 					Utils::AttachColorTexture(m_ColorAttachmentIDs[i], m_Specification.Samples, GL_RGBA8, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
 					break;
+				case FrameBufferAttachmentFormat::RED_INTEGER:
+					Utils::AttachColorTexture(m_ColorAttachmentIDs[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
+					break;
 				}
 			}
 		}
@@ -188,4 +191,17 @@ namespace Nut
 
 		Recreate();
 	}
+
+	int OpenGLFrameBuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
+	{
+		NUT_CORE_ASSERT( (attachmentIndex < m_ColorAttachmentIDs.size()), "Attachment index is beyond the scope of Attachments which we set");
+
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
+
+		int pixelData;
+		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+		
+		return pixelData;
+	}
+
 }
