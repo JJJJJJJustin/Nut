@@ -7,6 +7,9 @@ namespace Nut { namespace Tool {
 namespace Nut
 {
 
+	// -------------------------------------------------------------------
+	// -------------------- Experiment 1 ---------------------------------
+	// -------------------------------------------------------------------
 	struct Process {
 	public:
 		std::string name;      // 进程名称
@@ -42,4 +45,62 @@ namespace Nut
 		// 实现算法
 		static std::vector<Process> round_robin(std::vector<Process>& processes, int time_quantum, const std::string& output_filename);
 	};
+
+	// -------------------------------------------------------------------
+	// -------------------- Experiment 2 ---------------------------------
+	// -------------------------------------------------------------------
+	class Banker {
+	public:
+		Banker(int num, int type);
+		void requestResources(int processId, std::vector<int> request);
+		void releaseResources(int processId, std::vector<int> release);
+		void printStatus();
+
+	private:
+		int m_Num; // 进程数
+		int m_Type; // 资源种类
+		std::vector<std::vector<int>> m_Allocation; // 分配矩阵
+		std::vector<std::vector<int>> m_Max;        // 最大需求矩阵
+		std::vector<std::vector<int>> m_Need;       // 需求矩阵
+		std::vector<int> m_Available;				// 可用资源
+		bool isSafe();
+
+		void calculateNeed();
+	};
+
+
+	// -------------------------------------------------------------------
+	// -------------------- Experiment 3 ---------------------------------
+	// -------------------------------------------------------------------
+
+	class StorageManage 
+	{
+	public:
+		StorageManage() = default;
+
+		static void ParseInstructions(const std::string& filename, std::vector<std::string>& instructions);
+		static int GetPage(int instructionIndex);
+
+		static void GenerateInstructions(const std::string& filename, int totalInstructions = 320, int maxAddress = 1000);
+		static std::vector<int> ExecuteInstructions(const std::string& filename);
+	public:
+		static double FIFO(const std::vector<int>& executedPages, int numFrames);
+		static double LRU(const std::vector<int>& executedPages, int numFrames);
+		static double OPT(const std::vector<int>& executedPages, int numFrames);
+		static double Clock(const std::vector<int>& executedPages, int numFrames);
+
+		static inline std::vector<int> GetPages() { return m_ExecutedPages; }
+	private:
+		static std::vector<int> m_ExecutedPages;
+
+	};
+
+
+
+
+
+
+
+
+
 }
