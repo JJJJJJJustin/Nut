@@ -52,6 +52,9 @@ namespace Nut {
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 
+		// Bounds
+		glm::vec2 m_ViewportBounds[2];
+
 		//Gizmo
 		int m_GizmoType = -1;
 	};
