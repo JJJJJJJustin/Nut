@@ -351,10 +351,10 @@ namespace Nut
 	// ---------------------------------------------------------------
 	// ---------------------- Storage Management ---------------------
 	// ---------------------------------------------------------------
-	std::vector<int> StorageManage::m_ExecutedPages;					// 定义静态成员变量
+	std::vector<int> StorageManage::m_ExecutedPages;						// 定义静态成员变量
 
 	void StorageManage::GenerateInstructions(const std::string& filename, int totalInstructions, int maxAddress) {
-		// 打开文件
+
 		std::ofstream file(filename);
 		NUT_CORE_ASSERT(file, "无法打开文件");
 
@@ -368,23 +368,22 @@ namespace Nut
 
 		// 生成顺序执行的指令
 		for (int i = 0; i < numSequential; ++i) {
-			int address = i;  // 顺序地址
+			int address = i;													// 顺序地址
 			file << "CMD_" << address << ": Do something at address " << address << std::endl;
 		}
 
 		// 生成均匀分布在前地址部分的指令
 		for (int i = 0; i < numFront; ++i) {
-			int address = std::rand() % (maxAddress / 2);  // 前半部分的地址
+			int address = std::rand() % (maxAddress / 2);						// 前半部分的地址
 			file << "CMD_" << address << ": Do something at address " << address << std::endl;
 		}
 
 		// 生成均匀分布在后地址部分的指令
 		for (int i = 0; i < numBack; ++i) {
-			int address = std::rand() % (maxAddress / 2) + (maxAddress / 2);  // 后半部分的地址
+			int address = std::rand() % (maxAddress / 2) + (maxAddress / 2);	// 后半部分的地址
 			file << "CMD_" << address << ": Do something at address " << address << std::endl;
 		}
 
-		// 关闭文件
 		file.close();
 		NUT_CORE_INFO("文件生成完成，包含{0}条指令。", totalInstructions)
 	}

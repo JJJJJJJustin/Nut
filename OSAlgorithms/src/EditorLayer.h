@@ -31,6 +31,8 @@ namespace Nut {
 		void OpenScene();
 		void SaveSceneAs();
 	private:
+		void DrawResults(const std::string& algorithmName, std::function<double(std::vector<int>, int)> func);
+	private:
 		// Instance 
 		static EditorLayer* s_Instance;		// s_Instance is a pointer type variable, cuz it takes 'this' pointer and 'nullptr'
 

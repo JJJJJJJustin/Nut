@@ -17,6 +17,8 @@
 #include "Algorithm.h"
 
 namespace Nut {
+	static float xTrans = 0.0f;
+
 	EditorLayer* EditorLayer::s_Instance = nullptr;		// Initialize s_Instance as null, then give it a value(this pointer) in constructor
 
 	EditorLayer::EditorLayer()
@@ -35,6 +37,7 @@ namespace Nut {
 		m_ActiveScene = CreateRef<Scene>();
 
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+
 #if 0
 		srand(static_cast<unsigned int>(time(0)));	// 设置随机种子
 		int num_processes = rand() % 5 + 4;			// 生成4到8个进程
@@ -207,7 +210,7 @@ namespace Nut {
 		//banker.releaseResources(0, { 0, 1, 0, 1 });
 		banker.requestResources(1, { 2, 0, 2, 0 });
 #endif
-#if 1
+#if 0
 		StorageManage::GenerateInstructions("E:/Instructions.txt");
 		StorageManage::ExecuteInstructions("E:/Instructions2.txt");
 
@@ -215,82 +218,23 @@ namespace Nut {
 		for (int numFrames = 2; numFrames <= 32; numFrames *= 2) {
 			std::cout << "\n内存大小-> " << numFrames * 1024 << " 字节 (物理块: " << numFrames << ")\n";
 
-			std::cout << "FIFO: " << StorageManage::FIFO(StorageManage::GetPages(), numFrames) << std::endl;
-			std::cout << "LRU: " << StorageManage::LRU(StorageManage::GetPages(), numFrames) << std::endl;
-			std::cout << "OPT: " << StorageManage::OPT(StorageManage::GetPages(), numFrames) << std::endl;
-			std::cout << "Clock: " << StorageManage::Clock(StorageManage::GetPages(), numFrames) << std::endl;
+			std::cout << "FIFO: " << StorageManage::FIFO(StorageManage::GetPages(), numFrames) << "\t";
+			std::cout << "LRU: " << StorageManage::LRU(StorageManage::GetPages(), numFrames) << "\t";
+			std::cout << "OPT: " << StorageManage::OPT(StorageManage::GetPages(), numFrames) << "\t";
+			std::cout << "Clock: " << StorageManage::Clock(StorageManage::GetPages(), numFrames) << "\t\n";
 		}
 
-		float xTrans = 0.0f;
-		for (int numFrames = 2; numFrames <= 32; numFrames *= 2)
-		{
-			float scale = StorageManage::FIFO(StorageManage::GetPages(), numFrames);
 
-			std::stringstream entityName;
-			entityName << "FIFO with" << numFrames << "Frames";
-
-			Entity squareEntity = m_ActiveScene->CreateEntity(entityName.str());
-			squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
-			auto& tc = squareEntity.GetComponent<TransformComponent>();
-			tc.Translation = {xTrans, scale / 2, 0.0f};				// scale / 2 ：保证实体位于同一水平线
-			tc.Scale = { 0.5f, scale, 1.0f };
-
-			xTrans += 0.6f;
-		}
+		DrawResults("FIFO", StorageManage::FIFO);
 
 		xTrans += 2.0f;
-		for (int numFrames = 2; numFrames <= 32; numFrames *= 2)
-		{
-			float scale = StorageManage::LRU(StorageManage::GetPages(), numFrames);
-
-			std::stringstream entityName;
-			entityName << "LRU with" << numFrames << "Frames";
-
-			Entity squareEntity = m_ActiveScene->CreateEntity(entityName.str());
-			squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 0.0f, 1.0f, 1.0f });
-
-			auto& tc = squareEntity.GetComponent<TransformComponent>();
-			tc.Translation = { xTrans, scale / 2, 0.0f };
-			tc.Scale = { 0.5f, scale, 1.0f };
-
-			xTrans += 0.6f;
-		}
+		DrawResults("LRU", StorageManage::LRU);
 
 		xTrans += 2.0f;
-		for (int numFrames = 2; numFrames <= 32; numFrames *= 2)
-		{
-			float scale = StorageManage::OPT(StorageManage::GetPages(), numFrames);
-
-			std::stringstream entityName;
-			entityName << "OPT with" << numFrames << "Frames";
-
-			Entity squareEntity = m_ActiveScene->CreateEntity(entityName.str());
-			squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 1.0f, 0.0f, 1.0f });
-
-			auto& tc = squareEntity.GetComponent<TransformComponent>();
-			tc.Translation = { xTrans, scale / 2, 0.0f };
-			tc.Scale = { 0.5f, scale, 1.0f };
-
-			xTrans += 0.6f;
-		}
+		DrawResults("OPT", StorageManage::OPT);
 
 		xTrans += 2.0f;
-		for (int numFrames = 2; numFrames <= 32; numFrames *= 2)
-		{
-			float scale = StorageManage::Clock(StorageManage::GetPages(), numFrames);
-
-			std::stringstream entityName;
-			entityName << "Clock with" << numFrames << "Frames";
-
-			Entity squareEntity = m_ActiveScene->CreateEntity(entityName.str());
-			squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
-
-			auto& tc = squareEntity.GetComponent<TransformComponent>();
-			tc.Translation = { xTrans, scale / 2, 0.0f };
-			tc.Scale = { 0.5f, scale, 1.0f };
-
-			xTrans += 0.6f;
-		}
+		DrawResults("Clock", StorageManage::Clock);
 
 #endif
 
@@ -564,7 +508,7 @@ namespace Nut {
 			break;
 		}
 
-					  // Gizmo
+			// Gizmo
 		case NUT_KEY_Q:
 		{
 			m_GizmoType = -1;
@@ -619,5 +563,26 @@ namespace Nut {
 		}
 	}
 
+	void EditorLayer::DrawResults(const std::string& algorithmName, std::function<double(std::vector<int>, int)> func)
+	{
+		for (int numFrames = 2; numFrames <= 32; numFrames *= 2)
+		{
+			float scale = func(StorageManage::GetPages(), numFrames);
 
+			std::stringstream entityName;
+			entityName << algorithmName << " with" << numFrames << "Frames";
+
+			Entity squareEntity = m_ActiveScene->CreateEntity(entityName.str());
+			squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
+			auto& tc = squareEntity.GetComponent<TransformComponent>();
+			tc.Translation = { xTrans, scale / 2, 0.0f };				// scale / 2 ：保证实体位于同一水平线
+			tc.Scale = { 0.5f, scale, 1.0f };
+
+			xTrans += 0.6f;
+		}
 	}
+
+
+
+
+}
