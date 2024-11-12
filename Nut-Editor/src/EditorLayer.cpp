@@ -91,6 +91,10 @@ namespace Nut {
 		RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RendererCommand::Clear();
 
+		// Clear entity ID to -1
+		m_Framebuffer->ClearAttachment(1, -1);
+
+		// Update scene
 		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);				// Now we just update EditorCamera in Nut-Editor APP, rather than RuntimeCamera in game
 		//m_ActiveScene->OnScript(ts);									// 更新本机脚本
 
@@ -242,7 +246,6 @@ namespace Nut {
 		ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 		// Confirm boundary values
-		ImVec2 windowSize = ImGui::GetWindowSize();
 		ImVec2 minBound = ImGui::GetWindowPos();
 		minBound.x += viewportOffset.x;
 		minBound.y += viewportOffset.y;

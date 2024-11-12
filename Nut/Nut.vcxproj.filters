@@ -132,6 +132,9 @@
     <ClInclude Include="src\Nut\Renderer\Camera.h">
       <Filter>src\Nut\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Nut\Renderer\EditorCamera.h">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Nut\Renderer\FrameBuffer.h">
       <Filter>src\Nut\Renderer</Filter>
     </ClInclude>
@@ -1470,7 +1473,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Nut\Renderer\EditorCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Core\Application.cpp">
@@ -1498,6 +1500,9 @@
       <Filter>src\Nut\Math</Filter>
     </ClCompile>
     <ClCompile Include="src\Nut\Renderer\Buffer.cpp">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Nut\Renderer\EditorCamera.cpp">
       <Filter>src\Nut\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Nut\Renderer\FrameBuffer.cpp">
@@ -1590,6 +1595,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Nut\Renderer\EditorCamera.cpp" />
   </ItemGroup>
 </Project>
