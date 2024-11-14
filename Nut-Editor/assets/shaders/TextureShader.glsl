@@ -16,8 +16,9 @@ uniform mat4 u_ViewProjection;
 out vec4 v_Color;
 out vec2 v_TexCoord;
 out float v_TexIndex;
+// Should i add Keyword flat' here?
 out float v_TilingFactor;
-out int v_EntityID;
+out flat int v_EntityID;
 
 void main()
 {
@@ -39,9 +40,9 @@ layout(location = 1) out int color2;
 in vec4 v_Color;
 in vec2 v_TexCoord;
 in float v_TexIndex;
+// Should i add Keyword flat' here?
 in float v_TilingFactor;
 in flat int v_EntityID;
-// What's the different between 'in int v_EntityID;'and 'in flat int v_EntityID;'
 
 uniform sampler2D u_Textures[32];
 //uniform vec4 u_Color;
