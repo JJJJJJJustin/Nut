@@ -61,7 +61,7 @@ namespace Nut
 			for (auto entity : group) {
 				auto [transform, color] = group.get<TransformComponent, SpriteComponent>(entity);
 
-				Renderer2D::DrawQuad(transform.GetTransform(), color.Color);
+				Renderer2D::DrawQuad(transform.GetTransform(), color.Color, (int)entity);
 			}
 
 			Renderer2D::EndScene();
@@ -76,7 +76,7 @@ namespace Nut
 		for (auto entity : group) {
 			auto [transform, color] = group.get<TransformComponent, SpriteComponent>(entity);
 
-			Renderer2D::DrawQuad(transform.GetTransform(), color.Color);
+			Renderer2D::DrawQuad(transform.GetTransform(), color.Color, (int)entity);
 		}
 
 		Renderer2D::EndScene();
