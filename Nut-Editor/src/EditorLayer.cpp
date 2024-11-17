@@ -237,6 +237,11 @@ namespace Nut {
 			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
+		std::string name2 = "None";
+		if (m_UsingEntity)
+			name2 = m_UsingEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Entity in use: %s", name2.c_str());
+
 		ImGui::End();
 		// ----------- Viewport Image --------------------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -327,6 +332,7 @@ namespace Nut {
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(NUT_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressedEvent>(NUT_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 	}
 
 
@@ -389,6 +395,19 @@ namespace Nut {
 				break;
 			}
 		}
+	}
+
+	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& event)
+	{
+		if(Input::IsMouseButtonPressed(NUT_MOUSE_BUTTON_LEFT))
+		{
+			if (m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(NUT_KEY_LEFT_ALT)) 
+			{
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+				m_UsingEntity = m_HoveredEntity;
+			}
+		}
+		return false;
 	}
 
 	void EditorLayer::NewScene()
