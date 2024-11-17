@@ -140,7 +140,7 @@ namespace Nut
                     name = tc["Tag"].as<std::string>();
                 
                 NUT_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
-                Entity& deserializedEntity = m_Scene->CreateEntity(name);       // Create a new entity in m_Scene with all defalur values
+                Entity& deserializedEntity = m_Scene->CreateEntity(name);       // Create a new entity in m_Scene with all default values
                 
                 DeserializeEntity(entity, deserializedEntity);                  // Update values in this entity accroding to yaml file
             }
