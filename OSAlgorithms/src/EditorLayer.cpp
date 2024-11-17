@@ -237,6 +237,54 @@ namespace Nut {
 		DrawResults("Clock", StorageManage::Clock);
 
 #endif
+#if 1
+		std::srand(std::time(0));
+
+		std::vector<int> requests(10);
+		int start = 100;						// 磁头初始位置
+
+		// 填充数组，生成0到199之间的随机值
+		for (int i = 0; i < 10; i++) {
+			requests[i] = std::rand() % 200;	// 生成0到199之间的随机数
+		}
+
+		DiskScheduler scheduler(requests, start);
+
+		// SCAN 算法
+		m_ProcessedScanSeq = scheduler.Scan();
+		std::cout << "SCAN Sequence: ";
+		scheduler.Print(m_ProcessedScanSeq);
+
+		// CSCAN 算法
+		m_ProcessedCscanSeq = scheduler.Cscan();
+		std::cout << "CSCAN Sequence: ";
+		scheduler.Print(m_ProcessedCscanSeq);
+
+		Entity entity = m_ActiveScene->CreateEntity("Disk Track");
+
+		entity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f });
+
+		auto& tc = entity.GetComponent<TransformComponent>();
+		tc.Translation = glm::vec3{ 0.0f, 0.0f, 0.0f };
+		tc.Scale = glm::vec3{ 10.0f, 1.0f, 1.0f };
+
+		for (size_t i = 0; i < requests.size(); i++)
+		{
+			std::string name = "Location" + std::to_string(requests[i]);
+
+			Entity squareEntity = m_ActiveScene->CreateEntity(name);
+
+			squareEntity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 0.3f, 0.0f, 1.0f });
+
+			auto& tc = squareEntity.GetComponent<TransformComponent>();
+			tc.Translation = glm::vec3{ (requests[i] - 100.0) / 100.0 * 5.0, 0.0f, 0.3f };
+			tc.Scale = glm::vec3{ 0.03f, 1.0f, 1.0f };
+		}
+
+		m_ArrowEntity = m_ActiveScene->CreateEntity("Arrow"); 
+		m_ArrowEntity.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 0.0f, 0.0f, 1.0f });
+		m_ArrowEntity.GetComponent<TransformComponent>().Scale = glm::vec3{ 0.0f };
+#endif
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
@@ -388,6 +436,19 @@ namespace Nut {
 		ImGui::Text("Vertices: %d", stats.GetVertexCount());
 		ImGui::Text("Indices: %d", stats.GetIndexCount());
 
+		ImGui::Separator();
+		if (ImGui::Button("Run Scan")) 
+		{
+			NUT_CORE_INFO("Scan sequence is running now");
+			DrawArrow(m_ProcessedScanSeq);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Run Cscan"))
+		{
+			NUT_CORE_INFO("Cscan sequence is running now")
+			DrawArrow(m_ProcessedCscanSeq);
+		}
+
 		ImGui::End();
 		// ----------- Viewport Image --------------------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -489,46 +550,46 @@ namespace Nut {
 		switch (event.GetKeyCode())
 		{
 			// Dialog
-		case NUT_KEY_N: {
-			if (ctrl)
-				NewScene();
+			case NUT_KEY_N: {
+				if (ctrl)
+					NewScene();
 
-			break;
-		}
-		case NUT_KEY_O: {
-			if (ctrl)
-				OpenScene();
+				break;
+			}
+			case NUT_KEY_O: {
+				if (ctrl)
+					OpenScene();
 
-			break;
-		}
-		case NUT_KEY_S: {
-			if (ctrl && shift)
-				SaveSceneAs();
+				break;
+			}
+			case NUT_KEY_S: {
+				if (ctrl && shift)
+					SaveSceneAs();
 
-			break;
-		}
+				break;
+			}
 
 			// Gizmo
-		case NUT_KEY_Q:
-		{
-			m_GizmoType = -1;
-			break;
-		}
-		case NUT_KEY_W:
-		{
-			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-			break;
-		}
-		case NUT_KEY_E:
-		{
-			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-			break;
-		}
-		case NUT_KEY_R:
-		{
-			m_GizmoType = ImGuizmo::OPERATION::SCALE;
-			break;
-		}
+			case NUT_KEY_Q:
+			{
+				m_GizmoType = -1;
+				break;
+			}
+			case NUT_KEY_W:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				break;
+			}
+			case NUT_KEY_E:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+				break;
+			}
+			case NUT_KEY_R:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+				break;
+			}
 		}
 	}
 
@@ -582,7 +643,24 @@ namespace Nut {
 		}
 	}
 
+	void EditorLayer::DrawArrow(std::vector<int>& seq)
+	{
+		NUT_CORE_ASSERT(!seq.empty(), "sequence is empty")
 
+		static size_t index = 0;
+
+		if (index < seq.size()) {
+			auto& tc = m_ArrowEntity.GetComponent<TransformComponent>();
+			tc.Translation = glm::vec3{ (seq[index] - 100.0f) / 100.0f * 5.0f, 0.0f, 0.0f };
+			tc.Scale = glm::vec3{ 0.1f, 1.0f, 1.0f };
+
+			index += 1;
+		}
+		else
+		{
+			NUT_CORE_INFO("Scan sequence run completed");
+		}
+	}
 
 
 }

@@ -55,6 +55,7 @@ namespace Nut
 	// -----------------------------------------------------------------------------------
 	// ---------------------------- Priority Algorithm -----------------------------------
 	// -----------------------------------------------------------------------------------
+#pragma region  Priority Algorithm 
 	bool PriorityAlgorithm::compare(const Process& a, const Process& b)
 	{
 		return a.priority > b.priority; // 优先级高的排在前面
@@ -123,11 +124,12 @@ namespace Nut
 
 		return completed_processes;
 	}
-
+#pragma endregion
 
 	// -----------------------------------------------------------------------------------
 	// --------------------------- Round-robin -------------------------------------------
 	// -----------------------------------------------------------------------------------
+#pragma region Round-robin
 	//随机生成进程
 	void RoundAlgorithm::generate_processes(std::vector<Process>& processes, int num_processes)
 	{
@@ -151,67 +153,68 @@ namespace Nut
 		// 排序进程根据到达时间
 		std::sort(processes.begin(), processes.end(), [](const Process& a, const Process& b) { return a.arrival_time < b.arrival_time; });
 
-		#// 打开文件输出流
+#// 打开文件输出流
 		std::ofstream output_file(output_filename);
 		NUT_CORE_ASSERT(output_file.is_open(), "Failed to open file ! ")
 
-		while (processes_completed < n) {
-			// 将到达的进程加入就绪队列
-			for (int i = 0; i < n; ++i) {
-				if (processes[i].arrival_time <= current_time && processes[i].remaining_time > 0) {
-					ready_queue.push(i);
-				}
-			}
-
-			if (!ready_queue.empty()) {
-				int current_process_index = ready_queue.front();
-				ready_queue.pop();
-
-				// 检查当前进程是否仍然需要执行
-				if (processes[current_process_index].remaining_time > 0) {
-					// 输出当前时间和正在运行的进程
-					output_file << "Time: " << current_time << " - Running process: " << processes[current_process_index].name;
-
-					// 处理当前进程
-					int execution_time = std::min(processes[current_process_index].remaining_time, time_segment);
-					processes[current_process_index].remaining_time -= execution_time;
-					current_time += execution_time;
-
-					// 输出当前进程执行的时间
-					output_file << " ( executed for " << execution_time << "s";
-
-					if (processes[current_process_index].remaining_time == 0) {
-						processes[current_process_index].turnaround_time = current_time - processes[current_process_index].arrival_time;
-						output_file << " and finished.\n"; // 输出完成信息
-						processes_completed++;
+			while (processes_completed < n) {
+				// 将到达的进程加入就绪队列
+				for (int i = 0; i < n; ++i) {
+					if (processes[i].arrival_time <= current_time && processes[i].remaining_time > 0) {
+						ready_queue.push(i);
 					}
-					else {
-						output_file << " and not finished.\n"; // 输出未完成信息
+				}
+
+				if (!ready_queue.empty()) {
+					int current_process_index = ready_queue.front();
+					ready_queue.pop();
+
+					// 检查当前进程是否仍然需要执行
+					if (processes[current_process_index].remaining_time > 0) {
+						// 输出当前时间和正在运行的进程
+						output_file << "Time: " << current_time << " - Running process: " << processes[current_process_index].name;
+
+						// 处理当前进程
+						int execution_time = std::min(processes[current_process_index].remaining_time, time_segment);
+						processes[current_process_index].remaining_time -= execution_time;
+						current_time += execution_time;
+
+						// 输出当前进程执行的时间
+						output_file << " ( executed for " << execution_time << "s";
+
+						if (processes[current_process_index].remaining_time == 0) {
+							processes[current_process_index].turnaround_time = current_time - processes[current_process_index].arrival_time;
+							output_file << " and finished.\n"; // 输出完成信息
+							processes_completed++;
+						}
+						else {
+							output_file << " and not finished.\n"; // 输出未完成信息
+							ready_queue.push(current_process_index);
+						}
+					}
+
+					// 如果进程未完成，重新加入就绪队列
+					if (processes[current_process_index].remaining_time > 0) {
 						ready_queue.push(current_process_index);
 					}
 				}
-
-				// 如果进程未完成，重新加入就绪队列
-				if (processes[current_process_index].remaining_time > 0) {
-					ready_queue.push(current_process_index);
+				else {
+					// 如果没有进程可执行，则跳到下一个可到达进程
+					current_time++;
 				}
 			}
-			else {
-				// 如果没有进程可执行，则跳到下一个可到达进程
-				current_time++;
-			}
-		}
 
 		// 关闭文件输出流
 		output_file.close();
 		return processes;
 	}
-
+#pragma endregion
 
 	// -----------------------------------------------------------------------------------
 	// --------------------------- Banker ------------------------------------------------
 	// -----------------------------------------------------------------------------------
-	Banker::Banker(int num, int type) : m_Num(num), m_Type(type) 
+#pragma region Banker
+	Banker::Banker(int num, int type) : m_Num(num), m_Type(type)
 	{
 		m_Allocation.resize(m_Num, std::vector<int>(m_Type));
 		m_Max.resize(m_Num, std::vector<int>(m_Type));
@@ -346,11 +349,12 @@ namespace Nut
 		}
 		std::cout << std::endl;
 	}
-
+#pragma endregion
 
 	// ---------------------------------------------------------------
 	// ---------------------- Storage Management ---------------------
 	// ---------------------------------------------------------------
+#pragma region Storage Management
 	std::vector<int> StorageManage::m_ExecutedPages;						// 定义静态成员变量
 
 	void StorageManage::GenerateInstructions(const std::string& filename, int totalInstructions, int maxAddress) {
@@ -599,6 +603,121 @@ namespace Nut
 
 		return 1.0 - (double)pageFaults / executedPages.size();
 	}
+#pragma endregion
+
+
+	// ---------------------------------------------------------------
+	// ---------------------- Disk Scheduler -------------------------
+	// ---------------------------------------------------------------
+	DiskScheduler::DiskScheduler(std::vector<int> reqs, int startPos, int maxTrack) {
+		m_Requests = reqs;
+		m_Start = startPos;
+		m_MaxTrack = maxTrack;
+		std::sort(m_Requests.begin(), m_Requests.end());  // 按照磁道请求排序
+	}
+
+	// SCAN 算法实现
+	std::vector<int> DiskScheduler::Scan() {
+		std::vector<int> left, right;
+		for (int req : m_Requests) {
+			if (req < m_Start) {
+				left.push_back(req);			// 小于起始位置的请求
+			}
+			else {
+				right.push_back(req);			// 大于起始位置的请求
+			}
+		}
+		std::reverse(left.begin(), left.end());  // 反转左侧请求，以便从大到小处理
+
+		std::vector<int> seek_sequence;
+		// 向右扫描
+		for (int track : right) {
+			seek_sequence.push_back(track);
+		}
+		// 扫描到最大轨道后，反向扫描
+		for (int track : left) {
+			seek_sequence.push_back(track);
+		}
+
+		return seek_sequence;
+	}
+
+	// CSCAN 算法实现
+	std::vector<int> DiskScheduler::Cscan() {
+		std::vector<int> left, right;
+		for (int req : m_Requests) {
+			if (req < m_Start) {
+				left.push_back(req);			// 小于起始位置的请求
+			}
+			else {
+				right.push_back(req);			// 大于起始位置的请求
+			}
+		}
+
+		std::vector<int> seek_sequence;
+		// 向右扫描
+		for (int track : right) {
+			seek_sequence.push_back(track);
+		}
+		// 扫描到最大轨道后，回到最小轨道,从最小轨道继续向右扫描
+		for (int track : left) {
+			seek_sequence.push_back(track);
+		}
+
+		return seek_sequence;
+	}
+
+	//// 改进的 SCAN 算法，避免磁臂粘着问题
+	//std::vector<int> DiskScheduler::ImprovedScan() {
+	//	std::vector<int> left, right;
+	//	for (int req : m_Requests) {
+	//		if (req < m_Start) {
+	//			left.push_back(req);			// 小于起始位置的请求
+	//		}
+	//		else {
+	//			right.push_back(req);			// 大于起始位置的请求
+	//		}
+	//	}
+	//	std::reverse(left.begin(), left.end());  // 反转左侧请求，以便从大到小处理
+
+	//	std::vector<int> seek_sequence;
+	//	// 优先向右扫描
+	//	if (!right.empty()) {
+	//		for (int track : right) {
+	//			seek_sequence.push_back(track);
+	//		}
+	//	}
+
+	//	// 如果右边没有请求，则改变方向向左扫描
+	//	if (right.empty()) {
+	//		for (int track = m_Start; track >= 1; --track) {
+	//			seek_sequence.push_back(track);
+	//		}
+	//	}
+	//	else {
+	//		// 向右扫描到最大轨道后，反向扫描
+	//		if (!left.empty()) {
+	//			for (int track : left) {
+	//				seek_sequence.push_back(track);
+	//			}
+	//		}
+	//	}
+
+	//	return seek_sequence;
+	//}
+
+
+	// 打印磁道访问顺序
+	void DiskScheduler::Print(const std::vector<int>& sequence) {
+		std::stringstream ss;
+		for (int i = 0; i < sequence.size(); ++i) {
+			ss << sequence[i] << (i == sequence.size() - 1 ? "\n" : " -> ");
+			NUT_CORE_INFO(ss.str())
+		}
+	}
+
+
+
 
 
 }

@@ -32,6 +32,7 @@ namespace Nut {
 		void SaveSceneAs();
 	private:
 		void DrawResults(const std::string& algorithmName, std::function<double(std::vector<int>, int)> func);
+		void DrawArrow(std::vector<int>& seq);
 	private:
 		// Instance 
 		static EditorLayer* s_Instance;		// s_Instance is a pointer type variable, cuz it takes 'this' pointer and 'nullptr'
@@ -43,7 +44,7 @@ namespace Nut {
 		Ref<FrameBuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;
-		Entity m_SquareEntity, m_RedSquare;
+		Entity m_SquareEntity, m_RedSquare, m_ArrowEntity;
 		Entity m_CameraEntity, m_SecondCamera;
 
 		OrthoGraphicCameraController m_CameraController;
@@ -53,6 +54,9 @@ namespace Nut {
 
 		//Gizmo
 		int m_GizmoType = -1;
+
+		// Disk scheduler
+		std::vector<int> m_ProcessedScanSeq, m_ProcessedCscanSeq;
 	};
 
 }

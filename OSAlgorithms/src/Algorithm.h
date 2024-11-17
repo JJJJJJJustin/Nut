@@ -97,6 +97,30 @@ namespace Nut
 
 
 
+	// ---------------------------------------------------------------------
+	// ----------------------- Experiment 4 --------------------------------
+	// ---------------------------------------------------------------------
+	class DiskScheduler {
+	private:
+		std::vector<int> m_Requests;	// 磁道请求列表
+		int m_Start;					// 磁头初始位置
+		int m_MaxTrack;					// 最大磁道
+
+	public:
+		DiskScheduler(std::vector<int> reqs, int startPos, int maxTrack = 200);
+
+		// SCAN 算法实现
+		std::vector<int> Scan();
+
+		// CSCAN 算法实现
+		std::vector<int> Cscan();
+
+		// 改进的 SCAN 算法，避免磁臂粘着
+		std::vector<int> ImprovedScan();
+
+		// 打印磁道访问顺序
+		void Print(const std::vector<int>& sequence);
+	};
 
 
 
