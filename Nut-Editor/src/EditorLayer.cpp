@@ -221,8 +221,9 @@ namespace Nut {
 		}
 		#pragma endregion
 		// ----------- Should be writen in Dockspace( Between dockspace's ImGui::Begin() <-> ImGui::End() ) ----
-		// ----------- Hierarchy Panel -------------------------------------------
+		// ----------- Hierarchy Panel & Content Browser Panel -------------------------------------------
 		m_SceneHierarchyPanel.OnImGuiRender();
+		m_ContentBrowserPanel.OnImGuiRender();
 		// ----------- Test Panel---------------------------------------------
 		ImGui::Begin("Stats");
 		auto stats = Renderer2D::GetStats();
@@ -238,7 +239,7 @@ namespace Nut {
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
 		std::string name2 = "None";
-		if (m_UsingEntity)
+		if (m_UsingEntity && m_UsingEntity.HasComponent<TagComponent>())
 			name2 = m_UsingEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Entity in use: %s", name2.c_str());
 

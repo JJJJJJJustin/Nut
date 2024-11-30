@@ -7,8 +7,7 @@ The game_engine which learned from Cherno, and made some improvements
 
 - [English](#english)
 - [中文](#中文)
-<br>
-___
+---
 
 # 中文
 
