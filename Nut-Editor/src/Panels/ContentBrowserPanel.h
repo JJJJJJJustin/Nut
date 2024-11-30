@@ -2,6 +2,8 @@
 
 #include <filesystem>
 
+#include "Nut/Renderer/Texture.h"
+
 namespace Nut
 {
 
@@ -13,6 +15,9 @@ namespace Nut
 		void OnImGuiRender();
 	private:
 		std::filesystem::path m_CurrentDirectory;
+
+		Ref<Texture> m_FolderIcon;
+		Ref<Texture> m_FileIcon;
 	};
 
 }
