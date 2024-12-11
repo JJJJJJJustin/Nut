@@ -18,10 +18,13 @@ bin-int/
 # Ingore Log file
 *.log
 
+# Directories
+Nut/vendor/VulkanSDK
+Nut-Editor/assets/cache
+scripts/__pycache__
+
 # Ignore all .json files
-/Sandbox/*.json
-Sandbox/NutProfile-Runtime.json
-Sandbox/NutProfile-Shutdown.json
-Sandbox/NutProfile-Startup.json
+*.json
+
 # Ignore imgui.ini file
 /Sandbox/imgui.ini

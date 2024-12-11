@@ -2,3 +2,6 @@
 
 当你输入修改并保存之后，下一次打开会留下上次修改时的日期。如下（.LOG脚本自动生成）
 14:59 2024/2/19
+
+19:46 2024/11/30
+It's been a long long time since i last opened this file.
