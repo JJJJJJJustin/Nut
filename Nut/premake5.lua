@@ -3,7 +3,7 @@ project "Nut"                                                   --项目
     kind "StaticLib"                                            --类型（动态库）
     language "C++"                                              --语言
     cppdialect "C++17"                                          --C++标准（编译时）
-    staticruntime "on"                                          --是否将运行时库静态链接运行时库（dll属性的文件需要关闭）
+    staticruntime "on"                                         --是否将运行时库静态链接运行时库（dll属性的文件需要关闭）
 
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")               --输出目录(.. XX ..中 ".."是字符串连接符)
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")              --中间目录
@@ -43,7 +43,8 @@ project "Nut"                                                   --项目
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
-        "%{IncludeDir.ImGuizmo}"
+        "%{IncludeDir.ImGuizmo}",
+        "%{IncludeDir.VulkanSDK}"
     }
 
     links                                                       --为Nut项目(.dll)链接文件
@@ -82,12 +83,33 @@ project "Nut"                                                   --项目
         runtime "Debug"
         symbols "on"                                        --编译器是否生成带有调试符号的可执行文件
 
+        links
+        {
+            "%{Library.ShaderC_Debug}",
+            "%{Library.SPIRV_Cross_Debug}",
+            "%{Library.SPIRV_Cross_GLSL_Debug}"
+        }
+
     filter "configurations:Release"
         defines "NUT_Release"
         runtime "Release"
         optimize "on"                                       --是否开启代码优化
 
+        links
+        {
+            "%{Library.ShaderC_Release}",
+            "%{Library.SPIRV_Cross_Release}",
+            "%{Library.SPIRV_Cross_GLSL_Release}"
+        }
+
     filter "configurations:Dist"
         defines "NUT_DIST"
         runtime "Release"
         optimize "on"
+
+        links
+        {
+            "%{Library.ShaderC_Release}",
+            "%{Library.SPIRV_Cross_Release}",
+            "%{Library.SPIRV_Cross_GLSL_Release}"
+        }
