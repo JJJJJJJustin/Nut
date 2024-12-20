@@ -14,7 +14,8 @@ namespace Nut {
 
 	Application* Application::s_Instance = nullptr;										//! ! !初始化唯一实例的静态成员s_Instance
 
-	Application::Application(const std::string& name /* = Nut App */ )
+	Application::Application(const std::string& name /* = Nut App */, ApplicationCommandLineArgs args /* = ApplicationCommandLineArgs()*/)
+		:m_CommandLineArgs(args)
 	{
 		NUT_PROFILE_FUNCTION();
 

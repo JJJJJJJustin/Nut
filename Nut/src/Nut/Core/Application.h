@@ -15,10 +15,23 @@ int main(int argc, char** argv);
 
 namespace Nut {
 
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			NUT_CORE_ASSERT((index < Count), "Application Command Line Arags invalid");
+			return Args[index];
+		}
+	};
+
+
 	class Application
 	{
 	public:
-		Application(const std::string& name = "Nut App");
+		Application(const std::string& name = "Nut App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 		virtual ~Application();
 
 		void OnEvent(Event& e);							//事件分发
@@ -28,8 +41,10 @@ namespace Nut {
 
 		inline Window& GetWindow() { return *m_Window; }			//返回下面这个指向Window的指针
 		inline ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
-		inline static Application& Get() { return *s_Instance; }	//! ! !返回的是s_Instance这个指向Application的指针
+		inline static Application& Get() { return *s_Instance; }	// ! ! ! 返回的是 s_Instance 这个指向 Application 的指针
 																	//（为什么函数是引用传递？：因为application是一个单例，如果不使用&则会多出一个复制，这有悖于单例模式的只有一个对象的要求
+		inline ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
+		
 		inline void WindowClose() { m_Running = false; }			// 不同于 OnWindowClose ，WindowClose 是公有的关闭窗口函数，而 OnWindowClose 是回调函数中的事件处理
 	private:
 		void Run();													// Run 函数现在为私有（ Run 函数中定义 RunLoop）
@@ -37,8 +52,11 @@ namespace Nut {
 		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnWindowResize(WindowResizeEvent& event);
 	private:
+		ApplicationCommandLineArgs m_CommandLineArgs;
+
 		bool m_Running = true;
 		bool m_Minimized = false;
+
 		std::unique_ptr<Window> m_Window;				//指向Window的指针
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
@@ -50,6 +68,6 @@ namespace Nut {
 	};
 
 	//To be defined in CLIENT
-	Application* CreateApplication();
+	Application* CreateApplication(ApplicationCommandLineArgs args);
 
 }

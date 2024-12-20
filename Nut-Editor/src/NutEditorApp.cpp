@@ -8,8 +8,8 @@ namespace Nut {
 	class NutEditor : public Application
 	{
 	public:
-		NutEditor()
-			:Application("Nut Editor")
+		NutEditor(ApplicationCommandLineArgs args)
+			:Application("Nut Editor", args)
 		{
 			PushLayer(new EditorLayer());
 		}
@@ -21,9 +21,9 @@ namespace Nut {
 	};
 
 
-	Application* CreateApplication()
+	Application* CreateApplication(ApplicationCommandLineArgs args)
 	{
-		return new NutEditor();
+		return new NutEditor(args);
 	}
 
 }
