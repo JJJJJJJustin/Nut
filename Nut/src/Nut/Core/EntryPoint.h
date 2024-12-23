@@ -11,7 +11,6 @@ int main(int argc, char** argv)				//将其设置为windows平台上的win main函数，可能
 
 	NUT_CORE_WARN("Initialized Log!");
 	NUT_INFO("Goodbye World!");
-	NUT_ERROR("Goodbye World!");
 	
 	NUT_CORE_WARN("Command line args:");
 	for (int i = 0; i < argc; i++) {

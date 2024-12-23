@@ -10,13 +10,15 @@ layout(location = 3) in float a_TexIndex;
 layout(location = 4) in float a_TilingFactor;
 layout(location = 5) in int a_EntityID;
 
-uniform mat4 u_ViewProjection;
-//uniform mat4 u_Transform;
+layout(std140, binding = 0) uniform Camera
+{
+	mat4 u_ViewProjection;
+	//uniform mat4 u_Transform;
+};
 
 out vec4 v_Color;
 out vec2 v_TexCoord;
 out float v_TexIndex;
-// Should i add Keyword flat' here?
 out float v_TilingFactor;
 out flat int v_EntityID;
 
@@ -40,19 +42,14 @@ layout(location = 1) out int color2;
 in vec4 v_Color;
 in vec2 v_TexCoord;
 in float v_TexIndex;
-// Should i add Keyword flat' here?
 in float v_TilingFactor;
 in flat int v_EntityID;
 
-uniform sampler2D u_Textures[32];
-//uniform vec4 u_Color;
-//uniform sampler2D u_Texture;
-//uniform float u_TilingFactor;
+layout (binding = 0) uniform sampler2D u_Textures[32];
 
 void main()
 {
 	color = texture(u_Textures[int(v_TexIndex)], v_TexCoord * v_TilingFactor) * v_Color;
-	//color = vec4(v_TexIndex, 0.0f, 0.0f, 1.0f);
-
+	
 	color2 = v_EntityID;
 }

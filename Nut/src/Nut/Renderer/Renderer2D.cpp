@@ -7,6 +7,7 @@
 #include "Nut/Renderer/VertexArray.h"
 #include "Nut/Renderer/RendererCommand.h"
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Nut/Renderer/UniformBuffer.h"
 
 namespace Nut {
 
@@ -50,6 +51,14 @@ namespace Nut {
 		};
 
 		Renderer2D::Statistics Stats;
+
+		struct CameraData
+		{
+			glm::mat4 ViewProjection;
+		};
+		CameraData CameraBuffer;
+
+		Ref<UniformBuffer> CameraUniformBuffer;
 	};
 	static Renderer2DData s_Data;														// 更改为栈上分配
 
@@ -96,15 +105,11 @@ namespace Nut {
 		// QuadVertex Ptr
 		s_Data.QuadVBBase = new QuadVertex[s_Data.MaxVertices];									//保存指针初始位置
 
-		// Generate Samplers
-		int32_t samplers[s_Data.MaxTextureSlots];
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
-			samplers[i] = i;
-
 		// Shader
 		s_Data.TextureShader = Shader::Create("assets/shaders/TextureShader.glsl");				//根据glsl创建着色器对象
-		s_Data.TextureShader->Bind();															//绑定着色器对象
-		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);		//上传所有采样器到对应纹理单元
+		
+		// UBO
+		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
 
 		// Texture
 		s_Data.WhiteTexture = Texture2D::Create(1,1);											//通过Create函数设置宽高比，根据包含颜色数据设置内存，直接从底层创建白色纹理
@@ -126,10 +131,8 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		glm::mat4 viewProjectionMatrix = camera.GetProjection() * glm::inverse(viewMatrix);
-
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
+		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(viewMatrix);
+		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
@@ -140,8 +143,8 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
+		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
 		s_Data.QuadIndexCount = 0;																//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的顶点索引数要从零重新开始
 		s_Data.TextureSlotIndex = 1;															//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
@@ -152,10 +155,8 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		glm::mat4 viewProjectionMatrix = camera.GetViewProjection();
-
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
+		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
+		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
@@ -190,6 +191,7 @@ namespace Nut {
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			s_Data.Textures[i]->Bind(i);														// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
 
+		s_Data.TextureShader->Bind();
 		RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);						// 运行至此处时进行渲染
 		s_Data.Stats.DrawCalls++;
 	}

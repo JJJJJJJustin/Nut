@@ -177,6 +177,7 @@
     <ClInclude Include="src\Nut\Renderer\Shader.h" />
     <ClInclude Include="src\Nut\Renderer\SubTexture2D.h" />
     <ClInclude Include="src\Nut\Renderer\Texture.h" />
+    <ClInclude Include="src\Nut\Renderer\UniformBuffer.h" />
     <ClInclude Include="src\Nut\Renderer\VertexArray.h" />
     <ClInclude Include="src\Nut\Scene\Component.h" />
     <ClInclude Include="src\Nut\Scene\Entity.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLUniformBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\nutpch.h" />
@@ -635,6 +637,7 @@
     <ClCompile Include="src\Nut\Renderer\Shader.cpp" />
     <ClCompile Include="src\Nut\Renderer\SubTexture2D.cpp" />
     <ClCompile Include="src\Nut\Renderer\Texture.cpp" />
+    <ClCompile Include="src\Nut\Renderer\UniformBuffer.cpp" />
     <ClCompile Include="src\Nut\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Nut\Scene\Entity.cpp" />
     <ClCompile Include="src\Nut\Scene\Scene.cpp" />
@@ -647,6 +650,7 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLUniformBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsPlatformUtils.cpp" />
