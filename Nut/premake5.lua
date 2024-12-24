@@ -3,7 +3,7 @@ project "Nut"                                                   --项目
     kind "StaticLib"                                            --类型（动态库）
     language "C++"                                              --语言
     cppdialect "C++17"                                          --C++标准（编译时）
-    staticruntime "on"                                         --是否将运行时库静态链接运行时库（dll属性的文件需要关闭）
+    staticruntime "off"                                         --是否将运行时库静态链接运行时库（dll属性的文件需要关闭）
 
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")               --输出目录(.. XX ..中 ".."是字符串连接符)
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")              --中间目录

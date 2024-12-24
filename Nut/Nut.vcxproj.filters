@@ -99,6 +99,9 @@
     <ClInclude Include="src\Nut\Core\MouseButtonCodes.h">
       <Filter>src\Nut\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Nut\Core\Timer.h">
+      <Filter>src\Nut\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Nut\Core\Timestep.h">
       <Filter>src\Nut\Core</Filter>
     </ClInclude>
@@ -168,6 +171,9 @@
     <ClInclude Include="src\Nut\Renderer\Texture.h">
       <Filter>src\Nut\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Nut\Renderer\UniformBuffer.h">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Nut\Renderer\VertexArray.h">
       <Filter>src\Nut\Renderer</Filter>
     </ClInclude>
@@ -208,6 +214,9 @@
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLUniformBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
@@ -1473,8 +1482,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Nut\Renderer\UniformBuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLUniformBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Nut\Core\Application.cpp">
@@ -1540,6 +1547,9 @@
     <ClCompile Include="src\Nut\Renderer\Texture.cpp">
       <Filter>src\Nut\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Nut\Renderer\UniformBuffer.cpp">
+      <Filter>src\Nut\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Nut\Renderer\VertexArray.cpp">
       <Filter>src\Nut\Renderer</Filter>
     </ClCompile>
@@ -1576,6 +1586,9 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLUniformBuffer.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
@@ -1597,7 +1610,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Nut\Renderer\UniformBuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLUniformBuffer.cpp" />
   </ItemGroup>
 </Project>
