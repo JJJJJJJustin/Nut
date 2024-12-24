@@ -32,6 +32,8 @@ namespace Nut
 
 	void SceneCamera::ViewportResize(uint32_t width, uint32_t height)
 	{
+		NUT_CORE_ASSERT((width > 0 && height > 0), "Viewport size invalid! ");
+
 		m_AspectRatio = (float)width / (float)height;
 
 		UpdateProjection();

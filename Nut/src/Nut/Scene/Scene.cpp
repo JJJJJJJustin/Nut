@@ -168,7 +168,8 @@ namespace Nut
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
-		component.Camera.ViewportResize(m_ViewportWidth, m_ViewportHeight);
+		if (m_ViewportWidth > 0 && m_ViewportHeight > 0)
+			component.Camera.ViewportResize(m_ViewportWidth, m_ViewportHeight);
 	}
 
 	template<>

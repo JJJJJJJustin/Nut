@@ -14,7 +14,7 @@ int main(int argc, char** argv)				//将其设置为windows平台上的win main函数，可能
 	
 	NUT_CORE_WARN("Command line args:");
 	for (int i = 0; i < argc; i++) {
-		NUT_CORE_TRACE("Argument {0}: {1}", i, argv[i])
+		NUT_CORE_WARN("Argument {0}: {1}", i, argv[i])
 	}
 
 	NUT_PROFILE_BEGIN_SESSION("Startup", "NutProfile-Startup.json");
