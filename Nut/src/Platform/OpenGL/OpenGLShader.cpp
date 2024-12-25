@@ -176,7 +176,7 @@ namespace Nut
 			}
 		}
 		else {
-			NUT_CORE_ERROR("Could not open file form : '{0}'", filepath);
+			NUT_CORE_ERROR("Could not open file from : '{0}'", filepath);
 		}
 
 		return result;

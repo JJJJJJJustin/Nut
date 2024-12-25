@@ -30,8 +30,8 @@ namespace Nut {
 
 		m_Framebuffer = FrameBuffer::Create({ 1280, 720, 1, {FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::RED_INTEGER, FrameBufferAttachmentFormat::Depth} });
 
-		m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
-		m_Emoji = Texture2D::Create("assets/textures/emoji.png");
+		m_Texture = Texture2D::Create("E:/VS/Nut/Nut-Editor/assets/textures/Checkerboard.png");
+		m_Emoji = Texture2D::Create("E:/VS/Nut/Nut-Editor/assets/textures/emoji.png");
 
 		m_ActiveScene = CreateRef<Scene>();
 

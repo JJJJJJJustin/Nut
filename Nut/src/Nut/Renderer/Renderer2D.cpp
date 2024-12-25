@@ -106,7 +106,7 @@ namespace Nut {
 		s_Data.QuadVBBase = new QuadVertex[s_Data.MaxVertices];									//保存指针初始位置
 
 		// Shader
-		s_Data.TextureShader = Shader::Create("assets/shaders/TextureShader.glsl");				//根据glsl创建着色器对象
+		s_Data.TextureShader = Shader::Create("E:/VS/Nut/Nut-Editor/assets/shaders/TextureShader.glsl");		//根据glsl创建着色器对象
 		
 		// UBO
 		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);

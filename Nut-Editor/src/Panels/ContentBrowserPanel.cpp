@@ -3,6 +3,8 @@
 
 #include <imgui/imgui.h>
 
+#include <shellapi.h>
+
 namespace Nut
 {
 	static float padding = 16.0f;															// 间隔大小
@@ -12,8 +14,8 @@ namespace Nut
 	ContentBrowserPanel::ContentBrowserPanel()
 		:m_CurrentDirectory(s_AssetPath)
 	{
-		m_FolderIcon = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon3.png");
-		m_FileIcon   = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon3.png");
+		m_FolderIcon = Texture2D::Create("E:/VS/Nut/Nut-Editor/Resources/Icons/ContentBrowser/DirectoryIcon3.png");
+		m_FileIcon   = Texture2D::Create("E:/VS/Nut/Nut-Editor/Resources/Icons/ContentBrowser/FileIcon3.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -56,6 +58,13 @@ namespace Nut
 			{
 				if (directoryEntry.is_directory())
 					m_CurrentDirectory /= path.filename();
+				if (directoryEntry.is_regular_file())
+				{
+					std::filesystem::path absolutePath = "E:\\VS\\Nut\\Nut-Editor" / path;
+
+					// 使用 ShellExecute 打开记事本
+					ShellExecuteA(nullptr, "open", "F:\\Microsoft VS Code\\Code.exe", absolutePath.string().c_str(), nullptr, SW_SHOWNORMAL);
+				}
 			}
 
 			ImGui::TextWrapped(filenameString.c_str());										// 附加文本（可自动折叠）

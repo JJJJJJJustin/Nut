@@ -37,7 +37,7 @@ namespace Nut
 			NUT_PROFILE_SCOPE("stbi_load -> OpenGLTexture2D::OpenGLTexture2D(const std::string&)");
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0); 
 		}
-		NUT_CORE_ASSERT(data, "Failed to load image!");
+		NUT_CORE_ASSERT(data, "Failed to load image! Which is from : {0}", path);
 
 		m_Width = width;
 		m_Height = height;																// gl func need unsigned int data So we assign the value of width to m_Width
