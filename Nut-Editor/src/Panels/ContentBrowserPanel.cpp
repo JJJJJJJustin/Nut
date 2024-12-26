@@ -9,10 +9,10 @@ namespace Nut
 {
 	static float padding = 16.0f;															// 间隔大小
 	static float thumbnailSize = 128.0f;													// 缩略图尺寸
-	static const std::filesystem::path s_AssetPath = "assets";
+	extern const std::filesystem::path g_AssetPath = "assets";
 
 	ContentBrowserPanel::ContentBrowserPanel()
-		:m_CurrentDirectory(s_AssetPath)
+		:m_CurrentDirectory(g_AssetPath)
 	{
 		m_FolderIcon = Texture2D::Create("E:/VS/Nut/Nut-Editor/Resources/Icons/ContentBrowser/DirectoryIcon3.png");
 		m_FileIcon   = Texture2D::Create("E:/VS/Nut/Nut-Editor/Resources/Icons/ContentBrowser/FileIcon3.png");
@@ -25,7 +25,7 @@ namespace Nut
 		ImGui::Columns(2);
 		if(ImGui::Button("<"))																// 绘制“返回”键
 		{
-			if(m_CurrentDirectory != s_AssetPath)
+			if(m_CurrentDirectory != g_AssetPath)
 			{
 				m_CurrentDirectory = m_CurrentDirectory.parent_path();
 			}
@@ -49,11 +49,23 @@ namespace Nut
 		for(auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))	// m_CurrentDirectory 中的每一个目录项：DirectoryEntry
 		{
 			auto const& path = directoryEntry.path();										// 每一个目录项的路径
-			auto relativePath = std::filesystem::relative(path, s_AssetPath);				// 记录目录项相对于 assets/ 的相对路径
+			auto relativePath = std::filesystem::relative(path, g_AssetPath);				// 记录目录项相对于 assets/ 的相对路径
 			std::string& filenameString = relativePath.filename().string();					// 获得相对路径的文件名
 			
+			ImGui::PushID(filenameString.c_str());
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			Ref<Texture> icon = (directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon);
 			ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+			
+			if(ImGui::BeginDragDropSource())
+			{
+				const wchar_t* itemPath = relativePath.c_str();
+				ImGui::SetDragDropPayload("CONTENT_BROSWER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+				ImGui::EndDragDropSource();
+			}
+
+			ImGui::PopStyleColor();
+
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				if (directoryEntry.is_directory())
@@ -70,6 +82,8 @@ namespace Nut
 			ImGui::TextWrapped(filenameString.c_str());										// 附加文本（可自动折叠）
 
 			ImGui::NextColumn();
+
+			ImGui::PopID();
 		}
 
 		ImGui::Columns(1);
