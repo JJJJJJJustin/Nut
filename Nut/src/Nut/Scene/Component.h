@@ -6,6 +6,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/quaternion.hpp"
 
+#include "Nut/Renderer/Texture.h"
 #include "Nut/Scene/SceneCamera.h"
 #include "Nut/Scene/ScriptableEntity.h"
 
@@ -45,6 +46,8 @@ namespace Nut
 	struct SpriteComponent
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		Ref<Texture2D> Texture;
+		float TilingFactor = 1.0f;
 
 		SpriteComponent() = default;
 		SpriteComponent(const glm::vec4& color)

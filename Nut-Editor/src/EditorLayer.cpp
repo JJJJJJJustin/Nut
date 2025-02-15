@@ -287,7 +287,7 @@ namespace Nut {
 		// DragDrop preview
 		if(ImGui::BeginDragDropTarget())
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROSWER_ITEM")) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
 				const wchar_t* path = (const wchar_t*)payload->Data;
 				OpenScene(std::filesystem::path(g_AssetPath) / path);
 			}

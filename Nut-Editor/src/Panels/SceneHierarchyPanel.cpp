@@ -10,6 +10,8 @@
 
 namespace Nut
 {
+	extern const std::filesystem::path g_AssetPath;
+
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
 	{
 		SetContext(scene);
@@ -222,6 +224,24 @@ namespace Nut
 		DrawComponent<SpriteComponent>("Sprite Renderer", entity, [](auto& component)
 		{
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+
+			ImGui::Text("Place texture here:");
+
+			// DragDropPayload
+			ImGui::Button("..Texture..", ImVec2(100.0f, 50.0f));
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+					component.Texture = Texture2D::Create(texturePath.string());
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (component.Texture)
+				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
 		});
 	}
 

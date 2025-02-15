@@ -60,10 +60,9 @@ namespace Nut
 			if(ImGui::BeginDragDropSource())
 			{
 				const wchar_t* itemPath = relativePath.c_str();
-				ImGui::SetDragDropPayload("CONTENT_BROSWER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 				ImGui::EndDragDropSource();
 			}
-
 			ImGui::PopStyleColor();
 
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -74,7 +73,7 @@ namespace Nut
 				{
 					std::filesystem::path absolutePath = "E:\\VS\\Nut\\Nut-Editor" / path;
 
-					// 使用 ShellExecute 打开记事本
+					// 使用 ShellExecute 打开VS Cos=de
 					ShellExecuteA(nullptr, "open", "F:\\Microsoft VS Code\\Code.exe", absolutePath.string().c_str(), nullptr, SW_SHOWNORMAL);
 				}
 			}
