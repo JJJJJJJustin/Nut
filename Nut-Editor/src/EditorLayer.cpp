@@ -14,7 +14,8 @@
 #include "Nut/Math/Math.h"
 
 
-namespace Nut {
+namespace Nut 
+{
 	extern const std::filesystem::path g_AssetPath;
 
 	EditorLayer* EditorLayer::s_Instance = nullptr;		// Initialize s_Instance as null, then give it a value(this pointer) in constructor
@@ -94,11 +95,6 @@ namespace Nut {
 			m_EditorCamera.SetViewportSize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		// Camera Update
-		if(m_ViewportFocused)
-			m_CameraController.OnUpdate(ts);
-		m_EditorCamera.OnUpdate(ts);
-
 		// Render
 		Renderer2D::ClearStats();										// 每次更新前都要将Stats统计数据清零
 		m_Framebuffer->Bind();											// 在颜色被设置之前就声明帧缓冲
@@ -108,11 +104,27 @@ namespace Nut {
 
 		// Clear entity ID to -1
 		m_Framebuffer->ClearAttachment(1, -1);
+		
+		switch (m_ToolbarPanel.GetSceneState())
+		{
+			case SceneState::Edit: 
+			{
+				if (m_ViewportFocused)
+					m_CameraController.OnUpdate(ts);
 
-		// Update scene
-		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);				// Now we just update EditorCamera in Nut-Editor APP, rather than RuntimeCamera in game
-		//m_ActiveScene->OnScript(ts);									// 更新本机脚本
+				m_EditorCamera.OnUpdate(ts);
 
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);				// Now we just update EditorCamera in Nut-Editor APP, rather than RuntimeCamera in game
+				//m_ActiveScene->OnScript(ts);									// 更新本机脚本
+				break;
+
+			}
+			case SceneState::Play: 
+			{
+				m_ActiveScene->OnUpdateRuntime(ts); 
+				break;
+			}
+		}
 		// Read Pixels from attachment
 		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
 
@@ -236,9 +248,10 @@ namespace Nut {
 		}
 		#pragma endregion
 		// ----------- Should be writen in Dockspace( Between dockspace's ImGui::Begin() <-> ImGui::End() ) ----
-		// ----------- Hierarchy Panel & Content Browser Panel -------------------------------------------
+		// ----------- Hierarchy Panel & Content Browser Panel & Toolbar Panel-------------------------------------------
 		m_SceneHierarchyPanel.OnImGuiRender();
 		m_ContentBrowserPanel.OnImGuiRender();
+		m_ToolbarPanel.OnImGuiRender();
 		// ----------- Test Panel---------------------------------------------
 		ImGui::Begin("Stats");
 		auto stats = Renderer2D::GetStats();

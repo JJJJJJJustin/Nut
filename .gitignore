@@ -28,3 +28,8 @@ scripts/__pycache__
 
 # Ignore imgui.ini file
 /Sandbox/imgui.ini
+Nut-Editor/imgui.ini
+
+# Ignore OSAlgorithm files
+/OSAlgorithms/
+

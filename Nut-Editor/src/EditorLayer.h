@@ -3,6 +3,7 @@
 #include "Nut.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
+#include "Panels/ToolbarPanel.h"
 
 #include "Nut/Renderer/EditorCamera.h"
 
@@ -55,6 +56,7 @@ namespace Nut {
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
+		ToolbarPanel m_ToolbarPanel;
 
 		// Bounds
 		glm::vec2 m_ViewportBounds[2];
