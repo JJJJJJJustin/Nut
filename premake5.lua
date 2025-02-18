@@ -30,6 +30,7 @@ group "Dependencies"
     include "Nut/vendor/Glad"
     include "Nut/vendor/imgui"
     include "Nut/vendor/yaml-cpp"
+    include "Nut/vendor/Box2D"
 group "" 
 
 include "Nut"

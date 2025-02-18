@@ -44,6 +44,7 @@ project "Nut"                                                   --项目
         "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.ImGuizmo}",
+        "%{IncludeDir.Box2D}",
         "%{IncludeDir.VulkanSDK}"
     }
 
@@ -53,6 +54,7 @@ project "Nut"                                                   --项目
         "Glad",                                                     --链接上方group中的项目Glad
         "ImGui",                                                    --链接上方group中的项目ImGui
         "yaml-cpp",                                                 --链接根目录premake文件里group中的项目yaml-cpp
+        "Box2D",
         "opengl32.lib"
     }
 

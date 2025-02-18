@@ -20,3 +20,6 @@
 [submodule "Nut/vendor/ImGuizmo"]
 	path = Nut/vendor/ImGuizmo
 	url = https://github.com/JJJJJJJustin/ImGuizmo
+[submodule "Nut/vendor/Box2D"]
+	path = Nut/vendor/Box2D
+	url = https://github.com/JJJJJJJustin/box2d

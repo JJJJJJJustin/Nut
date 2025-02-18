@@ -26,7 +26,8 @@ project "Nut-Editor"
         "%{IncludeDir.glm}",
         "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
-        "%{IncludeDir.ImGuizmo}"
+        "%{IncludeDir.ImGuizmo}",
+        "%{IncludeDir.Box2D}"
     }
 
     links
