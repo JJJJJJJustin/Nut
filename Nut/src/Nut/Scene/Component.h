@@ -102,7 +102,7 @@ namespace Nut
 		bool FixedRotation = false;
 
 		// Storage for runtime (just for runtime, don't need to serialize)
-		void* Body = nullptr;
+		void* RuntimeBody = nullptr;
 
 		Rigidbody2DComponent() = default;
 		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;

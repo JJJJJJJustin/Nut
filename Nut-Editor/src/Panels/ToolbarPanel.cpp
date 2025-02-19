@@ -1,6 +1,8 @@
 #include "nutpch.h"
 #include "ToolbarPanel.h"
 
+#include "../EditorLayer.h"
+
 #include <imgui/imgui.h>
 
 namespace Nut
@@ -44,11 +46,13 @@ namespace Nut
 	void ToolbarPanel::OnScenePlay() 
 	{
 		m_SceneState = SceneState::Play;
+		EditorLayer::Get().m_ActiveScene->OnRuntimeStart();
 	}
 
 	void ToolbarPanel::OnSceneStop()
 	{
 		m_SceneState = SceneState::Edit;
+		EditorLayer::Get().m_ActiveScene->OnRuntimeStart();
 	}
 
 }
