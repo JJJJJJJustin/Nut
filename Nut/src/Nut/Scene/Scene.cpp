@@ -76,7 +76,7 @@ namespace Nut
 				auto& bc2c = entity.GetComponent<BoxCollider2DComponent>();
 
 				b2PolygonShape boxShape;
-				boxShape.SetAsBox(bc2c.Size.x, bc2c.Size.y);
+				boxShape.SetAsBox(bc2c.Size.x * tc.Scale.x, bc2c.Size.y * tc.Scale.y);
 
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &boxShape;

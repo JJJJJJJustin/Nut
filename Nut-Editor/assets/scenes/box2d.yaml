@@ -1,0 +1,58 @@
+Scene: Untitled
+Entities:
+  - Entity: 256257383941
+    TagComponent:
+      Tag: camera
+    TransformComponent:
+      Translation: [-0.708797872, 1.42295265, 9.6815691]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 256257383941
+    TagComponent:
+      Tag: rigid body
+    TransformComponent:
+      Translation: [0.0180946421, 1.58642435, -0.0968638435]
+      Rotation: [0, 0, 0.000141436278]
+      Scale: [1.96999681, 1.96999764, 1.96999288]
+    SpriteComponent:
+      Color: [0.640222609, 0.907473326, 0.410139173, 1]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.300000012
+      Restitution: 0.720000029
+      RestitutionThreshold: 0.5
+  - Entity: 256257383941
+    TagComponent:
+      Tag: ground
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [23.9060459, 1, 1]
+    SpriteComponent:
+      Color: [0.052075997, 0, 0.914590716, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
