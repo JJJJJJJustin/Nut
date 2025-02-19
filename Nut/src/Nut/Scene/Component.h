@@ -69,7 +69,7 @@ namespace Nut
 	
 	};
 
-
+	// ---------------------- Script --------------------------------------
 	struct NativeScriptComponent
 	{
 		ScriptableEntity* Instance = nullptr;
@@ -91,6 +91,40 @@ namespace Nut
 			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
 			DeinstantiateScript = [](NativeScriptComponent* nsc) {delete nsc->Instance; nsc->Instance = nullptr;};  // Why need to define nsc->Instance with nullptr?? 
 		}
+	};
+
+
+	// ----------------------- Physics --------------------------------------
+	struct Rigidbody2DComponent
+	{
+		enum class BodyType{ Static = 0, Dynamic, Kinematic };
+		BodyType Type = BodyType::Static;
+		bool FixedRotation = false;
+
+		// Storage for runtime (just for runtime, don't need to serialize)
+		void* Body = nullptr;
+
+		Rigidbody2DComponent() = default;
+		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
+
+	};
+
+	struct BoxCollider2DComponent
+	{
+		glm::vec2 Offset = { 0.0f, 0.0f };					// 重心偏移量
+		glm::vec2 Size = { 0.5f, 0.5f };					// 碰撞体积
+
+		// TODO: May move this to Physics Material
+		float Density = 1.0f;								// 密度
+		float Friction = 0.5f;								// 摩擦力
+		float Restitution = 0.0f;							// 恢复
+		float RestitutionThreshold = 0.5f;					// 恢复阈值
+
+		// Storage for runtime
+		void* RuntimeFixture = nullptr;						// 运行时的配件、运行时附件
+
+		BoxCollider2DComponent() = default;
+		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 
 
