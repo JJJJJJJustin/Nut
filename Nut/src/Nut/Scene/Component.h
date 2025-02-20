@@ -1,17 +1,24 @@
 #pragma once
 
+#include "Nut/Core/UUID.h"
+#include "Nut/Renderer/Texture.h"
+#include "Nut/Scene/SceneCamera.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/quaternion.hpp"
 
-#include "Nut/Renderer/Texture.h"
-#include "Nut/Scene/SceneCamera.h"
-#include "Nut/Scene/ScriptableEntity.h"
-
 namespace Nut
 {
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+	};
 
 	struct TagComponent
 	{
@@ -70,6 +77,8 @@ namespace Nut
 	};
 
 	// ---------------------- Script --------------------------------------
+	class ScriptableEntity;								// Ç°ÏòÉùÃ÷£¨forward declaration)
+
 	struct NativeScriptComponent
 	{
 		ScriptableEntity* Instance = nullptr;
