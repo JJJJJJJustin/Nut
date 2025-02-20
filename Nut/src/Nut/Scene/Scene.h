@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Nut/Core/Timestep.h"
+#include "Nut/Core/UUID.h"
 #include "Nut/Renderer/EditorCamera.h"
 
 #include "entt.hpp"
@@ -18,6 +19,7 @@ namespace Nut
 		~Scene();
 
 		Entity CreateEntity(const std::string& name = "");
+		Entity CreateEntityWithUUID(UUID id, const std::string& name = "");
 		void DestroyEntity(Entity& entity);
 
 		void OnRuntimeStart();

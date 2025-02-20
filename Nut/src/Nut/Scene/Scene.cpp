@@ -1,6 +1,7 @@
 #include "nutpch.h"
 #include "Scene.h"
 
+#include "Nut/Scene/ScriptableEntity.h"
 #include "Nut/Renderer/Renderer2D.h"
 #include "Nut/Scene/Component.h"
 #include "Nut/Scene/Entity.h"
@@ -36,8 +37,14 @@ namespace Nut
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		CreateEntityWithUUID(UUID(), name);
+	}
+
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	{
 		Entity entity = { m_Registry.create(), this };
 
+		entity.AddComponent<IDComponent>(UUID(uuid));
 		entity.AddComponent<TransformComponent>(glm::vec3{ 0.0f });
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Unnamed Entity" : name;
@@ -234,6 +241,11 @@ namespace Nut
 	void Scene::OnComponentAdded(Entity entity, T& component) 
 	{
 		static_assert(false);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
+	{
 	}
 
 	template<>
