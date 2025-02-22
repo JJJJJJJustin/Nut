@@ -449,6 +449,7 @@ namespace Nut
 		return false;
 	}
 
+	// ---------------------------------------------------------------------------
 	void EditorLayer::NewScene()
 	{
 		m_ActiveScene = CreateRef<Scene>();
@@ -465,12 +466,16 @@ namespace Nut
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
 	{
-			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);// We use it cuz we must flash framebuffer after we open file
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
+		if (m_ToolbarPanel.GetSceneState() != SceneState::Edit)
+			m_ToolbarPanel.SetSceneState(SceneState::Edit);
+			m_ActiveScene->OnRuntimeStop();
 
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(path.string());
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);// We use it cuz we must flash framebuffer after we open file
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
+
+		SceneSerializer serializer(m_ActiveScene);
+		serializer.Deserialize(path.string());
 	}
 
 	void EditorLayer::SaveSceneAs()
@@ -482,6 +487,5 @@ namespace Nut
 			deserializer.Serialize(filepath);
 		}
 	}
-
 
 }

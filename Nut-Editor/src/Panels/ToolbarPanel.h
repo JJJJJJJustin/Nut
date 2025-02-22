@@ -17,6 +17,7 @@ namespace Nut
 
 		void OnImGuiRender();
 
+		inline void SetSceneState(SceneState ss) { m_SceneState = ss; }
 		inline SceneState GetSceneState() const { return m_SceneState; }
 	private:
 		void OnScenePlay();
