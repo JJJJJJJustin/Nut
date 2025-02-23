@@ -412,6 +412,15 @@ namespace Nut
 				break;
 			}
 
+			// Scene Commands
+			case NUT_KEY_D:
+			{
+				if(ctrl)
+					OnDuplicateEntity();
+
+				break;
+			}
+
 			// Gizmo
 			case NUT_KEY_Q:
 			{
@@ -447,6 +456,16 @@ namespace Nut
 			}
 		}
 		return false;
+	}
+
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if (m_ToolbarPanel.GetSceneState() != SceneState::Edit)
+			return;
+
+		auto selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if(selectedEntity)
+			m_ActiveScene->DuplicateEntity(selectedEntity);
 	}
 
 	// ---------------------------------------------------------------------------

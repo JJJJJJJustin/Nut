@@ -33,6 +33,8 @@ namespace Nut
 
 		void OnViewportResize(uint32_t width, uint32_t height);
 
+		void DuplicateEntity(Entity& srcEntity);
+
 		Entity GetPrimaryCamera();
 	private:
 		template<typename T>

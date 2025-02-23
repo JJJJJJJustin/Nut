@@ -28,6 +28,8 @@ namespace Nut {
 		bool OnKeyPressed(KeyPressedEvent& event);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& event);
 
+		void OnDuplicateEntity();
+
 		glm::vec2 GetImGuiViewportSize() { return m_ViewportSize; };
 
 		void NewScene();

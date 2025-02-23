@@ -34,6 +34,17 @@ namespace Nut
 	Scene::~Scene()
 	{
 	}
+	
+	// CopyComponentForNewEntity
+	template<typename Component>
+	static void CopyComponentIfExists(Entity dstEntity, Entity srcEntity)
+	{
+		if(srcEntity.HasComponent<Component>())
+		{
+			dstEntity.AddOrReplaceComponent<Component>(srcEntity.GetComponent<Component>());
+		}
+
+	}
 
 	template<typename Component>
 	static void CopyComponentForNewScene(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
@@ -82,6 +93,21 @@ namespace Nut
 		CopyComponentForNewScene<BoxCollider2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
 
 		return newScene;
+	}
+
+
+	void Scene::DuplicateEntity(Entity& srcEntity)
+	{
+		std::string name = srcEntity.GetComponent<TagComponent>().Tag;
+		Entity newEntity = CreateEntity(name);
+
+		CopyComponentIfExists<TransformComponent>(newEntity, srcEntity);
+		CopyComponentIfExists<CameraComponent>(newEntity, srcEntity);
+		CopyComponentIfExists<SpriteComponent>(newEntity, srcEntity);
+		CopyComponentIfExists<NativeScriptComponent>(newEntity, srcEntity);
+		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, srcEntity);
+		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, srcEntity);
+
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
