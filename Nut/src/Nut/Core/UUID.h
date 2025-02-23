@@ -1,6 +1,5 @@
 #pragma once
 
-//
 #include <xhash>		//  ?  why xhash file  ?
 
 namespace Nut 
@@ -9,7 +8,7 @@ namespace Nut
 	class UUID
 	{
 	public:
-		UUID();
+		UUID();// 为 UUID 类型定义哈希函数
 		UUID(uint64_t uuid);
 		UUID(const UUID&) = default;
 
@@ -20,14 +19,15 @@ namespace Nut
 
 }
 
-//namespace std
-//{
-//	template<>
-//		struct hash<Nut::UUID>
-//	{
-//		std::size_t operator()(const Nut::UUID& uuid) const
-//		{
-//			return hash<uint64_t>()((uint64_t)uuid);
-//		}
-//	};
-//}
+namespace std
+{
+	// // 为 UUID 类型定义哈希函数（确保 UUID 可以被哈希处理）
+	template<>
+		struct hash<Nut::UUID>
+	{
+		std::size_t operator()(const Nut::UUID& uuid) const
+		{
+			return hash<uint64_t>()((uint64_t)uuid);
+		}
+	};
+}

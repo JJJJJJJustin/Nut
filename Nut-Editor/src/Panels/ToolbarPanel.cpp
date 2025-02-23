@@ -1,6 +1,5 @@
 #include "nutpch.h"
 #include "ToolbarPanel.h"
-
 #include "../EditorLayer.h"
 
 #include <imgui/imgui.h>
@@ -45,14 +44,29 @@ namespace Nut
 
 	void ToolbarPanel::OnScenePlay() 
 	{
+		// Get scene & panel data (Which is References types) from EditorLayer
+		Ref<Scene>& activeScene = EditorLayer::Get().m_ActiveScene;
+		Ref<Scene>& editorScene = EditorLayer::Get().m_EditorScene;
+		SceneHierarchyPanel& sceneHierarchyPanel = EditorLayer::Get().m_SceneHierarchyPanel;
+
 		m_SceneState = SceneState::Play;
-		EditorLayer::Get().m_ActiveScene->OnRuntimeStart();
+		activeScene = Scene::Copy(editorScene);					// When playing, active scene is the duplicate of editor scene
+		
+		activeScene->OnRuntimeStart();
+		sceneHierarchyPanel.SetContext(activeScene);
 	}
 
 	void ToolbarPanel::OnSceneStop()
 	{
+		Ref<Scene>& activeScene = EditorLayer::Get().m_ActiveScene;
+		Ref<Scene>& editorScene = EditorLayer::Get().m_EditorScene;
+		SceneHierarchyPanel& sceneHierarchyPanel = EditorLayer::Get().m_SceneHierarchyPanel;
+
 		m_SceneState = SceneState::Edit;
-		EditorLayer::Get().m_ActiveScene->OnRuntimeStop();
+		activeScene = editorScene;								// When editing, active scene is the editor scene
+
+		activeScene->OnRuntimeStop();
+		sceneHierarchyPanel.SetContext(activeScene);
 	}
 
 }

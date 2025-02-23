@@ -30,24 +30,25 @@ namespace Nut
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Scene Hierarchy");
-		m_Context->m_Registry.view<entt::entity>().each(
-			[&](auto entityID) 
+		if (m_Context) {
+			m_Context->m_Registry.view<entt::entity>().each(
+				[&](auto entityID)
+				{
+					Entity entity{ entityID, m_Context.get() };			// So we can use member function from class Entity
+					DrawEntityNode(entity);
+				}
+			);
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())		// When mouse left was pressed and mouse position was in SceneHierarchy Panel, then...
+				m_SelectionContext = {};
+
+			// Right-click on blank space of the window
+			if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))	// Disable 'ContextWindow' from covering previous 'ContextItem Menu'(Which was in SceneHierarchyPanel::DrawEntityNode)
 			{
-				Entity entity{entityID, m_Context.get()};			// So we can use member function from class Entity
-				DrawEntityNode(entity);
+				if (ImGui::MenuItem("Create Empty Entity"))
+					m_Context->CreateEntity("Empty Entity");
+				ImGui::EndPopup();
 			}
-		);
-		if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())		// When mouse left was pressed and mouse position was in SceneHierarchy Panel, then...
-			m_SelectionContext = {};
-
-		// Right-click on blank space of the window
-		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))	// Disable 'ContextWindow' from covering previous 'ContextItem Menu'(Which was in SceneHierarchyPanel::DrawEntityNode)
-		{
-			if (ImGui::MenuItem("Create Empty Entity"))
-				m_Context->CreateEntity("Empty Entity");
-			ImGui::EndPopup();
 		}
-
 		ImGui::End();
 
 		ImGui::Begin("Properties");
@@ -269,7 +270,7 @@ namespace Nut
 				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
 		});
 
-		DrawComponent<Rigidbody2DComponent>("Transform", entity, [](auto& component)
+		DrawComponent<Rigidbody2DComponent>("Rigidbody2D", entity, [](auto& component)
 		{
 			const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
 			const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
@@ -291,7 +292,7 @@ namespace Nut
 			ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
 		});
 
-		DrawComponent<BoxCollider2DComponent>("Transform", entity, [](auto& component)
+		DrawComponent<BoxCollider2DComponent>("BoxCollider2D", entity, [](auto& component)
 		{
 			ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
 			ImGui::DragFloat2("Size", glm::value_ptr(component.Size));

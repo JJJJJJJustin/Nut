@@ -70,7 +70,7 @@ namespace Nut
 		secondController.Primary = false;
 		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			//添加本机脚本
 #endif
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		//m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -454,6 +454,7 @@ namespace Nut
 	{
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
@@ -470,12 +471,16 @@ namespace Nut
 			m_ToolbarPanel.SetSceneState(SceneState::Edit);
 			m_ActiveScene->OnRuntimeStop();
 
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);// We use it cuz we must flash framebuffer after we open file
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
-
-		SceneSerializer serializer(m_ActiveScene);
-		serializer.Deserialize(path.string());
+		Ref<Scene> newScene = CreateRef<Scene>();
+		SceneSerializer serializer(newScene);
+		if(serializer.Deserialize(path.string()))
+		{
+			m_EditorScene = newScene;
+			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);// We use it cuz we must flash framebuffer after we open file
+			
+			m_ActiveScene = m_EditorScene;
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
+		}
 	}
 
 	void EditorLayer::SaveSceneAs()

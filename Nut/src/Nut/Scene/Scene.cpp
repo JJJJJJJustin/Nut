@@ -35,6 +35,55 @@ namespace Nut
 	{
 	}
 
+	template<typename Component>
+	static void CopyComponentForNewScene(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		auto view = src.view<Component>();
+		for(auto e : view)
+		{
+			UUID uuid = src.get<IDComponent>(e).ID;
+			NUT_CORE_ASSERT((enttMap.find(uuid) != enttMap.end()), "Unable to find an entity in dst with an ID that matches the src entity ID(Occurs in Scene copy)");
+			entt::entity dstEntity = enttMap.at(uuid);			// If src entity ID can be find in dst entity IDs map(dst entiy is which we created by src),then we copy component for this entity
+
+			auto& component = src.get<Component>(e);
+			dst.emplace_or_replace<Component>(dstEntity, component);
+		}
+	}
+
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+		auto& dstRegistry = newScene->m_Registry;
+		auto& srcRegistry = other->m_Registry;
+
+		// Init private member
+		newScene->m_ViewportHeight = other->m_ViewportHeight;
+		newScene->m_ViewportWidth = other->m_ViewportWidth;
+
+		// Init entites & create unordered_map<UUID, entt::entity>
+		std::unordered_map<UUID, entt::entity> dstEntityMap;
+
+		auto& view = srcRegistry.view<IDComponent>();
+		for(auto e : view)
+		{
+			UUID uuid = srcRegistry.get<IDComponent>(e).ID;
+			const auto& name = srcRegistry.get<TagComponent>(e).Tag;		// const auto& name ?
+			Entity newEntity = newScene->CreateEntityWithUUID(uuid, name);	// Create new entities for newScene (new entities is empty now)
+
+			dstEntityMap[uuid] = (entt::entity)newEntity;
+		}
+
+		// Copy data to dstScene from srcScene( except IdComponent & TagComponent)
+		CopyComponentForNewScene<TransformComponent>(dstRegistry, srcRegistry, dstEntityMap);
+		CopyComponentForNewScene<CameraComponent>(dstRegistry, srcRegistry, dstEntityMap);
+		CopyComponentForNewScene<SpriteComponent>(dstRegistry, srcRegistry, dstEntityMap);
+		CopyComponentForNewScene<NativeScriptComponent>(dstRegistry, srcRegistry, dstEntityMap);
+		CopyComponentForNewScene<Rigidbody2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
+		CopyComponentForNewScene<BoxCollider2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
+
+		return newScene;
+	}
+
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		return CreateEntityWithUUID(UUID(), name);
