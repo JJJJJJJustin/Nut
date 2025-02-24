@@ -22,11 +22,15 @@ namespace Nut
 	private:
 		void OnScenePlay();
 		void OnSceneStop();
+
+		void ImGuiInfoWindow(const std::string& text);
 	private:
 		SceneState m_SceneState = SceneState::Edit;
 
 		Ref<Texture2D> m_PlayIcon;
 		Ref<Texture2D> m_StopIcon;
+
+		bool m_ShowPop = false;
 	};
 
 }

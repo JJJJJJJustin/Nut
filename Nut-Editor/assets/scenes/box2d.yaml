@@ -1,33 +1,6 @@
 Scene: Untitled
 Entities:
-  - Entity: 16583251412534461561
-    TagComponent:
-      Tag: blue box
-    TransformComponent:
-      Translation: [4.5, 3.5, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    SpriteComponent:
-      Color: [0.00696547655, 0.677806616, 0.978647709, 1]
-  - Entity: 10800249492629730049
-    TagComponent:
-      Tag: camera
-    TransformComponent:
-      Translation: [-0.708736718, 4.61730433, 11.0976515]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: 0
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 16124586516072186306
+  - Entity: 14954831987827376961
     TagComponent:
       Tag: rigid body
     TransformComponent:
@@ -46,6 +19,25 @@ Entities:
       Friction: 0.300000012
       Restitution: 0.639999986
       RestitutionThreshold: 0
+  - Entity: 11439783333486204192
+    TagComponent:
+      Tag: white body
+    TransformComponent:
+      Translation: [-4.66103745, 5.61999989, 0]
+      Rotation: [0, 0, 0.704938471]
+      Scale: [0.999999881, 0.999999881, 1]
+    SpriteComponent:
+      Color: [1, 1, 1, 1]
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.349999994
+      RestitutionThreshold: 0.5
   - Entity: 8911692003211906132
     TagComponent:
       Tag: ground
@@ -65,15 +57,15 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 11439783333486204192
+  - Entity: 16124586516072186306
     TagComponent:
-      Tag: white body
+      Tag: rigid rectangle
     TransformComponent:
-      Translation: [-4.66103745, 5.61999989, 0]
-      Rotation: [0, 0, 0.704938471]
-      Scale: [0.999999881, 0.999999881, 1]
+      Translation: [6.62651634, 7.50094795, 0]
+      Rotation: [0, 0, -0.351062238]
+      Scale: [4.18501663, 1.96999729, 1.96999288]
     SpriteComponent:
-      Color: [1, 1, 1, 1]
+      Color: [0.459695607, 0.907473326, 0.410139173, 1]
     Rigidbody2DComponent:
       BodyType: Dynamic
       FixedRotation: false
@@ -81,6 +73,43 @@ Entities:
       Offset: [0, 0]
       Size: [0.5, 0.5]
       Density: 1
+      Friction: 0.300000012
+      Restitution: 0.639999986
+      RestitutionThreshold: 0
+  - Entity: 10800249492629730049
+    TagComponent:
+      Tag: camera
+    TransformComponent:
+      Translation: [2.57568789, 4.61730433, 16.7999992]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 16583251412534461561
+    TagComponent:
+      Tag: blue box
+    TransformComponent:
+      Translation: [8.90658855, 1.82040942, -3.99631972e-08]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteComponent:
+      Color: [0.00696547655, 0.677806616, 0.978647709, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
       Friction: 0.5
-      Restitution: 0.349999994
+      Restitution: 0
       RestitutionThreshold: 0.5

@@ -35,6 +35,7 @@ namespace Nut {
 		void NewScene();
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
+		void SaveScene();
 		void SaveSceneAs();
 	private:
 		// Instance 
@@ -48,7 +49,6 @@ namespace Nut {
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
 		Entity m_SquareEntity, m_RedSquare, m_HoveredEntity, m_UsingEntity;
-		//Entity m_CameraEntity, m_SecondCamera;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
@@ -66,6 +66,9 @@ namespace Nut {
 
 		//Gizmo
 		int m_GizmoType = -1;
+
+		// Path
+		std::filesystem::path m_ActiveScenePath;
 	private:
 		friend class ToolbarPanel;
 	};

@@ -139,7 +139,7 @@ namespace Nut
 		if(mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
-			NUT_CORE_WARN("Pixel data: {0}", pixelData);
+			//NUT_CORE_WARN("Pixel data: {0}", pixelData);
 
 			if (pixelData != -1 && m_HoveredEntity != Entity((entt::entity)pixelData, m_ActiveScene.get()))
 				m_HoveredEntity = Entity((entt::entity)pixelData, m_ActiveScene.get());
@@ -230,6 +230,8 @@ namespace Nut
 				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }*/
 				if (ImGui::MenuItem("New", "Ctrl + N"))
 					NewScene();
+				if (ImGui::MenuItem("Save", "Ctrl + S"))
+					SaveScene();
 				if (ImGui::MenuItem("Save As...", "Ctrl + Shift + S"))
 					SaveSceneAs();
 				if (ImGui::MenuItem("Open...", "Ctrl + O"))
@@ -266,6 +268,7 @@ namespace Nut
 			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
+		m_UsingEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		std::string name2 = "None";
 		if (m_UsingEntity && m_UsingEntity.HasComponent<TagComponent>())
 			name2 = m_UsingEntity.GetComponent<TagComponent>().Tag;
@@ -367,7 +370,8 @@ namespace Nut
 	void EditorLayer::OnEvent(Event& event)
 	{
 		m_CameraController.OnEvent(event);
-		m_EditorCamera.OnEvent(event);
+		if (m_ToolbarPanel.GetSceneState() == SceneState::Edit)
+			m_EditorCamera.OnEvent(event);
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(NUT_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -406,8 +410,12 @@ namespace Nut
 				break;
 			}
 			case NUT_KEY_S: {
-				if (ctrl && shift)
-					SaveSceneAs();
+				if (ctrl) {
+					if (shift)
+						SaveSceneAs();
+					else
+						SaveScene();
+				}
 
 				break;
 			}
@@ -452,7 +460,6 @@ namespace Nut
 			if (m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(NUT_KEY_LEFT_ALT)) 
 			{
 				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
-				m_UsingEntity = m_HoveredEntity;
 			}
 		}
 		return false;
@@ -475,6 +482,8 @@ namespace Nut
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		m_ActiveScenePath = std::filesystem::path();
 	}
 
 	void EditorLayer::OpenScene()
@@ -499,6 +508,21 @@ namespace Nut
 			
 			m_ActiveScene = m_EditorScene;
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
+			
+			m_ActiveScenePath = path;
+		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		if (!m_ActiveScenePath.empty()) 
+		{
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(m_ActiveScenePath.string());
+		}
+		else
+		{
+			SaveSceneAs();
 		}
 	}
 
@@ -507,8 +531,10 @@ namespace Nut
 		std::string filepath = FileDialogs::SaveFile("Nut Scene()(*.yaml)\0 * .yaml\0");
 		if (!filepath.empty()) 
 		{
-			SceneSerializer deserializer(m_ActiveScene);
-			deserializer.Serialize(filepath);
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(filepath);
+
+			m_ActiveScenePath = filepath;
 		}
 	}
 
