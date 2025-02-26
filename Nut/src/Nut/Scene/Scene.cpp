@@ -88,6 +88,7 @@ namespace Nut
 		CopyComponentForNewScene<TransformComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<CameraComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<SpriteComponent>(dstRegistry, srcRegistry, dstEntityMap);
+		CopyComponentForNewScene<CircleComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<NativeScriptComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<Rigidbody2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<BoxCollider2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
@@ -104,6 +105,7 @@ namespace Nut
 		CopyComponentIfExists<TransformComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<CameraComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<SpriteComponent>(newEntity, srcEntity);
+		CopyComponentIfExists<CircleComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<NativeScriptComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, srcEntity);
@@ -225,11 +227,25 @@ namespace Nut
 			// Do some rendering (获取当前摄像机的投影矩阵 projection 和 位移矩阵 transform，
 			Renderer2D::BeginScene(*mainCamera, mainTransform);
 
-			auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
-			for (auto entity : group) {
-				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+			// Update rectangles
+			{
+				auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
+				for (auto entity : group) 
+				{
+					auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 
-				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+					Renderer2D::DrawQuadSprite(transform.GetTransform(), sprite, (int)entity);
+				}
+			}
+			// Update circles
+			{
+				auto& view = m_Registry.view<TransformComponent, CircleComponent>();
+				for (auto entity : view)
+				{
+					auto [transform, circle] = view.get<TransformComponent, CircleComponent>(entity);
+
+					Renderer2D::DrawCircleSprite(transform.GetTransform(), circle, (int)entity);
+				}
 			}
 
 			Renderer2D::EndScene();
@@ -240,11 +256,25 @@ namespace Nut
 	{
 		Renderer2D::BeginScene(camera);
 
-		auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
-		for (auto entity : group) {
-			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+		// Update rectangles
+		{
+			auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
+			for (auto entity : group)
+			{
+				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 
-			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+				Renderer2D::DrawQuadSprite(transform.GetTransform(), sprite, (int)entity);
+			}
+		}
+		// Update circles
+		{
+			auto& view = m_Registry.view<TransformComponent, CircleComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, circle] = view.get<TransformComponent, CircleComponent>(entity);
+
+				Renderer2D::DrawCircleSprite(transform.GetTransform(), circle, (int)entity);
+			}
 		}
 
 		Renderer2D::EndScene();
@@ -335,6 +365,11 @@ namespace Nut
 
 	template<>
 	void Scene::OnComponentAdded<SpriteComponent>(Entity entity, SpriteComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CircleComponent>(Entity entity, CircleComponent& component)
 	{
 	}
 

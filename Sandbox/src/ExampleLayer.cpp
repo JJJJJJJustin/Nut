@@ -92,7 +92,7 @@ ExampleLayer::ExampleLayer()
 	m_SquareVA->SetIndexBuffer(squareIB);
 
 	m_SquareShader = Nut::Shader::Create("assets/shaders/FlatColorShader.glsl");
-	//auto m_TextureShader = Nut::Shader::Create("assets/shaders/TextureShader.glsl");
+	//auto m_TextureShader = Nut::Shader::Create("assets/shaders/QuadShader.glsl");
 	auto textureShader = m_ShaderLibrary.Load("assets/shaders/TextureShader.glsl");
 
 	textureShader->Bind();

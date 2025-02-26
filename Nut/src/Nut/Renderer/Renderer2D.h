@@ -48,17 +48,20 @@ namespace Nut {
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 
-		// 精灵 Sprite
-		static void DrawSprite(const glm::mat4& transform, const SpriteComponent& src, const int& entityID);
+		static void DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thickness = 1.0f, float fade = 0.005f, const int& entityID = -1);
+
+		// 精灵 Sprite（目前指代矩形）
+		static void DrawQuadSprite(const glm::mat4& transform, const SpriteComponent& src, const int& entityID);
+		static void DrawCircleSprite(const glm::mat4& transform, const CircleComponent& src, const int& entityID);
 
 		// Statistics (调试时使用的统计数据，存放在Statistics结构体)
 		struct Statistics {
 			uint32_t DrawCalls;
-			uint32_t QuadCount;
+			uint32_t GraphicCount;
 
 			// 函数被调用时再计算Vertex或Index，节省性能
-			uint32_t GetVertexCount() { return QuadCount * 4; }
-			uint32_t GetIndexCount() { return QuadCount * 6; }
+			uint32_t GetVertexCount() { return GraphicCount * 4; }
+			uint32_t GetIndexCount() { return GraphicCount * 6; }
 		};
 		static void ClearStats();
 		static Statistics GetStats();											// So that we can grab data (in s_Data.Stats) where we want to use 

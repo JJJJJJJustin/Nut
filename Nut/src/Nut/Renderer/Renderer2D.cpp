@@ -23,6 +23,18 @@ namespace Nut {
 		int EntityID;
 	};
 
+	struct CircleVertex
+	{
+		glm::vec3 WorldPosition;
+		glm::vec2 LocalPosition;
+		glm::vec4 Color;
+		float Thickness;
+		float Fade;
+
+		// Entity only
+		int EntityID;
+	};
+
 	struct Renderer2DData
 	{
 		static const uint32_t MaxQuads = 1000;
@@ -33,12 +45,20 @@ namespace Nut {
 		Ref<VertexArray> QuadVA;
 		Ref<VertexBuffer> QuadVB;
 		Ref<IndexBuffer> QuadIB;
-		Ref<Shader> TextureShader;
+		Ref<Shader> QuadShader;
 		Ref<Texture2D> WhiteTexture;
 
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVBBase = nullptr;												// 顶点指针起始
 		QuadVertex* QuadVBHind = nullptr;												// 顶点指针末尾
+
+		Ref<VertexArray> CircleVA;
+		Ref<VertexBuffer> CircleVB;
+		Ref<Shader> CircleShader;
+
+		uint32_t CircleIndexCount = 0;
+		CircleVertex* CircleVBBase = nullptr;
+		CircleVertex* CircleVBHind = nullptr;
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> Textures;
 		uint32_t TextureSlotIndex = 1;													// 0 => WhiteTexture
@@ -48,6 +68,14 @@ namespace Nut {
 			{  0.5f, -0.5f, 0.0f, 1.0f },
 			{  0.5f,  0.5f, 0.0f, 1.0f },
 			{ -0.5f,  0.5f, 0.0f, 1.0f }
+		};
+
+		glm::vec4 CircleLocalPosition[4]
+		{
+			{ -1.0f, -1.0f, 0.0f, 1.0f },
+			{  1.0f, -1.0f, 0.0f, 1.0f },
+			{  1.0f,  1.0f, 0.0f, 1.0f },
+			{ -1.0f,  1.0f, 0.0f, 1.0f }
 		};
 
 		Renderer2D::Statistics Stats;
@@ -67,7 +95,7 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
-		// VertexBuffer + IndexBuffer + VertexArray
+		// VertexBuffer + IndexBuffer + VertexArray (... for quad)
 		s_Data.QuadVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
 		BufferLayout squareLayout =
 		{
@@ -81,7 +109,6 @@ namespace Nut {
 		s_Data.QuadVB->SetLayout(squareLayout);
 		
 		uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
-		
 		uint32_t offset = 0;
 		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
 		{
@@ -102,12 +129,31 @@ namespace Nut {
 		s_Data.QuadVA->SetIndexBuffer(s_Data.QuadIB);
 		s_Data.QuadVA->AddVertexBuffer(s_Data.QuadVB);
 
+		// (... for circle)
+		s_Data.CircleVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(CircleVertex));
+		s_Data.CircleVB->SetLayout(
+			{
+			{ShaderDataType::Float3, "a_WorldPosition"},
+			{ShaderDataType::Float2, "a_LocalPosition"},
+			{ShaderDataType::Float4, "a_Color"		  },
+			{ShaderDataType::Float,  "a_Thickness"	  },
+			{ShaderDataType::Float,  "a_Fade"		  },
+			{ShaderDataType::Int,    "a_EntityID"	  }
+			}
+		);
+
+		s_Data.CircleVA = VertexArray::Create();
+		s_Data.CircleVA->SetIndexBuffer(s_Data.QuadIB);				// Tips:We do not create CircleIB for initialize CircleVA cuz we can use QuadIB and we can get the same effect
+		s_Data.CircleVA->AddVertexBuffer(s_Data.CircleVB);
+
 		// QuadVertex Ptr
 		s_Data.QuadVBBase = new QuadVertex[s_Data.MaxVertices];									//保存指针初始位置
+		s_Data.CircleVBBase = new CircleVertex[s_Data.MaxVertices];
 
 		// Shader
-		s_Data.TextureShader = Shader::Create("E:/VS/Nut/Nut-Editor/assets/shaders/TextureShader.glsl");		//根据glsl创建着色器对象
-		
+		s_Data.QuadShader = Shader::Create("E:/VS/Nut/Nut-Editor/assets/shaders/Renderer2D_Quad.glsl");		//根据glsl创建着色器对象
+		s_Data.CircleShader = Shader::Create("E:/VS/Nut/Nut-Editor/assets/shaders/Renderer2D_Circle.glsl");
+
 		// UBO
 		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
 
@@ -124,6 +170,7 @@ namespace Nut {
 		NUT_PROFILE_FUNCTION();
 
 		delete[] s_Data.QuadVBBase;
+		delete[] s_Data.CircleVBBase;
 	}
 
 	// If camera belongs to type "Camera", then use this function( ViewMatrix need to be filled in manually )
@@ -137,6 +184,9 @@ namespace Nut {
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
 		s_Data.QuadVBHind = s_Data.QuadVBBase;
+		
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVBHind = s_Data.CircleVBBase;
 	}
 
 	void Renderer2D::BeginScene(const OrthoGraphicCamera& camera)
@@ -149,6 +199,9 @@ namespace Nut {
 		s_Data.QuadIndexCount = 0;																//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的顶点索引数要从零重新开始
 		s_Data.TextureSlotIndex = 1;															//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
 		s_Data.QuadVBHind = s_Data.QuadVBBase;													//每结束一次场景（依次场景中可能包含多个批渲染调用），需要将后端指针 Hind 的位置赋值为起始位置，从新开始
+		
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVBHind = s_Data.CircleVBBase;
 	}
 
 	void Renderer2D::BeginScene(const EditorCamera& camera) 
@@ -161,14 +214,14 @@ namespace Nut {
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
 		s_Data.QuadVBHind = s_Data.QuadVBBase;
+
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVBHind = s_Data.CircleVBBase;
 	}
 
 	void Renderer2D::EndScene()
 	{
 		NUT_PROFILE_FUNCTION();
-
-		uint32_t dataSize = uint32_t((uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase);// Size 等于后端指针减去前端(hind 在绘制时一直更新数据）
-		s_Data.QuadVB->SetData(s_Data.QuadVBBase, dataSize);									// Reset VertexBuffer so flush Vertex data （because of Dynamic Draw)
 
 		Flush();																				// 更新数据之后绘制（刷新）
 	}
@@ -177,23 +230,45 @@ namespace Nut {
 	{
 		EndScene();
 
-		s_Data.QuadIndexCount = 0;
-		s_Data.TextureSlotIndex = 1;
-		s_Data.QuadVBHind = s_Data.QuadVBBase;
+		if (s_Data.QuadIndexCount)
+		{
+			s_Data.QuadIndexCount = 0;
+			s_Data.TextureSlotIndex = 1;
+			s_Data.QuadVBHind = s_Data.QuadVBBase;
+		}
+
+		if (s_Data.CircleIndexCount)
+		{
+			s_Data.CircleIndexCount = 0;
+			s_Data.CircleVBHind = s_Data.CircleVBBase;
+		}
 	}
 
 	void Renderer2D::Flush()
 	{
-		if (s_Data.QuadIndexCount == 0)
-			return;																				// 如果依次运行下来后发现没有需要绘制的图形，则返回空并跳出，不运行之后代码以节省性能
+		if (s_Data.QuadIndexCount)																// 如果依次运行下来后发现没有需要绘制的图形，则返回空并跳出，不运行之后代码以节省性能
+		{
+			uint32_t dataSize = uint32_t((uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase);// Size 等于后端指针减去前端(hind 在绘制时一直更新数据）
+			s_Data.QuadVB->SetData(s_Data.QuadVBBase, dataSize);									// Reset VertexBuffer so flush Vertex data （because of Dynamic Draw)
 
-		// Bind texture before rendering
-		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-			s_Data.Textures[i]->Bind(i);														// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
+			// Bind texture before rendering
+			for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+				s_Data.Textures[i]->Bind(i);														// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
 
-		s_Data.TextureShader->Bind();
-		RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);						// 运行至此处时进行渲染
-		s_Data.Stats.DrawCalls++;
+			s_Data.QuadShader->Bind();
+			RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);						// 运行至此处时进行渲染
+			s_Data.Stats.DrawCalls++;
+		}
+
+		if (s_Data.CircleIndexCount)
+		{
+			uint32_t dataSize = uint32_t((uint8_t*)s_Data.CircleVBHind - (uint8_t*)s_Data.CircleVBBase);
+			s_Data.CircleVB->SetData(s_Data.CircleVBBase, dataSize);
+
+			s_Data.CircleShader->Bind();
+			RendererCommand::DrawIndexed(s_Data.CircleVA, s_Data.CircleIndexCount);
+			s_Data.Stats.DrawCalls++;
+		}
 	}
 
 	// -------------------------- Draw func ------------------------------------------------------------------
@@ -225,7 +300,7 @@ namespace Nut {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -288,7 +363,7 @@ namespace Nut {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, float tilingFactor /*= 1.0f*/, const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
@@ -352,7 +427,7 @@ namespace Nut {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 
@@ -397,7 +472,7 @@ namespace Nut {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 
@@ -458,7 +533,7 @@ namespace Nut {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 
@@ -521,7 +596,7 @@ namespace Nut {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 
@@ -539,8 +614,35 @@ namespace Nut {
 		DrawRotatedQuad(transform, rotation, subtexture, tilingFactor, tintColor);
 	}
 
+	void Renderer2D::DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thickness /*=1.0f*/, float fade /*=0.005f*/, const int& entityID /*= -1*/)
+	{
+		NUT_PROFILE_FUNCTION();
+
+		if (s_Data.CircleIndexCount >= s_Data.MaxIndices) 
+		{
+			FlushAndReset();
+		}
+
+		constexpr size_t circleVertexCount = 4;
+
+		for (size_t i = 0; i < circleVertexCount; i++) 
+		{
+			s_Data.CircleVBHind->WorldPosition = transform * s_Data.QuadVertexPosition[i];
+			s_Data.CircleVBHind->LocalPosition = s_Data.CircleLocalPosition[i];
+			s_Data.CircleVBHind->Color = color;
+			s_Data.CircleVBHind->Thickness = thickness;
+			s_Data.CircleVBHind->Fade = fade;
+			s_Data.CircleVBHind->EntityID = entityID;
+			s_Data.CircleVBHind++;
+		}
+
+		s_Data.CircleIndexCount += 6;
+
+		s_Data.Stats.GraphicCount++;
+	}
+
 	// ------------------------------------- Draw Sprite -------------------------------------------------
-	void Renderer2D::DrawSprite(const glm::mat4& transform, const SpriteComponent& src, const int& entityID)
+	void Renderer2D::DrawQuadSprite(const glm::mat4& transform, const SpriteComponent& src, const int& entityID)
 	{
 		if (src.Texture)
 			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color, entityID);
@@ -548,10 +650,17 @@ namespace Nut {
 			DrawQuad(transform, src.Color, entityID);
 	}
 
+	void Renderer2D::DrawCircleSprite(const glm::mat4& transform, const CircleComponent& src, const int& entityID)
+	{
+		DrawCircle(transform, src.Color, src.Thickness, src.Fade, entityID);
+	}
+
+
+
 	void Renderer2D::ClearStats()
 	{
 		//s_Data.Stats.DrawCalls = 0;
-		//s_Data.Stats.QuadCount = 0;
+		//s_Data.Stats.GraphicCount = 0;
 		memset(&s_Data.Stats, 0, sizeof(Statistics));
 	}
 

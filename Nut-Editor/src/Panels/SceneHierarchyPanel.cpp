@@ -144,6 +144,15 @@ namespace Nut
 						}
 					}
 
+					if (!entity.HasComponent<CircleComponent>())
+					{
+						if (ImGui::MenuItem("CircleRendererComponent"))
+						{
+							m_SelectionContext.AddComponent<CircleComponent>();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+
 					if (!entity.HasComponent<Rigidbody2DComponent>())
 					{
 						if (ImGui::MenuItem("Rigidbody2DComponent"))
@@ -269,6 +278,13 @@ namespace Nut
 			if (component.Texture)
 				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
 		});
+
+		DrawComponent<CircleComponent>("Circle Renderer", entity, [](auto& component)
+			{
+				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+				ImGui::DragFloat("Thickness", &component.Thickness, 0.025f, 0.0f, 1.0f);
+				ImGui::DragFloat("Fade", &component.Fade, 0.00025f, 0.0f, 1.0f);
+			});
 
 		DrawComponent<Rigidbody2DComponent>("Rigidbody2D", entity, [](auto& component)
 		{
