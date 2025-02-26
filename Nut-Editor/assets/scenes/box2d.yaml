@@ -1,8 +1,19 @@
 Scene: Untitled
 Entities:
+  - Entity: 9322571375263289016
+    TagComponent:
+      Tag: red circle
+    TransformComponent:
+      Translation: [1.96226668, 1.26927173, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CircleComponent:
+      Color: [1, 0, 0, 1]
+      Thickness: 1
+      Fade: 0.00499999989
   - Entity: 14954831987827376961
     TagComponent:
-      Tag: rigid body
+      Tag: golden box
     TransformComponent:
       Translation: [-0.00214172713, 7.5, 0]
       Rotation: [0, 0, 0.000141773096]
@@ -21,7 +32,7 @@ Entities:
       RestitutionThreshold: 0
   - Entity: 11439783333486204192
     TagComponent:
-      Tag: white body
+      Tag: white box
     TransformComponent:
       Translation: [-4.66103745, 5.61999989, 0]
       Rotation: [0, 0, 0.704938471]
@@ -40,11 +51,11 @@ Entities:
       RestitutionThreshold: 0.5
   - Entity: 8911692003211906132
     TagComponent:
-      Tag: ground
+      Tag: ground2
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [23.9060459, 1, 1]
+      Translation: [14.2248878, -2.04613233, 6.10351562e-05]
+      Rotation: [0, 0, 0.459955454]
+      Scale: [23.9060555, 1, 1]
     SpriteComponent:
       Color: [0.052075997, 0, 0.914590716, 1]
     Rigidbody2DComponent:
@@ -59,7 +70,7 @@ Entities:
       RestitutionThreshold: 0.5
   - Entity: 16124586516072186306
     TagComponent:
-      Tag: rigid rectangle
+      Tag: green box
     TransformComponent:
       Translation: [6.62651634, 7.50094795, 0]
       Rotation: [0, 0, -0.351062238]
@@ -73,14 +84,14 @@ Entities:
       Offset: [0, 0]
       Size: [0.5, 0.5]
       Density: 1
-      Friction: 0.300000012
+      Friction: 0.0599999987
       Restitution: 0.639999986
       RestitutionThreshold: 0
   - Entity: 10800249492629730049
     TagComponent:
       Tag: camera
     TransformComponent:
-      Translation: [2.57568789, 4.61730433, 16.7999992]
+      Translation: [4.70546436, 3.78811336, 16.7999992]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
@@ -103,6 +114,25 @@ Entities:
       Scale: [1, 1, 1]
     SpriteComponent:
       Color: [0.00696547655, 0.677806616, 0.978647709, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 6958073775201139256
+    TagComponent:
+      Tag: ground1
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, -0.24209398]
+      Scale: [23.9060402, 1, 1]
+    SpriteComponent:
+      Color: [0.052075997, 0, 0.914590716, 1]
     Rigidbody2DComponent:
       BodyType: Static
       FixedRotation: false

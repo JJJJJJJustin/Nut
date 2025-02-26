@@ -283,6 +283,19 @@ namespace Nut
             out << YAML::EndMap;
         }
 
+        if (entity.HasComponent<CircleComponent>())
+        {
+            out << YAML::Key << "CircleComponent";
+            out << YAML::BeginMap;
+
+            auto& circleComponent = entity.GetComponent<CircleComponent>();
+            out << YAML::Key << "Color" << YAML::Value << circleComponent.Color;
+            out << YAML::Key << "Thickness" << YAML::Value << circleComponent.Thickness;
+            out << YAML::Key << "Fade" << YAML::Value << circleComponent.Fade;
+
+            out << YAML::EndMap;
+        }
+
         if(entity.HasComponent<Rigidbody2DComponent>())
         {
             out << YAML::Key << "Rigidbody2DComponent";
@@ -353,6 +366,15 @@ namespace Nut
         {
             auto& sc = entity.AddComponent<SpriteComponent>();
             sc.Color = spriteComponent["Color"].as<glm::vec4>();
+        }
+
+        auto circleComponent = data["CircleComponent"];
+        if (circleComponent)
+        {
+            auto& circleC = entity.AddComponent<CircleComponent>();
+            circleC.Color = circleComponent["Color"].as<glm::vec4>();
+            circleC.Thickness = circleComponent["Thickness"].as<float>();
+            circleC.Fade = circleComponent["Fade"].as<float>();
         }
 
         auto rigidbody2DComponent = data["Rigidbody2DComponent"];
