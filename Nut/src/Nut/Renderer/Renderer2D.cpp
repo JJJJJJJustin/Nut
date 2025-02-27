@@ -11,6 +11,15 @@
 
 namespace Nut {
 
+	struct LineVertex
+	{
+		glm::vec3 Position;
+		glm::vec4 Color;
+
+		// Entity only
+		int EntityID;
+	};
+
 	struct QuadVertex 
 	{
 		glm::vec3 Position;
@@ -47,7 +56,6 @@ namespace Nut {
 		Ref<IndexBuffer> QuadIB;
 		Ref<Shader> QuadShader;
 		Ref<Texture2D> WhiteTexture;
-
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVBBase = nullptr;												// 顶点指针起始
 		QuadVertex* QuadVBHind = nullptr;												// 顶点指针末尾
@@ -55,10 +63,17 @@ namespace Nut {
 		Ref<VertexArray> CircleVA;
 		Ref<VertexBuffer> CircleVB;
 		Ref<Shader> CircleShader;
-
 		uint32_t CircleIndexCount = 0;
 		CircleVertex* CircleVBBase = nullptr;
 		CircleVertex* CircleVBHind = nullptr;
+
+		Ref<VertexArray> LineVA;
+		Ref<VertexBuffer> LineVB;
+		Ref<Shader> LineShader;
+		uint32_t LineIndexCount = 0;
+		LineVertex* LineVBBase = nullptr;
+		LineVertex* LineVBHind = nullptr;
+
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> Textures;
 		uint32_t TextureSlotIndex = 1;													// 0 => WhiteTexture
@@ -95,6 +110,19 @@ namespace Nut {
 	{
 		NUT_PROFILE_FUNCTION();
 
+		//(... for line)
+		s_Data.LineVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(LineVertex));
+		s_Data.LineVB->SetLayout(
+			{
+			{ShaderDataType::Float3, "a_Position"},
+			{ShaderDataType::Float4, "a_Color"	 },
+			{ShaderDataType::Int,    "a_EntityID"}
+			}
+		);
+
+		s_Data.LineVA = VertexArray::Create();
+		s_Data.LineVA->AddVertexBuffer(s_Data.LineVB);
+		
 		// VertexBuffer + IndexBuffer + VertexArray (... for quad)
 		s_Data.QuadVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
 		BufferLayout squareLayout =
@@ -149,10 +177,12 @@ namespace Nut {
 		// QuadVertex Ptr
 		s_Data.QuadVBBase = new QuadVertex[s_Data.MaxVertices];									//保存指针初始位置
 		s_Data.CircleVBBase = new CircleVertex[s_Data.MaxVertices];
+		s_Data.LineVBBase = new LineVertex[s_Data.MaxVertices];
 
 		// Shader
 		s_Data.QuadShader = Shader::Create("E:/VS/Nut/Nut-Editor/assets/shaders/Renderer2D_Quad.glsl");		//根据glsl创建着色器对象
 		s_Data.CircleShader = Shader::Create("E:/VS/Nut/Nut-Editor/assets/shaders/Renderer2D_Circle.glsl");
+		s_Data.LineShader = Shader::Create("E:/VS/Nut/Nut-Editor/assets/shaders/Renderer2D_Line.glsl");
 
 		// UBO
 		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
@@ -181,12 +211,7 @@ namespace Nut {
 		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(viewMatrix);
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
-		s_Data.QuadIndexCount = 0;
-		s_Data.TextureSlotIndex = 1;
-		s_Data.QuadVBHind = s_Data.QuadVBBase;
-		
-		s_Data.CircleIndexCount = 0;
-		s_Data.CircleVBHind = s_Data.CircleVBBase;
+		StartBatch();
 	}
 
 	void Renderer2D::BeginScene(const OrthoGraphicCamera& camera)
@@ -196,12 +221,7 @@ namespace Nut {
 		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
-		s_Data.QuadIndexCount = 0;																//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的顶点索引数要从零重新开始
-		s_Data.TextureSlotIndex = 1;															//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
-		s_Data.QuadVBHind = s_Data.QuadVBBase;													//每结束一次场景（依次场景中可能包含多个批渲染调用），需要将后端指针 Hind 的位置赋值为起始位置，从新开始
-		
-		s_Data.CircleIndexCount = 0;
-		s_Data.CircleVBHind = s_Data.CircleVBBase;
+		StartBatch();
 	}
 
 	void Renderer2D::BeginScene(const EditorCamera& camera) 
@@ -211,12 +231,7 @@ namespace Nut {
 		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
-		s_Data.QuadIndexCount = 0;
-		s_Data.TextureSlotIndex = 1;
-		s_Data.QuadVBHind = s_Data.QuadVBBase;
-
-		s_Data.CircleIndexCount = 0;
-		s_Data.CircleVBHind = s_Data.CircleVBBase;
+		StartBatch();
 	}
 
 	void Renderer2D::EndScene()
@@ -230,18 +245,7 @@ namespace Nut {
 	{
 		EndScene();
 
-		if (s_Data.QuadIndexCount)
-		{
-			s_Data.QuadIndexCount = 0;
-			s_Data.TextureSlotIndex = 1;
-			s_Data.QuadVBHind = s_Data.QuadVBBase;
-		}
-
-		if (s_Data.CircleIndexCount)
-		{
-			s_Data.CircleIndexCount = 0;
-			s_Data.CircleVBHind = s_Data.CircleVBBase;
-		}
+		StartBatch();
 	}
 
 	void Renderer2D::Flush()
@@ -269,10 +273,54 @@ namespace Nut {
 			RendererCommand::DrawIndexed(s_Data.CircleVA, s_Data.CircleIndexCount);
 			s_Data.Stats.DrawCalls++;
 		}
+
+		if (s_Data.LineIndexCount)
+		{
+			uint32_t dataSize = uint32_t((uint8_t*)s_Data.LineVBHind - (uint8_t*)s_Data.LineVBBase);
+			s_Data.LineVB->SetData(s_Data.LineVBBase, dataSize);
+
+			s_Data.LineShader->Bind();
+			RendererCommand::DrawLines(s_Data.LineVA, s_Data.LineIndexCount);
+			s_Data.Stats.DrawCalls++;
+		}
+	}
+
+	void Renderer2D::StartBatch() 
+	{
+		s_Data.QuadIndexCount = 0;																//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的顶点索引数要从零重新开始
+		s_Data.TextureSlotIndex = 1;															//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
+		s_Data.QuadVBHind = s_Data.QuadVBBase;													//每结束一次场景（依次场景中可能包含多个批渲染调用），需要将后端指针 Hind 的位置赋值为起始位置，从新开始
+
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVBHind = s_Data.CircleVBBase;
+
+		s_Data.LineIndexCount = 0;
+		s_Data.LineVBHind = s_Data.LineVBBase;
 	}
 
 	// -------------------------- Draw func ------------------------------------------------------------------
 	// -------------------------- Draw Quad
+	void Renderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const int& entityID)
+	{
+		NUT_PROFILE_FUNCTION();
+
+		/*if (s_Data.LineIndexCount >= s_Data.MaxIndices)
+		{
+			FlushAndReset();
+		}*/
+		s_Data.LineVBHind->Position = p0;
+		s_Data.LineVBHind->Color = color;
+		s_Data.LineVBHind->EntityID = entityID;
+		s_Data.LineVBHind++;
+
+		s_Data.LineVBHind->Position = p1;
+		s_Data.LineVBHind->Color = color;
+		s_Data.LineVBHind->EntityID = entityID;
+		s_Data.LineVBHind++;
+
+		s_Data.LineIndexCount += 2;
+	}
+
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const int& entityID)
 	{
 		NUT_PROFILE_FUNCTION();

@@ -69,6 +69,13 @@ namespace Nut
 		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	{
+		vertexArray->Bind();
+
+		glDrawArrays(GL_LINES, 0, vertexCount);
+	}
+
 	// Cherno do:
 	//void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount /*= 0*/){
 	//	uint32_t count = indexCount ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
