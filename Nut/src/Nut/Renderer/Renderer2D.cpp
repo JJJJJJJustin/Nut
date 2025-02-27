@@ -67,6 +67,8 @@ namespace Nut {
 		CircleVertex* CircleVBBase = nullptr;
 		CircleVertex* CircleVBHind = nullptr;
 
+		float LineWidth = 4;
+
 		Ref<VertexArray> LineVA;
 		Ref<VertexBuffer> LineVB;
 		Ref<Shader> LineShader;
@@ -280,6 +282,7 @@ namespace Nut {
 			s_Data.LineVB->SetData(s_Data.LineVBBase, dataSize);
 
 			s_Data.LineShader->Bind();
+			RendererCommand::SetLineWidth(s_Data.LineWidth);
 			RendererCommand::DrawLines(s_Data.LineVA, s_Data.LineIndexCount);
 			s_Data.Stats.DrawCalls++;
 		}
@@ -319,6 +322,31 @@ namespace Nut {
 		s_Data.LineVBHind++;
 
 		s_Data.LineIndexCount += 2;
+	}
+
+	void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const int& entityID)
+	{
+		glm::vec3 p0 = { position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z };
+		glm::vec3 p1 = { position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z };
+		glm::vec3 p2 = { position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z };
+		glm::vec3 p3 = { position.x - size.x * 0.5f, position.y + size.y * 0.5f, position.z };
+
+		DrawLine(p0, p1, color, entityID);
+		DrawLine(p1, p2, color, entityID);
+		DrawLine(p2, p3, color, entityID);
+		DrawLine(p3, p0, color, entityID);
+	}
+
+	void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec2& size, const glm::vec4& color, const int& entityID)
+	{
+		glm::vec3 verticesPos[4];
+		for(int i = 0; i < 4; i++)
+			verticesPos[i] = transform * s_Data.QuadVertexPosition[i];
+
+		DrawLine(verticesPos[0], verticesPos[1], color, entityID);
+		DrawLine(verticesPos[1], verticesPos[2], color, entityID);
+		DrawLine(verticesPos[2], verticesPos[3], color, entityID);
+		DrawLine(verticesPos[3], verticesPos[0], color, entityID);
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const int& entityID)

@@ -1,16 +1,37 @@
 Scene: Untitled
 Entities:
+  - Entity: 8422556523251498604
+    TagComponent:
+      Tag: pick circle
+    TransformComponent:
+      Translation: [3.99885941, 1.80366886, 0]
+      Rotation: [0, 0, 0]
+      Scale: [2, 2, 1]
+    CircleComponent:
+      Color: [0.982206404, 0, 0.692088723, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: true
+    CircleCollider2DComponent:
+      Offset: [0, 0]
+      Radius: 1
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
   - Entity: 9322571375263289016
     TagComponent:
       Tag: red circle
     TransformComponent:
-      Translation: [1.96226668, 1.26927173, 0]
+      Translation: [1.35101676, 1.74685836, 6.10351562e-05]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CircleComponent:
       Color: [1, 0, 0, 1]
-      Thickness: 1
-      Fade: 0.00499999989
+      Thickness: 0.375
+      Fade: 0.300000012
   - Entity: 14954831987827376961
     TagComponent:
       Tag: golden box

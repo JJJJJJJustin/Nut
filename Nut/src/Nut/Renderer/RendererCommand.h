@@ -43,6 +43,11 @@ namespace Nut
 		{
 			s_RendererAPI->DrawLines(vertexArray, vertexCount);
 		}
+
+		inline static void SetLineWidth(const float& width)
+		{
+			s_RendererAPI->SetLineWidth(width);
+		}
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

@@ -27,7 +27,7 @@ namespace Nut {
 		static void FlushAndReset();
 
 		// 图元 Primitive
-		static void DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const int& entityID = -1);
+		static void DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const int& entityID = -1);	// Do these things require ID?
 		static void DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const int& entityID = -1);
 		static void DrawRect(const glm::mat4& transform, const glm::vec2& size, const glm::vec4& color, const int& entityID = -1);
 

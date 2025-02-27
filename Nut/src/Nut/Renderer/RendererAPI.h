@@ -28,6 +28,7 @@ namespace Nut
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) = 0;
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount) = 0;
 		virtual void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount) = 0;
+		virtual void SetLineWidth(const float& width) = 0;
 
 		inline static API GetAPI() { return s_API; }			//注意静态函数使用时的作用域标识
 		inline static API SetAPI(API api) { s_API = api; }
