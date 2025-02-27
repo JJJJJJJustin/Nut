@@ -135,7 +135,7 @@ namespace Nut
 	struct BoxCollider2DComponent
 	{
 		glm::vec2 Offset = { 0.0f, 0.0f };					// 重心偏移量
-		glm::vec2 Size = { 0.5f, 0.5f };					// 碰撞体积
+		glm::vec2 Size = { 0.5f, 0.5f };					// 碰撞体积大小(x轴增量，y轴增量）
 
 		// TODO: May move this to Physics Material
 		float Density = 1.0f;								// 密度
@@ -150,6 +150,22 @@ namespace Nut
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 
+	struct CircleCollider2DComponent
+	{
+		glm::vec2 Offset = { 0.0f, 0.0f };					// 重心偏移量
+		float Radius = 0.5f;								// 碰撞半径大小
 
+		// TODO: May move this to Physics Material
+		float Density = 1.0f;								// 密度
+		float Friction = 0.5f;								// 摩擦力
+		float Restitution = 0.0f;							// 恢复
+		float RestitutionThreshold = 0.5f;					// 恢复阈值
+
+		// Storage for runtime
+		void* RuntimeFixture = nullptr;						// 运行时的配件、运行时附件
+
+		CircleCollider2DComponent() = default;
+		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
+	};
 
 }

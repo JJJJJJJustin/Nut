@@ -11,6 +11,7 @@
 #include "box2d/b2_world.h"
 #include "box2d/b2_body.h"
 #include "box2d/b2_polygon_shape.h"
+#include "box2d/b2_circle_shape.h"
 #include "box2d/b2_fixture.h"
 
 namespace Nut
@@ -92,6 +93,7 @@ namespace Nut
 		CopyComponentForNewScene<NativeScriptComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<Rigidbody2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<BoxCollider2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
+		CopyComponentForNewScene<CircleCollider2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
 
 		return newScene;
 	}
@@ -109,6 +111,7 @@ namespace Nut
 		CopyComponentIfExists<NativeScriptComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, srcEntity);
+		CopyComponentIfExists<CircleCollider2DComponent>(newEntity, srcEntity);
 
 	}
 
@@ -171,6 +174,26 @@ namespace Nut
 
 				body->CreateFixture(&fixtureDef);
 			}
+
+			if (entity.HasComponent<CircleCollider2DComponent>())
+			{
+				auto& cc2c = entity.GetComponent<CircleCollider2DComponent>();
+
+				b2CircleShape circleShape;
+				circleShape.m_p.Set(cc2c.Offset.x, cc2c.Offset.y);
+				circleShape.m_radius = cc2c.Radius;
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &circleShape;
+				fixtureDef.density = cc2c.Density;
+				fixtureDef.friction = cc2c.Friction;
+				fixtureDef.restitution = cc2c.Restitution;
+				fixtureDef.restitutionThreshold = cc2c.RestitutionThreshold;
+
+				body->CreateFixture(&fixtureDef);
+			}
+
+
 		}
 	}
 
@@ -227,7 +250,7 @@ namespace Nut
 			// Do some rendering (获取当前摄像机的投影矩阵 projection 和 位移矩阵 transform，
 			Renderer2D::BeginScene(*mainCamera, mainTransform);
 
-			// Update rectangles
+			// Update quads
 			{
 				auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
 				for (auto entity : group) 
@@ -237,6 +260,7 @@ namespace Nut
 					Renderer2D::DrawQuadSprite(transform.GetTransform(), sprite, (int)entity);
 				}
 			}
+
 			// Update circles
 			{
 				auto& view = m_Registry.view<TransformComponent, CircleComponent>();
@@ -256,7 +280,7 @@ namespace Nut
 	{
 		Renderer2D::BeginScene(camera);
 
-		// Update rectangles
+		// Update quads
 		{
 			auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
 			for (auto entity : group)
@@ -266,6 +290,7 @@ namespace Nut
 				Renderer2D::DrawQuadSprite(transform.GetTransform(), sprite, (int)entity);
 			}
 		}
+
 		// Update circles
 		{
 			auto& view = m_Registry.view<TransformComponent, CircleComponent>();
@@ -392,6 +417,11 @@ namespace Nut
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
 	{
 	}
 }
