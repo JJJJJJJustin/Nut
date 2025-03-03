@@ -64,7 +64,7 @@ namespace Nut
 		}
 		else
 		{
-			NUT_CORE_CRITICAL("There is no active scene to used(should load scene first)!");
+			NUT_CORE_CRITICAL("There is no active scene to used(should load scene first)!\nOr you can create new scene first");
 			m_ShowPop = true;
 		}
 	}

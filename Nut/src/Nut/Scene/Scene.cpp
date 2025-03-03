@@ -181,7 +181,7 @@ namespace Nut
 
 				b2CircleShape circleShape;
 				circleShape.m_p.Set(cc2c.Offset.x, cc2c.Offset.y);
-				circleShape.m_radius = cc2c.Radius;
+				circleShape.m_radius = tc.Scale.x * cc2c.Radius;
 
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &circleShape;
@@ -280,8 +280,8 @@ namespace Nut
 	{
 		Renderer2D::BeginScene(camera);
 
-		Renderer2D::DrawLine(glm::vec3(0.0f), glm::vec3(3.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		Renderer2D::DrawRect(glm::vec3(0.0f), glm::vec2(1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		/*Renderer2D::DrawLine(glm::vec3(0.0f), glm::vec3(3.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		Renderer2D::DrawRect(glm::vec3(0.0f), glm::vec2(1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));*/
 		// Update quads
 		{
 			auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
@@ -357,7 +357,7 @@ namespace Nut
 	}
 
 
-	Entity Scene::GetPrimaryCamera()
+	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view) 

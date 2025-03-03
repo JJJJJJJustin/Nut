@@ -35,7 +35,13 @@ namespace Nut
 
 		void DuplicateEntity(Entity& srcEntity);
 
-		Entity GetPrimaryCamera();
+		Entity GetPrimaryCameraEntity();
+
+		template<typename... Components>
+		auto GetEntityWithComponent()
+		{
+			return m_Registry.view<Components...>();
+		}
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

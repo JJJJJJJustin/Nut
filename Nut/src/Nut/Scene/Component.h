@@ -150,7 +150,7 @@ namespace Nut
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 
-	struct CircleCollider2DComponent
+	struct CircleCollider2DComponent						// 标准圆（半径为 float,且只有一个固定的半径）
 	{
 		glm::vec2 Offset = { 0.0f, 0.0f };					// 重心偏移量
 		float Radius = 0.5f;								// 碰撞半径大小

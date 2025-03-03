@@ -337,7 +337,7 @@ namespace Nut {
 		DrawLine(p3, p0, color, entityID);
 	}
 
-	void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec2& size, const glm::vec4& color, const int& entityID)
+	void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec4& color, const int& entityID)
 	{
 		glm::vec3 verticesPos[4];
 		for(int i = 0; i < 4; i++)

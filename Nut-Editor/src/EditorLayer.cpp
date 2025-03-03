@@ -109,8 +109,8 @@ namespace Nut
 		{
 			case SceneState::Edit: 
 			{
-				if (m_ViewportFocused)
-					m_CameraController.OnUpdate(ts);
+				/*if (m_ViewportFocused)
+					m_CameraController.OnUpdate(ts);*/
 
 				m_EditorCamera.OnUpdate(ts);
 
@@ -147,8 +147,9 @@ namespace Nut
 				m_HoveredEntity = Entity();
 		}
 
+		OnOverlayRender();
+
 		m_Framebuffer->Unbind();
-		
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -275,6 +276,10 @@ namespace Nut
 		ImGui::Text("Entity in use: %s", name2.c_str());
 
 		ImGui::End();
+		// ----------- Settings Panel --------------------------------------
+		ImGui::Begin("Settings");
+		ImGui::Checkbox("Visualizing physics colliders", &m_ShowPhysicsColliders);
+		ImGui::End();
 		// ----------- Viewport Image --------------------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
@@ -320,7 +325,7 @@ namespace Nut
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, (float)ImGui::GetWindowWidth(), (float)ImGui::GetWindowHeight());
 
 			// Get camera projection matrix & camera view matrix & transform matrix
-			Entity cameraEntity = m_ActiveScene->GetPrimaryCamera();
+			Entity cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
 #if 0		// Draw gizmos for the entities we create in Actual-Game(Which will use Runtime camera to check things)
 			// Camera Projection
 			const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
@@ -378,6 +383,53 @@ namespace Nut
 		dispatcher.Dispatch<MouseButtonPressedEvent>(NUT_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 	}
 
+	void EditorLayer::OnOverlayRender()
+	{
+		// Drawing visualized physics collider
+		if(m_ToolbarPanel.GetSceneState() == SceneState::Play)
+		{
+			Entity camera = m_ActiveScene->GetPrimaryCameraEntity();
+			Renderer2D::BeginScene( camera.GetComponent<CameraComponent>().Camera, camera.GetComponent<TransformComponent>().GetTransform());
+		}
+		else
+		{
+			Renderer2D::BeginScene(m_EditorCamera);
+		}
+
+		if (m_ShowPhysicsColliders) {
+			// Update quads visualization
+			{
+				auto view = m_ActiveScene->GetEntityWithComponent<TransformComponent, BoxCollider2DComponent>();
+				for (auto entity : view)
+				{
+					auto [tc, b2cc] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.Translation + glm::vec3(b2cc.Offset, 0.001f)) 
+						* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
+						* glm::scale(glm::mat4(1.0f), tc.Scale * glm::vec3(b2cc.Size * 2.0f, 1.0f));
+
+					Renderer2D::DrawRect(transform, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				}
+			}
+
+			// Update circles visualization
+			{
+				auto view = m_ActiveScene->GetEntityWithComponent<TransformComponent, CircleCollider2DComponent>();
+				for (auto entity : view)
+				{
+					auto [tc, cc2c] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
+
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.Translation + glm::vec3(cc2c.Offset, 0.001f))
+						* glm::scale(glm::mat4(1.0f), tc.Scale * glm::vec3(cc2c.Radius * 2.05f, cc2c.Radius * 2.05f, 1.0f));
+
+					Renderer2D::DrawCircle(transform, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 0.03f);
+				}
+			}
+		}
+
+		Renderer2D::EndScene();
+
+	}
 
 	// ------------------------------------------------------------------------------------------------------------
 	// --------------------------------------- Some definations ---------------------------------------------------

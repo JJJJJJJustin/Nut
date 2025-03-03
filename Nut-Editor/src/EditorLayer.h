@@ -24,6 +24,8 @@ namespace Nut {
 		void OnUpdate(Timestep ts) override;
 		void OnImGuiRender() override;
 		void OnEvent(Event& event) override;
+
+		void OnOverlayRender();
 	public:
 		bool OnKeyPressed(KeyPressedEvent& event);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& event);
@@ -49,6 +51,8 @@ namespace Nut {
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
 		Entity m_SquareEntity, m_RedSquare, m_HoveredEntity, m_UsingEntity;
+
+		bool m_ShowPhysicsColliders = false;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
