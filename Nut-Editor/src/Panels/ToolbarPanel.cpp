@@ -44,7 +44,7 @@ namespace Nut
 		if (m_ShowPop)
 		{
 			ImGui::OpenPopup("Info Popup");
-			ImGuiInfoWindow("Please load scene first!");
+			ImGuiInfoWindow("Please load scene first!\nOr you can create new scene first");
 		}
 	}
 
@@ -64,7 +64,7 @@ namespace Nut
 		}
 		else
 		{
-			NUT_CORE_CRITICAL("There is no active scene to used(should load scene first)!\nOr you can create new scene first");
+			NUT_CORE_CRITICAL("There is no active scene to used(should load scene first)! Or you can create new scene first");
 			m_ShowPop = true;
 		}
 	}
