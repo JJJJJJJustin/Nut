@@ -1,6 +1,6 @@
 ------------------------- Nut Dependencies --------------------------
 
-VULKAN_SDK = os.getenv("VULKAN_SDK")                -- s.getenv("VULKAN_SDK") 用来获取环境变量 VULKAN_SDK 的值，通常是存储 Vulkan SDK（软件开发工具包）的安装路径
+VULKAN_SDK = os.getenv("VULKAN_SDK")                -- s.getenv("VULKAN_SDK") 用来获取环境变量 VULKAN_SDK 的值，通常是存储 Vulkan SDK（软件开发工具包）的安装路径 == %{wks.location}/Nut/vendor/VulkanSDK
 
 IncludeDir = {}
 IncludeDir["stb_image"] = "%{wks.location}/Nut/vendor/stb_image"
@@ -20,6 +20,7 @@ LibraryDir = {}
 
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_Debug"] = "%{VULKAN_SDK}/Lib"
+LibraryDir["VulkanSDK_DebugDLL"] = "%{VULKAN_SDK}/Bin"
 
 Library = {}
 
