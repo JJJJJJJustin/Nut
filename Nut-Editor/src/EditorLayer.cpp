@@ -114,7 +114,7 @@ namespace Nut
 
 				m_EditorCamera.OnUpdate(ts);
 
-				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);				// Now we just update EditorCamera in Nut-Editor APP, rather than RuntimeCamera in game
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 				//m_ActiveScene->OnScript(ts);									// 更新本机脚本
 				break;
 
@@ -122,6 +122,13 @@ namespace Nut
 			case SceneState::Play: 
 			{
 				m_ActiveScene->OnUpdateRuntime(ts); 
+				break;
+			}
+			case SceneState::Simulate:
+			{
+				m_EditorCamera.OnUpdate(ts);
+
+				m_ActiveScene->OnUpdateSimulation(ts, m_EditorCamera);
 				break;
 			}
 		}

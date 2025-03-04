@@ -6,7 +6,7 @@ namespace Nut
 {
 	enum class SceneState
 	{
-		Edit = 0, Play = 1
+		Edit = 0, Play = 1, Simulate = 2
 	};
 
 
@@ -22,6 +22,9 @@ namespace Nut
 	private:
 		void OnScenePlay();
 		void OnSceneStop();
+		void OnSceneSimulate();
+		void OnSceneSimulateStop();
+
 
 		void ImGuiInfoWindow(const std::string& text);
 	private:
@@ -29,6 +32,7 @@ namespace Nut
 
 		Ref<Texture2D> m_PlayIcon;
 		Ref<Texture2D> m_StopIcon;
+		Ref<Texture2D> m_SimulateIcon;
 
 		bool m_ShowPop = false;
 	};

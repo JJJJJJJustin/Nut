@@ -18,24 +18,32 @@ namespace Nut
 		Scene();
 		~Scene();
 
-		static Ref<Scene> Copy(Ref<Scene> other);
-
 		Entity CreateEntity(const std::string& name = "");
 		Entity CreateEntityWithUUID(UUID id, const std::string& name = "");
 		void DestroyEntity(Entity& entity);
 
 		void OnRuntimeStart();
 		void OnRuntimeStop();
+		void OnSimulationStart();
+		void OnSimulationStop();
 
 		void OnUpdateRuntime(Timestep ts);
+		void OnUpdateSimulation(Timestep ts, EditorCamera camera);
 		void OnUpdateEditor(Timestep ts, EditorCamera camera);
 		void OnScript(Timestep ts);
 
 		void OnViewportResize(uint32_t width, uint32_t height);
+	public:
+		Entity GetPrimaryCameraEntity();
 
+		static Ref<Scene> Copy(Ref<Scene> other);
 		void DuplicateEntity(Entity& srcEntity);
 
-		Entity GetPrimaryCameraEntity();
+		void RenderScene(EditorCamera& camera);
+
+		void OnPhysics2DInit();
+		void OnPhysics2DDestroy();
+		void OnPhysics2DRun(Timestep& ts);
 
 		template<typename... Components>
 		auto GetEntityWithComponent()

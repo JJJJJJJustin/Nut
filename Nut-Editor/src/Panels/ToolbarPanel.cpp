@@ -10,6 +10,7 @@ namespace Nut
 	{
 		m_PlayIcon = Texture2D::Create("E:/VS/Nut/Nut-Editor/Resources/Icons/PlayButton3.png");
 		m_StopIcon = Texture2D::Create("E:/VS/Nut/Nut-Editor/Resources/Icons/PauseButton3.png");
+		m_SimulateIcon = Texture2D::Create("E:/VS/Nut/Nut-Editor/Resources/Icons/SimulateButton.png");
 	}
 
 	void ToolbarPanel::OnImGuiRender()
@@ -25,16 +26,31 @@ namespace Nut
 
 		ImGui::Begin("##Toolbar panel", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		float size = ImGui::GetWindowHeight() - 4.0f;
-		Ref<Texture2D> icon = (m_SceneState == SceneState::Edit ? m_PlayIcon : m_StopIcon);
 
-		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
-
-		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
 		{
-			if (m_SceneState == SceneState::Edit)
-				OnScenePlay();
-			else if (m_SceneState == SceneState::Play)
-				OnSceneStop();
+			Ref<Texture2D> icon = ((m_SceneState == SceneState::Edit || m_SceneState == SceneState::Simulate) ? m_PlayIcon : m_StopIcon);
+			ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+
+			if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+			{
+				if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Simulate)
+					OnScenePlay();
+				else if (m_SceneState == SceneState::Play)
+					OnSceneStop();
+			}
+		}
+
+		ImGui::SameLine();
+		{
+			Ref<Texture2D> icon2 = ((m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play) ? m_SimulateIcon : m_StopIcon);
+
+			if (ImGui::ImageButton((ImTextureID)icon2->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+			{
+				if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play)
+					OnSceneSimulate();
+				else if (m_SceneState == SceneState::Simulate)
+					OnSceneSimulateStop();
+			}
 		}
 
 		ImGui::PopStyleVar(2);
@@ -50,6 +66,11 @@ namespace Nut
 
 	void ToolbarPanel::OnScenePlay() 
 	{
+		if(m_SceneState == SceneState::Simulate)
+		{
+			OnSceneStop();
+		}
+
 		// Get scene & panel data (Which is References types) from EditorLayer
 		Ref<Scene>& activeScene = EditorLayer::Get().m_ActiveScene;
 		Ref<Scene>& editorScene = EditorLayer::Get().m_EditorScene;
@@ -83,6 +104,44 @@ namespace Nut
 
 	}
 
+	void ToolbarPanel::OnSceneSimulate()
+	{
+		if (m_SceneState == SceneState::Play)
+		{
+			OnSceneSimulateStop();
+		}
+
+		// Get scene & panel data (Which is References types) from EditorLayer
+		Ref<Scene>& activeScene = EditorLayer::Get().m_ActiveScene;
+		Ref<Scene>& editorScene = EditorLayer::Get().m_EditorScene;
+		SceneHierarchyPanel& sceneHierarchyPanel = EditorLayer::Get().m_SceneHierarchyPanel;
+		if (editorScene != nullptr)
+		{
+			m_SceneState = SceneState::Simulate;
+			activeScene = Scene::Copy(editorScene);					// When playing, active scene is the duplicate of editor scene
+
+			activeScene->OnSimulationStart();
+			sceneHierarchyPanel.SetContext(activeScene);
+		}
+		else
+		{
+			NUT_CORE_CRITICAL("There is no active scene to used(should load scene first)! Or you can create new scene first");
+			m_ShowPop = true;
+		}
+	}
+
+	void ToolbarPanel::OnSceneSimulateStop()
+	{
+		Ref<Scene>& activeScene = EditorLayer::Get().m_ActiveScene;
+		Ref<Scene>& editorScene = EditorLayer::Get().m_EditorScene;
+		SceneHierarchyPanel& sceneHierarchyPanel = EditorLayer::Get().m_SceneHierarchyPanel;
+
+		m_SceneState = SceneState::Edit;
+		activeScene = editorScene;								// When editing, active scene is the editor scene
+
+		activeScene->OnSimulationStop();
+		sceneHierarchyPanel.SetContext(activeScene);
+	}
 
 	void ToolbarPanel::ImGuiInfoWindow(const std::string& text)
 	{
