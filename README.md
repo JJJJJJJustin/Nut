@@ -51,6 +51,7 @@ The game_engine which learned from Cherno, and made some improvements
 # 中文
 
 ## 演示
+![演示](z笔记(notebook)/动图演示2.gif)
 ![演示](z笔记(notebook)/动图演示.gif)
 
 ## 笔记
